@@ -1,0 +1,5 @@
+FROM mikefarah/yq:3.3.2
+
+ENV DAPPER_SOURCE=/releases
+
+WORKDIR ${DAPPER_SOURCE}
