@@ -1,7 +1,10 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 function printerr() {
-    printf "ERROR: %s\n" "$*" >&2
+    local err_msg="$*"
+
+    [[ -z "${file}" ]] || err_msg+=" (${file})"
+    printf "ERROR: %s\n" "${err_msg}" >&2
 }
 
 function get_value() {
@@ -17,7 +20,7 @@ function validate_value() {
     local value=$(get_value $file $key | tr -d [:space:])
 
     if [[ -z "$value" ]]; then
-        printerr "Missing value for '${key}' in ${file}"
+        printerr "Missing value for ${key@Q}"
         return 1
     fi
 }
