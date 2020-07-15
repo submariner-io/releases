@@ -1,12 +1,17 @@
-DAPPER := ./.dapper -m bind
+ifneq (,$(DAPPER_SOURCE))
 
-include Makefile.dapper
-
-shell:
-	$(DAPPER)
+# Running in Dapper
 
 validate:
 	$(DAPPER) ./scripts/validate.sh
+
+else
+
+# Not running in Dapper
+
+include Makefile.dapper
+
+endif
 
 # Disable rebuilding Makefile
 Makefile Makefile.dapper: ;

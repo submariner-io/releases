@@ -1,16 +1,15 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 set -e
 
-source ${SCRIPTS_DIR}/lib/yaml_funcs
+source ${DAPPER_SOURCE}/scripts/lib/yaml_funcs
 
-function validate_file() {
-    local file=$1
-    local errors=0
+function validate_file_fields() {
+    local missing=0
 
     function _validate() {
         local key=$1
-        validate_value $file $key || errors=$((errors+1))
+        validate_value $file $key || missing=$((missing+1))
     }
 
     _validate 'version'
@@ -24,8 +23,18 @@ function validate_file() {
     _validate 'components.submariner-charts'
     _validate 'components.submariner-operator'
 
-    if [[ $errors -gt 0 ]]; then
-        printerr "Found ${errors} errors while validating ${file}."
+    if [[ $missing -gt 0 ]]; then
+        printerr "Missing ${missing} fields"
+        return 1
+    fi
+}
+
+function validate_file() {
+    validate_file_fields
+
+    version=$(get_value $file 'version')
+    if ! git check-ref-format "refs/tags/${version}"; then
+        printerr "Version ${version@Q} is not a valid tag name"
         return 1
     fi
 }

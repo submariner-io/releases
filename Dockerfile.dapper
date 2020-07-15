@@ -1,6 +1,7 @@
-FROM mikefarah/yq:3.3.2
+FROM mikefarah/yq:3.3.2 as yq
+FROM quay.io/submariner/shipyard-dapper-base:devel
 
+COPY --from=yq /usr/bin/yq /usr/bin/
 ENV DAPPER_SOURCE=/releases
-ENV SCRIPTS_DIR=${DAPPER_SOURCE}/scripts
 
 WORKDIR ${DAPPER_SOURCE}
