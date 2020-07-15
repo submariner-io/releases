@@ -1,0 +1,24 @@
+#!/usr/bin/env sh
+
+function printerr() {
+    printf "ERROR: %s\n" "$*" >&2
+}
+
+function get_value() {
+    local file=$1
+    local key=$2
+
+    yq r $file $key
+}
+
+function validate_value() {
+    local file=$1
+    local key=$2
+    local value=$(get_value $file $key | tr -d [:space:])
+
+    if [[ -z "$value" ]]; then
+        printerr "Missing value for '${key}' in ${file}"
+        return 1
+    fi
+}
+
