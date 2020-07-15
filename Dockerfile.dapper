@@ -1,5 +1,6 @@
 FROM mikefarah/yq:3.3.2
 
 ENV DAPPER_SOURCE=/releases
+ENV SCRIPTS_DIR=${DAPPER_SOURCE}/scripts
 
 WORKDIR ${DAPPER_SOURCE}
