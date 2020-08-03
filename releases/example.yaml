@@ -13,7 +13,7 @@ release-notes:
     by the administrator.
 components:
   admiral: v0.5.0 # tag is possible
-  submariner: v0.5.0-rc0 # even pre-release tag
+  submariner: v0.5.0
   lighthouse: 9d0d2ef6768c78a844fc8933fa3d246a37705b81 # full commit-id only
   submariner-operator: 445669b443982c6c55cc283731df0e47d85270a2
   submariner-charts: 7cc50b03d3f6e3bc4fa75a6db344dea87693dea3
