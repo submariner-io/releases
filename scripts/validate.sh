@@ -6,6 +6,7 @@ source ${DAPPER_SOURCE}/scripts/lib/yaml_funcs
 
 readonly PROJECTS=(admiral lighthouse shipyard submariner submariner-charts submariner-operator)
 readonly ADMIRAL_CONSUMERS=(lighthouse submariner)
+readonly SHIPYARD_CONSUMERS=(admiral lighthouse submariner submariner-operator)
 
 function validate_file_fields() {
     local missing=0
@@ -41,6 +42,17 @@ function validate_admiral_consumers() {
     done
 }
 
+function validate_shipyard_consumers() {
+    local expected_version="$1"
+    for project in ${SHIPYARD_CONSUMERS[*]}; do
+        local actual_version=$(head -1 "${project}/Dockerfile.dapper" | cut -f2 -d':')
+        if [[ "${expected_version}" != "${actual_version}" ]]; then
+            printerr "Expected Shipyard version ${expected_version} but found ${actual_version} in ${project}"
+            return 1
+        fi
+    done
+}
+
 function validate_file() {
     declare -A release
     validate_file_fields
@@ -65,6 +77,7 @@ function validate_file() {
     done
 
     validate_admiral_consumers "${release["components.admiral"]}"
+    validate_shipyard_consumers "${release["components.shipyard"]#v}"
     popd
     rm -rf projects
 }
