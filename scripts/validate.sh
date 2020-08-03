@@ -5,6 +5,7 @@ set -e
 source ${DAPPER_SOURCE}/scripts/lib/yaml_funcs
 
 readonly PROJECTS=(admiral lighthouse shipyard submariner submariner-charts submariner-operator)
+readonly ADMIRAL_CONSUMERS=(lighthouse submariner)
 
 function validate_file_fields() {
     local missing=0
@@ -27,6 +28,17 @@ function validate_file_fields() {
         printerr "Missing ${missing} fields"
         return 1
     fi
+}
+
+function validate_admiral_consumers() {
+    local expected_version="$1"
+    for project in ${ADMIRAL_CONSUMERS[*]}; do
+        local actual_version=$(grep admiral "${project}/go.mod" | cut -f2 -d' ')
+        if [[ "${expected_version}" != "${actual_version}" ]]; then
+            printerr "Expected Admiral version ${expected_version} but found ${actual_version} in ${project}"
+            return 1
+        fi
+    done
 }
 
 function validate_file() {
@@ -52,6 +64,7 @@ function validate_file() {
         popd
     done
 
+    validate_admiral_consumers "${release["components.admiral"]}"
     popd
     rm -rf projects
 }
