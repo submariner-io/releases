@@ -2,19 +2,21 @@
 
 set -e
 
-source ${DAPPER_SOURCE}/scripts/lib/yaml_funcs
+source ${DAPPER_SOURCE}/scripts/lib/utils
 
-readonly PROJECTS=(admiral lighthouse shipyard submariner submariner-charts submariner-operator)
 readonly ADMIRAL_CONSUMERS=(lighthouse submariner)
 readonly SHIPYARD_CONSUMERS=(admiral lighthouse submariner submariner-operator)
 
-function validate_file_fields() {
+function validate_release_fields() {
     local missing=0
 
     function _validate() {
         local key=$1
-        validate_value $file $key || missing=$((missing+1))
-        release[$key]=$(get_value $file $key)
+
+        if [[ -z "${release[$key]}" ]]; then
+            printerr "Missing value for ${key@Q}"
+            missing=$((missing+1))
+        fi
     }
 
     _validate 'version'
@@ -26,7 +28,7 @@ function validate_file_fields() {
     done
 
     if [[ $missing -gt 0 ]]; then
-        printerr "Missing ${missing} fields"
+        printerr "Missing values for ${missing} fields"
         return 1
     fi
 }
@@ -53,9 +55,8 @@ function validate_shipyard_consumers() {
     done
 }
 
-function validate_file() {
-    declare -A release
-    validate_file_fields
+function validate_release() {
+    validate_release_fields
 
     version=${release['version']}
     if ! git check-ref-format "refs/tags/${version}"; then
@@ -83,5 +84,6 @@ function validate_file() {
 }
 
 for file in $(find releases -type f); do
-    validate_file $file
+    read_release_file
+    validate_release
 done

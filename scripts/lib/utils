@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+readonly PROJECTS=(admiral lighthouse shipyard submariner submariner-charts submariner-operator)
+
+function printerr() {
+    local err_msg="$*"
+
+    [[ -z "${file}" ]] || err_msg+=" (${file})"
+    printf "ERROR: %s\n" "${err_msg}" >&2
+}
+
+function get_value() {
+    yq r $file $key
+}
+
+function read_release_file() {
+    declare -gA release
+
+    function _read() {
+        local key=$1
+        release[$key]=$(get_value $file $key)
+    }
+
+    _read 'version'
+    _read 'name'
+    _read 'release-notes'
+    _read 'components'
+    for project in ${PROJECTS[*]}; do
+        _read "components.${project}"
+    done
+}
+
+
