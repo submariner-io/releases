@@ -1,5 +1,6 @@
+---
 version: 0.5.0
-name: the mighty 0.5 release! # The name will be used for the GH release
+name: the mighty 0.5 release!  # The name will be used for the GH release
 release-notes:
   bugfixes: |
     * we fixed this bug
@@ -12,9 +13,9 @@ release-notes:
     Features or settings that have been deprecated and need to be updated
     by the administrator.
 components:
-  admiral: v0.5.0 # tag is possible
+  admiral: v0.5.0  # tag is possible
   submariner: v0.5.0
-  lighthouse: 9d0d2ef6768c78a844fc8933fa3d246a37705b81 # full commit-id only
+  lighthouse: 9d0d2ef6768c78a844fc8933fa3d246a37705b81  # full commit-id only
   submariner-operator: 445669b443982c6c55cc283731df0e47d85270a2
   submariner-charts: 7cc50b03d3f6e3bc4fa75a6db344dea87693dea3
   shipyard: v0.5.0
