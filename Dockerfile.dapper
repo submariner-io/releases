@@ -2,6 +2,7 @@ FROM mikefarah/yq:3.3.2 as yq
 FROM quay.io/submariner/shipyard-dapper-base:devel
 
 COPY --from=yq /usr/bin/yq /usr/bin/
-ENV DAPPER_SOURCE=/releases
+ENV DAPPER_SOURCE=/releases PATH=/releases/scripts:$PATH DAPPER_DOCKER_SOCKET=true
+ENV DAPPER_OUTPUT=${DAPPER_SOURCE}/output
 
 WORKDIR ${DAPPER_SOURCE}
