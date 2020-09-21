@@ -21,6 +21,9 @@ deploy: images
 images:
 	./scripts/images.sh
 
+release:
+	./scripts/release.sh
+
 validate:
 	./scripts/validate.sh
 
