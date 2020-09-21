@@ -1,17 +1,19 @@
 ---
 version: v0.6.1
 name: the mighty 0.6 release!  # The name will be used for the GH release
-release-notes:
-  bugfixes: |
+# Contents of release notes should be markdown formatted as that's what
+# GitHub uses
+release-notes: |
+  * bugfixes:
     * we fixed this bug
-  features: |
+  * features:
     * this feature was added
     * and this other one
-  upgrades: |  # optional
-    Upgrade notes important to anybody upgrading from a previous version
-  deprecations: | # optional
-    Features or settings that have been deprecated and need to be updated
-    by the administrator.
+  * upgrades: # optional
+    * Upgrade notes important to anybody upgrading from a previous version
+  * deprecations: # optional
+    * Features or settings that have been deprecated and need to be updated
+      by the administrator.
 components:
   admiral: v0.6.1  # tag is possible
   submariner: v0.6.1
