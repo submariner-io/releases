@@ -2,7 +2,11 @@ FROM mikefarah/yq:3.3.2 as yq
 FROM quay.io/submariner/shipyard-dapper-base:devel
 
 COPY --from=yq /usr/bin/yq /usr/bin/
-ENV DAPPER_SOURCE=/releases PATH=/releases/scripts:$PATH DAPPER_DOCKER_SOCKET=true
-ENV DAPPER_OUTPUT=${DAPPER_SOURCE}/output
+ENV DAPPER_SOURCE=/releases PATH=/releases/scripts:$PATH DAPPER_DOCKER_SOCKET=true \
+    DAPPER_ENV="GITHUB_TOKEN"
+ENV DAPPER_OUTPUT=${DAPPER_SOURCE}/output \
+    GH_VERSION=1.0.0
+
+RUN curl -L https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_${ARCH}.tar.gz | tar xzf - && mv gh_${GH_VERSION}_linux_${ARCH}/bin/gh /usr/bin/ && rm -rf gh_${GH_VERSION}_linux_${ARCH}
 
 WORKDIR ${DAPPER_SOURCE}
