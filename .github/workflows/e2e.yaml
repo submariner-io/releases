@@ -1,10 +1,5 @@
 on:
   pull_request:
-  push:
-    branches:
-      - master
-    tags:
-      - 'v**'
 
 name: End to End Tests
 jobs:
