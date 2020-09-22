@@ -77,8 +77,9 @@ function validate_release() {
         popd
     done
 
-    validate_admiral_consumers "${release["components.admiral"]}"
-    validate_shipyard_consumers "${release["components.shipyard"]#v}"
+# TODO: Uncomment once we're using automated release which makes sure these are in sync
+#    validate_admiral_consumers "${release["components.admiral"]}"
+#    validate_shipyard_consumers "${release["components.shipyard"]#v}"
     popd
     rm -rf projects
 }
