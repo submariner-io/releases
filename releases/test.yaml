@@ -1,0 +1,23 @@
+---
+version: v0.5.0
+name: the mighty 0.5 release!  # The name will be used for the GH release
+# Contents of release notes should be markdown formatted as that's what
+# GitHub uses
+release-notes: |
+  * bugfixes:
+    * we fixed this bug
+  * features:
+    * this feature was added
+    * and this other one
+  * upgrades: # optional
+    * Upgrade notes important to anybody upgrading from a previous version
+  * deprecations: # optional
+    * Features or settings that have been deprecated and need to be updated
+      by the administrator.
+components:
+  admiral: 548f00e4803ae19fa4834c5f8dd782957739c49b
+  submariner: d8ec1970b1dca95c0d0049d59a1357871facbf62
+  lighthouse: 9d0d2ef6768c78a844fc8933fa3d246a37705b81
+  submariner-operator: e8faa9268524a844fa7bfea475cc77ef03c6a8fd
+  submariner-charts: 7cc50b03d3f6e3bc4fa75a6db344dea87693dea3 # full commit-id also
+  shipyard: d7b85e73420de859a5047e0d1ae5b0685f1be7cf
