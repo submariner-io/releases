@@ -5,17 +5,31 @@ set -e
 source ${DAPPER_SOURCE}/scripts/lib/utils
 source ${SCRIPTS_DIR}/lib/debug_functions
 
+function _validate() {
+    local key=$1
+
+    if [[ -z "${release[$key]}" ]]; then
+        printerr "Missing value for ${key@Q}"
+        errors=$((errors+1))
+        return 1
+    fi
+}
+
+function _validate_component() {
+    local project=$1
+    if ! _validate "components.${project}"; then
+        return
+    fi
+
+    local commit_hash="${release["components.${project}"]}"
+    if [[ ! $commit_hash =~ ^([0-9a-f]{7,40}|v[0-9a-z\.\-]+)$ ]]; then
+        printerr "Version of ${project} should be either a valid git commit hash or in the form v1.2.3: ${commit_hash}"
+        errors=$((errors+1))
+    fi
+}
+
 function validate_release_fields() {
-    local missing=0
-
-    function _validate() {
-        local key=$1
-
-        if [[ -z "${release[$key]}" ]]; then
-            printerr "Missing value for ${key@Q}"
-            missing=$((missing+1))
-        fi
-    }
+    local errors=0
 
     _validate 'version'
     _validate 'name'
@@ -25,19 +39,19 @@ function validate_release_fields() {
 
     case "${release['status']}" in
     shipyard)
-        _validate "components.shipyard"
+        _validate_component "shipyard"
         ;;
     admiral)
-        _validate "components.admiral"
+        _validate_component "admiral"
         ;;
     projects)
         for project in ${OPERATOR_CONSUMES[*]}; do
-            _validate "components.${project}"
+            _validate_component "${project}"
         done
         ;;
     released)
         for project in ${PROJECTS[*]}; do
-            _validate "components.${project}"
+            _validate_component "${project}"
         done
         ;;
     *)
@@ -46,8 +60,8 @@ function validate_release_fields() {
         ;;
     esac
 
-    if [[ $missing -gt 0 ]]; then
-        printerr "Missing values for ${missing} fields"
+    if [[ $errors -gt 0 ]]; then
+        printerr "Found ${errors} errors in the file"
         return 1
     fi
 }
