@@ -16,7 +16,7 @@ release-notes: |
       by the administrator.
 components:
   admiral: v0.6.1  # tag is possible
-  submariner: v0.6.1
+  submariner: 7ffe614 # short commit-id is accepted
   lighthouse: v0.6.1
   submariner-operator: v0.6.1
   submariner-charts: 7cc50b03d3f6e3bc4fa75a6db344dea87693dea3 # full commit-id also

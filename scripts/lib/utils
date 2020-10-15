@@ -30,4 +30,19 @@ function read_release_file() {
     done
 }
 
+function _git() {
+    git -C "projects/${project}" $@
+}
+
+function clone_repo() {
+    if [[ -d "projects/${project}" ]]; then
+        _git fetch -f --tags
+    else
+        mkdir -p projects
+        git clone "https://github.com/submariner-io/${project}" "projects/${project}"
+        _git config advice.detachedHead false
+    fi
+
+    _git checkout "${release["components.${project}"]}"
+}
 
