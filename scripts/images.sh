@@ -14,24 +14,22 @@ project_images[shipyard]="nettest shipyard-dapper-base"
 project_images[submariner]="submariner submariner-globalnet submariner-route-agent"
 project_images[submariner-operator]="submariner-operator"
 
-function _load_dev_image() {
-    docker pull "${image}:${hash}"
-    docker tag "${image}:${hash}" "${image}:${DEV_VERSION}"
-}
-
 function _pull_image() {
-    local image="${1}"
-    local hash="${2#v}"
-    if ! _load_dev_image; then
-        hash="${hash:0:7}"
-        _load_dev_image
-    fi
+    local hash="${1#v}"
+    local full_image="${REPO}/${image}"
+    docker pull "${full_image}:${hash}"
+    docker tag "${full_image}:${hash}" "${full_image}:${DEV_VERSION}"
 }
 
 function pull_images() {
     for project in ${PROJECTS[*]}; do
         for image in ${project_images[${project}]}; do
-            _pull_image "${REPO}/${image}" "${release["components.${project}"]}"
+            if ! _pull_image "${release["components.${project}"]}"; then
+                clone_repo
+                local project_version=$(_git describe --tags --dirty="-${DEV_VERSION}" --exclude="${CUTTING_EDGE}" --exclude="latest")
+                _pull_image "$project_version"
+            fi
+
             import_image "${REPO}/${image}"
         done
     done
