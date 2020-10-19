@@ -1,9 +1,12 @@
+---
+name: End to End Tests
+
 on:
   pull_request:
 
-name: End to End Tests
 jobs:
   e2e:
+    name: E2E
     timeout-minutes: 30
     runs-on: ubuntu-latest
     strategy:
@@ -11,8 +14,8 @@ jobs:
       matrix:
         globalnet: ['', 'globalnet']
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@master
+      - name: Check out the repository
+        uses: actions/checkout@v2
 
       - name: Reclaim free space!
         run: |
