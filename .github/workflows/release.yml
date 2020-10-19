@@ -1,17 +1,22 @@
 ---
+name: Release the Target Release
+
 on:
   push:
-    branches: [master]
+    branches:
+      - master
     paths:
       - 'releases/target'
-name: Release the Target Release
+
 jobs:
   release:
+    name: Release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - name: Check out the repository
+        uses: actions/checkout@v2
 
-      - name: Create the Release
+      - name: Create the release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: make release
