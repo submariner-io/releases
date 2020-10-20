@@ -14,6 +14,7 @@ clone_repo
 
 pushd projects/submariner-operator
 export VERSION="${release["version"]}"
+[[ "$1" == "cross" ]] && make build-cross
 make bin/subctl
 ln -f -s $(pwd)/bin/subctl /go/bin/subctl
 ./bin/subctl version
