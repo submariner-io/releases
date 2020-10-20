@@ -8,7 +8,7 @@ file=$(readlink -f releases/target)
 read_release_file
 
 gh config set prompt disabled
-gh release create "${release['version']}" --title "${release['name']}" --notes "${release['release-notes']}"
+gh release create "${release['version']}" projects/submariner-operator/dist/subctl-* --title "${release['name']}" --notes "${release['release-notes']}"
 
 export GITHUB_TOKEN="${RELEASE_TOKEN}"
 

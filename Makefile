@@ -9,7 +9,7 @@ override CLUSTERS_ARGS += $(CLUSTER_SETTINGS_FLAG)
 override DEPLOY_ARGS += $(CLUSTER_SETTINGS_FLAG) --deploytool_broker_args '--service-discovery'
 
 subctl:
-	./scripts/subctl.sh
+	./scripts/subctl.sh $(SUBCTL_ARGS)
 
 e2e: deploy
 	./scripts/e2e.sh
@@ -21,7 +21,8 @@ deploy: images
 images:
 	./scripts/images.sh
 
-release:
+release: SUBCTL_ARGS=cross
+release: subctl
 	./scripts/release.sh
 
 validate:
