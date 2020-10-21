@@ -8,20 +8,21 @@ CLUSTER_SETTINGS_FLAG = --cluster_settings $(DAPPER_SOURCE)/scripts/cluster_sett
 override CLUSTERS_ARGS += $(CLUSTER_SETTINGS_FLAG)
 override DEPLOY_ARGS += $(CLUSTER_SETTINGS_FLAG) --deploytool_broker_args '--service-discovery'
 
-/root/.local/bin/subctl:
-	./scripts/subctl.sh
+subctl:
+	./scripts/subctl.sh $(SUBCTL_ARGS)
 
 e2e: deploy
 	./scripts/e2e.sh
 
-clusters: /root/.local/bin/subctl
+clusters: subctl
 
 deploy: images
 
 images:
 	./scripts/images.sh
 
-release:
+release: SUBCTL_ARGS=cross
+release: subctl
 	./scripts/release.sh
 
 validate:
