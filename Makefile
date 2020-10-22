@@ -21,8 +21,8 @@ deploy: images
 images:
 	./scripts/images.sh
 
-release: SUBCTL_ARGS=cross
-release: subctl
+create-release: SUBCTL_ARGS=cross
+create-release: subctl
 	./scripts/release.sh
 
 validate:
