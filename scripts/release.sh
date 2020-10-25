@@ -2,6 +2,7 @@
 
 set -e
 
+source ${DAPPER_SOURCE}/scripts/lib/image_defs
 source ${DAPPER_SOURCE}/scripts/lib/utils
 source ${SCRIPTS_DIR}/lib/debug_functions
 
@@ -25,6 +26,21 @@ function create_release() {
         --notes "${release['release-notes']}"
 }
 
+function tag_images() {
+    images=""
+
+    # Creating a local tag so that images are uploaded with it
+    git tag -f "${release['version']}"
+
+    for project in ${PROJECTS[*]}; do
+        for image in ${project_images[${project}]}; do
+            images+=" $image"
+        done
+    done
+
+    make release RELEASE_ARGS="$images --tag ${release['version']}"
+}
+
 ### Main ###
 
 file=$(readlink -f releases/target)
@@ -41,6 +57,8 @@ for project in ${PROJECTS[*]}; do
     commit_ref=$(_git rev-parse --verify HEAD)
     create_release "${project}" "${commit_ref}" || errors=$((errors+1))
 done
+
+tag_images || errors=$((errors+1))
 
 if [[ $errors > 0 ]]; then
     printerr "Encountered ${errors} errors while doing the release."
