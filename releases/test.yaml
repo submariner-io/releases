@@ -1,0 +1,23 @@
+---
+version: v0.6.1
+name: the mighty 0.6 release!  # The name will be used for the GH release
+# Contents of release notes should be markdown formatted as that's what
+# GitHub uses
+release-notes: |
+  * bugfixes:
+    * we fixed this bug
+  * features:
+    * this feature was added
+    * and this other one
+  * upgrades: # optional
+    * Upgrade notes important to anybody upgrading from a previous version
+  * deprecations: # optional
+    * Features or settings that have been deprecated and need to be updated
+      by the administrator.
+components:
+  admiral: v0.6.1  # tag is possible
+  submariner: 7ffe614 # short commit-id is accepted
+  lighthouse: v0.6.1
+  submariner-operator: v0.6.1
+  submariner-charts: 7cc50b03d3f6e3bc4fa75a6db344dea87693dea3 # full commit-id also
+  shipyard: v0.6.1
