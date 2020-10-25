@@ -19,5 +19,7 @@ jobs:
       - name: Create the release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+          QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
           RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: make create-release
