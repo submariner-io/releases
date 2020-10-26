@@ -17,9 +17,10 @@ function create_release() {
     local target="$2"
     local files="${@:3}"
     local org=$(determine_org)
+    [[ "${release['pre-release']}" = "true" ]] && local prerelease="--prerelease"
 
     gh config set prompt disabled
-    gh release create "${release['version']}" $files \
+    gh release create "${release['version']}" $files $prerelease \
         --title "${release['name']}" \
         --repo "${org}/${project}" \
         --target "${target}" \
