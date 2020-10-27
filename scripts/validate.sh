@@ -83,6 +83,16 @@ function validate_release() {
         return 1
     fi
 
+    if [[ "${release['pre-release']}" = "true" ]] && [[ ! "${release['version']}" =~ -[0-9a-z\.]+$ ]]; then
+        printerr "Version ${version} should have a hyphen followed by identifiers as it's marked as pre-release"
+        return 1
+    fi
+
+    if [[ "${release['pre-release']}" != "true" ]] && [[ "${release['version']}" =~ - ]]; then
+        printerr "Version ${version} should not have a hyphen as it isn't marked as pre-release"
+        return 1
+    fi
+
     case "${release['status']}" in
     shipyard)
         local project=shipyard
