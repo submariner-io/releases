@@ -24,6 +24,7 @@ function read_release_file() {
     _read 'version'
     _read 'name'
     _read 'release-notes'
+    _read 'status'
     _read 'components'
     for project in ${PROJECTS[*]}; do
         _read "components.${project}"
