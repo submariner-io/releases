@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 readonly PROJECTS=(admiral lighthouse shipyard submariner submariner-charts submariner-operator)
+readonly SHIPYARD_CONSUMERS=(admiral lighthouse submariner submariner-operator)
 
 function printerr() {
     local err_msg="$*"
@@ -32,10 +33,11 @@ function read_release_file() {
 }
 
 function _git() {
-    git -C "projects/${project}" $@
+    git -C "projects/${project}" "$@"
 }
 
 function clone_repo() {
+    local branch="${1:-${release["components.${project}"]}}"
     if [[ -d "projects/${project}" ]]; then
         _git fetch -f --tags
     else
@@ -44,6 +46,6 @@ function clone_repo() {
         _git config advice.detachedHead false
     fi
 
-    _git checkout "${release["components.${project}"]}"
+    _git checkout "${branch}"
 }
 
