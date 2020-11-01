@@ -6,7 +6,6 @@ source ${DAPPER_SOURCE}/scripts/lib/utils
 source ${SCRIPTS_DIR}/lib/debug_functions
 
 readonly ADMIRAL_CONSUMERS=(lighthouse submariner)
-readonly SHIPYARD_CONSUMERS=(admiral lighthouse submariner submariner-operator)
 
 function validate_release_fields() {
     local missing=0
@@ -34,8 +33,8 @@ function validate_release_fields() {
         return 1
     fi
 
-    if [[ "${release['status']}" != "released" ]]; then
-        printerr "Status should be released."
+    if [[ ! "${release['status']}" =~ ^(shipyard|released)$ ]]; then
+        printerr "Status '${release['status']}' should be 'shipyard' or 'released'."
         return 2
     fi
 }
