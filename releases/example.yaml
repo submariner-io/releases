@@ -14,6 +14,7 @@ release-notes: |
   * deprecations: # optional
     * Features or settings that have been deprecated and need to be updated
       by the administrator.
+status: released
 components:
   admiral: v0.6.1  # tag is possible
   submariner: 7ffe614 # short commit-id is accepted

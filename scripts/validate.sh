@@ -23,6 +23,7 @@ function validate_release_fields() {
     _validate 'version'
     _validate 'name'
     _validate 'release-notes'
+    _validate 'status'
     _validate 'components'
     for project in ${PROJECTS[*]}; do
         _validate "components.${project}"
@@ -31,6 +32,11 @@ function validate_release_fields() {
     if [[ $missing -gt 0 ]]; then
         printerr "Missing values for ${missing} fields"
         return 1
+    fi
+
+    if [[ "${release['status']}" != "released" ]]; then
+        printerr "Status should be released."
+        return 2
     fi
 }
 

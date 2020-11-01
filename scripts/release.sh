@@ -41,24 +41,36 @@ function tag_images() {
     make release RELEASE_ARGS="$images --tag ${release['version']}"
 }
 
+function release_all() {
+    local commit_ref=$(git rev-parse --verify HEAD)
+    create_release releases "${commit_ref}" projects/submariner-operator/dist/subctl-* || errors=$((errors+1))
+
+    export GITHUB_TOKEN="${RELEASE_TOKEN}"
+
+    for project in ${PROJECTS[*]}; do
+        clone_repo
+        commit_ref=$(_git rev-parse --verify HEAD)
+        create_release "${project}" "${commit_ref}" || errors=$((errors+1))
+    done
+
+    tag_images || errors=$((errors+1))
+}
+
 ### Main ###
 
+errors=0
 file=$(readlink -f releases/target)
 read_release_file
-errors=0
 
-commit_ref=$(git rev-parse --verify HEAD)
-create_release releases "${commit_ref}" projects/submariner-operator/dist/subctl-* || errors=$((errors+1))
-
-export GITHUB_TOKEN="${RELEASE_TOKEN}"
-
-for project in ${PROJECTS[*]}; do
-    clone_repo
-    commit_ref=$(_git rev-parse --verify HEAD)
-    create_release "${project}" "${commit_ref}" || errors=$((errors+1))
-done
-
-tag_images || errors=$((errors+1))
+case "${release['status']}" in
+released)
+    release_all
+    ;;
+*)
+    printerr "Unknown status '${release['status']}'"
+    exit 1
+    ;;
+esac
 
 if [[ $errors > 0 ]]; then
     printerr "Encountered ${errors} errors while doing the release."
