@@ -24,18 +24,25 @@ function validate_release_fields() {
     _validate 'release-notes'
     _validate 'status'
     _validate 'components'
-    for project in ${PROJECTS[*]}; do
-        _validate "components.${project}"
-    done
+
+    case "${release['status']}" in
+    shipyard)
+        _validate "components.shipyard"
+        ;;
+    released)
+        for project in ${PROJECTS[*]}; do
+            _validate "components.${project}"
+        done
+        ;;
+    *)
+        printerr "Status '${release['status']}' should be 'shipyard' or 'released'."
+        return 2
+        ;;
+    esac
 
     if [[ $missing -gt 0 ]]; then
         printerr "Missing values for ${missing} fields"
         return 1
-    fi
-
-    if [[ ! "${release['status']}" =~ ^(shipyard|released)$ ]]; then
-        printerr "Status '${release['status']}' should be 'shipyard' or 'released'."
-        return 2
     fi
 }
 
@@ -70,9 +77,17 @@ function validate_release() {
         return 1
     fi
 
-    for project in ${PROJECTS[*]}; do
+    case "${release['status']}" in
+    shipyard)
+        local project=shipyard
         clone_repo
-    done
+        ;;
+    released)
+        for project in ${PROJECTS[*]}; do
+            clone_repo
+        done
+        ;;
+    esac
 
 # TODO: Uncomment once we're using automated release which makes sure these are in sync
 #    validate_admiral_consumers "${release["components.admiral"]}"
