@@ -1,10 +1,11 @@
 ---
-# This example file shows a final release stage where the file has all the fields filled
+# This example file shows the shipyard stage where the automation will release Shipyard
+# and make sure consuming projects are updated to use it.
 version: v0.6.1
-name: the mighty 0.6 release!  # The name will be used for the GH release
+name: the mighty 0.6 release! # The name will be used for the GH release (only on Shipyard)
 # Contents of release notes should be markdown formatted as that's what
 # GitHub uses
-release-notes: |
+release-notes: | # These notes will apply only to Shipyard
   * bugfixes:
     * we fixed this bug
   * features:
@@ -15,11 +16,6 @@ release-notes: |
   * deprecations: # optional
     * Features or settings that have been deprecated and need to be updated
       by the administrator.
-status: released
+status: shipyard
 components:
-  admiral: v0.6.1  # tag is possible
-  submariner: 7ffe614 # short commit-id is accepted
-  lighthouse: v0.6.1
-  submariner-operator: v0.6.1
-  submariner-charts: 7cc50b03d3f6e3bc4fa75a6db344dea87693dea3 # full commit-id also
-  shipyard: v0.6.1
+  shipyard: 2254d86
