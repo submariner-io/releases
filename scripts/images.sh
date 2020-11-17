@@ -29,6 +29,6 @@ function pull_images() {
     done
 }
 
-file=$(readlink -f releases/target)
+determine_target_release
 read_release_file
 pull_images

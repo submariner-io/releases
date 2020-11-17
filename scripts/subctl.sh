@@ -6,7 +6,7 @@ source ${DAPPER_SOURCE}/scripts/lib/utils
 source ${SCRIPTS_DIR}/lib/debug_functions
 source ${SCRIPTS_DIR}/lib/utils
 
-file=$(readlink -f releases/target)
+determine_target_release
 read_release_file
 
 project=submariner-operator

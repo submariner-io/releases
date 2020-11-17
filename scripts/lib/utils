@@ -14,6 +14,15 @@ function get_value() {
     yq r $file $key
 }
 
+function determine_target_release() {
+    file=$(readlink -f releases/target)
+
+    if [[ ! -f "$file" ]]; then
+        echo "WARN: Target release file doesn't exist, skipping."
+        exit 0
+    fi
+}
+
 function read_release_file() {
     declare -gA release
 
