@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 readonly PROJECTS=(admiral lighthouse shipyard submariner submariner-charts submariner-operator)
+readonly ADMIRAL_CONSUMERS=(lighthouse submariner)
 readonly SHIPYARD_CONSUMERS=(admiral lighthouse submariner submariner-operator)
 
 function printerr() {

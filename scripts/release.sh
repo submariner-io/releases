@@ -32,28 +32,38 @@ function create_project_release() {
     create_release "${project}" "${commit_ref}" || errors=$((errors+1))
 }
 
-function pin_to_shipyard() {
-    local org=$(determine_org)
-    local msg="Pin Shipyard to ${release['version']}"
-
-    clone_repo master
-    _git checkout -B pin_shipyard origin/master
-    sed -i -E "s/(shipyard-dapper-base):.*/\1:${release['version']#v}/" projects/${project}/Dockerfile.dapper
-
-    if [[ -f projects/${project}/go.mod ]]; then
-        # Run in subshell so we don't change the working directory even on failure
-        (
-            pushd "projects/${project}"
-            go get github.com/submariner-io/shipyard@${release['version']}
-            go mod vendor
-            go mod tidy
-        )
+function update_go_mod() {
+    local target="$1"
+    if [[ ! -f projects/${project}/go.mod ]]; then
+        return
     fi
+
+    # Run in subshell so we don't change the working directory even on failure
+    (
+        pushd "projects/${project}"
+        go get github.com/submariner-io/${target}@${release['version']}
+        go mod vendor
+        go mod tidy
+    )
+}
+
+function create_pr() {
+    local branch="$1"
+    local msg="$2"
+    local org=$(determine_org)
 
     _git -c user.name='Automated Release' -c user.email='release@submariner.io' \
         commit -a -s -m "${msg}"
-    _git push -f https://${GITHUB_ACTOR}:${RELEASE_TOKEN}@github.com/${org}/${project}.git pin_shipyard
-    gh pr create --repo "${org}/${project}" --head pin_shipyard --base master --title "${msg}" --body "${msg}"
+    _git push -f https://${GITHUB_ACTOR}:${RELEASE_TOKEN}@github.com/${org}/${project}.git ${branch}
+    gh pr create --repo "${org}/${project}" --head ${branch} --base master --title "${msg}" --body "${msg}"
+}
+
+function pin_to_shipyard() {
+    clone_repo master
+    _git checkout -B pin_shipyard origin/master
+    sed -i -E "s/(shipyard-dapper-base):.*/\1:${release['version']#v}/" projects/${project}/Dockerfile.dapper
+    update_go_mod shipyard
+    create_pr pin_shipyard "Pin Shipyard to ${release['version']}"
 }
 
 function release_shipyard() {
@@ -69,6 +79,26 @@ function release_shipyard() {
     # Create a PR to pin Shipyard on every one of its consumers
     for project in ${SHIPYARD_CONSUMERS[*]}; do
         pin_to_shipyard || errors=$((errors+1))
+    done
+}
+
+function pin_to_admiral() {
+    clone_repo master
+    _git checkout -B pin_admiral origin/master
+    update_go_mod admiral
+    create_pr pin_admiral "Pin Admiral to ${release['version']}"
+}
+
+function release_admiral() {
+    local project=admiral
+
+    # Release Admiral first so that we get the tag
+    clone_repo
+    create_project_release || errors=$((errors+1))
+
+    # Create a PR to pin Admiral on every one of it's consumers
+    for project in ${ADMIRAL_CONSUMERS[*]}; do
+        pin_to_admiral || errors=$((errors+1))
     done
 }
 
@@ -121,6 +151,9 @@ read_release_file
 case "${release['status']}" in
 shipyard)
     release_shipyard
+    ;;
+admiral)
+    release_admiral
     ;;
 released)
     release_all
