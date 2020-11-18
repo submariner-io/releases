@@ -1,8 +1,8 @@
 ---
-# This example file shows the shipyard stage where the automation will release Shipyard
-# and make sure consuming projects are updated to use it.
-version: v0.6.1
-name: the mighty 0.6 release! # The name will be used for the GH release (only on Shipyard)
+# This example file shows the partial stages where the automation will release either Shipyard
+# or Admiral and make sure consuming projects are updated to use the relased version.
+version: v0.6.1 # The version will be used to release Shipyard/Admiral
+name: the mighty 0.6 release! # The name will be used for the GH release (only on Shipyard/Admiral)
 # Contents of release notes should be markdown formatted as that's what
 # GitHub uses
 release-notes: | # These notes will apply only to Shipyard
@@ -16,6 +16,7 @@ release-notes: | # These notes will apply only to Shipyard
   * deprecations: # optional
     * Features or settings that have been deprecated and need to be updated
       by the administrator.
-status: shipyard
+status: shipyard # Or 'admiral'
 components:
-  shipyard: 2254d86
+  shipyard: 2254d86 # Only used if status is 'shipyard'
+  admiral: a69b58d # Only used if status is 'admiral'

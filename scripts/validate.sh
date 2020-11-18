@@ -5,8 +5,6 @@ set -e
 source ${DAPPER_SOURCE}/scripts/lib/utils
 source ${SCRIPTS_DIR}/lib/debug_functions
 
-readonly ADMIRAL_CONSUMERS=(lighthouse submariner)
-
 function validate_release_fields() {
     local missing=0
 
@@ -29,13 +27,16 @@ function validate_release_fields() {
     shipyard)
         _validate "components.shipyard"
         ;;
+    admiral)
+        _validate "components.admiral"
+        ;;
     released)
         for project in ${PROJECTS[*]}; do
             _validate "components.${project}"
         done
         ;;
     *)
-        printerr "Status '${release['status']}' should be 'shipyard' or 'released'."
+        printerr "Status '${release['status']}' should be one of: 'shipyard', 'admiral' or 'released'."
         return 2
         ;;
     esac
