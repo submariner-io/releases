@@ -30,13 +30,18 @@ function validate_release_fields() {
     admiral)
         _validate "components.admiral"
         ;;
+    projects)
+        for project in ${OPERATOR_CONSUMES[*]}; do
+            _validate "components.${project}"
+        done
+        ;;
     released)
         for project in ${PROJECTS[*]}; do
             _validate "components.${project}"
         done
         ;;
     *)
-        printerr "Status '${release['status']}' should be one of: 'shipyard', 'admiral' or 'released'."
+        printerr "Status '${release['status']}' should be one of: 'shipyard', 'admiral', 'projects' or 'released'."
         return 2
         ;;
     esac

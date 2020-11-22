@@ -3,6 +3,7 @@
 readonly PROJECTS=(admiral lighthouse shipyard submariner submariner-charts submariner-operator)
 readonly ADMIRAL_CONSUMERS=(lighthouse submariner)
 readonly SHIPYARD_CONSUMERS=(admiral lighthouse submariner submariner-operator)
+readonly OPERATOR_CONSUMES=(submariner lighthouse)
 
 function printerr() {
     local err_msg="$*"
