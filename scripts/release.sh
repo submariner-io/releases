@@ -102,6 +102,30 @@ function release_admiral() {
     done
 }
 
+function update_operator_pr() {
+    local project="submariner-operator"
+
+    clone_repo master
+    _git checkout -B update_operator origin/master
+    for target in ${OPERATOR_CONSUMES[*]} ; do
+        update_go_mod "${target}"
+    done
+
+    sed -i -E "s/(.*Version +=) .*/\1 \"${release['version']#v}\"/" projects/${project}/pkg/versions/versions.go
+    create_pr update_operator "Update Operator to use version ${release['version']}"
+}
+
+function release_projects() {
+    # Release projects first so that we get them tagged
+    for project in ${OPERATOR_CONSUMES[*]}; do
+        clone_repo
+        create_project_release || errors=$((errors+1))
+    done
+
+    # Create a PR for operator to use these versions
+    update_operator_pr || errors=$((errors+1))
+}
+
 function tag_images() {
     local images="$@"
 
@@ -154,6 +178,9 @@ shipyard)
     ;;
 admiral)
     release_admiral
+    ;;
+projects)
+    release_projects
     ;;
 released)
     release_all
