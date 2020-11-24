@@ -11,8 +11,14 @@ override DEPLOY_ARGS += $(CLUSTER_SETTINGS_FLAG) --deploytool_broker_args '--ser
 subctl:
 	./scripts/subctl.sh $(SUBCTL_ARGS)
 
-e2e: deploy
+_e2e: deploy
 	./scripts/e2e.sh
+
+e2e:
+	source $${DAPPER_SOURCE}/scripts/lib/utils; \
+	determine_target_release; \
+	read_release_file; \
+	[ "$${release['status']}" = "released" ] && $(MAKE) _e2e
 
 clusters: subctl
 
