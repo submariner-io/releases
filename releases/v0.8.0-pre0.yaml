@@ -1,0 +1,11 @@
+---
+version: v0.8.0-pre0
+name: 0.8.0-pre0
+pre-release: true
+# Contents of release notes should be markdown formatted as that's what
+# GitHub uses
+release-notes: |
+  Here be dragons
+status: shipyard
+components:
+  shipyard: 5e8ab3e
