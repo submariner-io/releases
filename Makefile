@@ -18,7 +18,7 @@ e2e:
 	source $${DAPPER_SOURCE}/scripts/lib/utils; \
 	determine_target_release; \
 	read_release_file; \
-	[ "$${release['status']}" = "released" ] && $(MAKE) _e2e
+	[ "$${release['status']}" != "released" ] || $(MAKE) _e2e
 
 clusters: subctl
 
