@@ -163,7 +163,7 @@ function release_all() {
         create_project_release
     done
 
-    tag_images || errors=$((errors+1))
+    tag_all_images || errors=$((errors+1))
 }
 
 ### Main ###
