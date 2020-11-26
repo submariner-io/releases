@@ -6,6 +6,7 @@ pre-release: true
 # GitHub uses
 release-notes: |
   Here be dragons
-status: shipyard
+status: admiral
 components:
   shipyard: 7e63ce8
+  admiral: 434a610
