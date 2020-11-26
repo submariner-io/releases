@@ -53,14 +53,13 @@ function create_pr() {
     local msg="$2"
     local org=$(determine_org)
 
-    _git -c user.name='Automated Release' -c user.email='release@submariner.io' \
-        commit -a -s -m "${msg}"
+    _git commit -a -s -m "${msg}"
     _git push -f https://${GITHUB_ACTOR}:${RELEASE_TOKEN}@github.com/${org}/${project}.git ${branch}
     gh pr create --repo "${org}/${project}" --head ${branch} --base master --title "${msg}" --body "${msg}"
 }
 
 function pin_to_shipyard() {
-    clone_repo master
+    clone_repo
     _git checkout -B pin_shipyard origin/master
     sed -i -E "s/(shipyard-dapper-base):.*/\1:${release['version']#v}/" projects/${project}/Dockerfile.dapper
     update_go_mod shipyard
@@ -84,7 +83,7 @@ function release_shipyard() {
 }
 
 function pin_to_admiral() {
-    clone_repo master
+    clone_repo
     _git checkout -B pin_admiral origin/master
     update_go_mod admiral
     create_pr pin_admiral "Pin Admiral to ${release['version']}"
@@ -106,7 +105,7 @@ function release_admiral() {
 function update_operator_pr() {
     local project="submariner-operator"
 
-    clone_repo master
+    clone_repo
     _git checkout -B update_operator origin/master
     for target in ${OPERATOR_CONSUMES[*]} ; do
         update_go_mod "${target}"

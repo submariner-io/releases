@@ -5,7 +5,6 @@ set -e
 source ${DAPPER_SOURCE}/scripts/lib/image_defs
 source ${DAPPER_SOURCE}/scripts/lib/utils
 source ${SCRIPTS_DIR}/lib/debug_functions
-source ${SCRIPTS_DIR}/lib/deploy_funcs
 source ${SCRIPTS_DIR}/lib/version
 
 function _pull_image() {
@@ -17,14 +16,11 @@ function _pull_image() {
 
 function pull_images() {
     for project in ${PROJECTS[*]}; do
-        for image in ${project_images[${project}]}; do
-            if ! _pull_image "${release["components.${project}"]}"; then
-                clone_repo
-                local project_version=$(_git describe --tags --dirty="-${DEV_VERSION}" --exclude="${CUTTING_EDGE}" --exclude="latest")
-                _pull_image "$project_version"
-            fi
+        clone_repo
+        local project_version=$(_git describe --tags --exclude="${CUTTING_EDGE}" --exclude="latest")
 
-            import_image "${REPO}/${image}"
+        for image in ${project_images[${project}]}; do
+            _pull_image "$project_version"
         done
     done
 }
