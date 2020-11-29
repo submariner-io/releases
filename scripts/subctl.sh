@@ -39,13 +39,13 @@ read_release_file
 project=submariner-operator
 clone_repo
 
-    pushd projects/submariner-operator
-    dapper_in_dapper
+pushd projects/submariner-operator
+dapper_in_dapper
 
-    [[ "$1" == "cross" ]] && make build-cross
-    make bin/subctl
+[[ "$1" == "cross" ]] && make build-cross
+make bin/subctl
 
-    ln -f -s $(pwd)/bin/subctl /go/bin/subctl
-    ./bin/subctl version
-    cleanup_dapper_in_dapper
+ln -f -s $(pwd)/bin/subctl /go/bin/subctl
+./bin/subctl version
+cleanup_dapper_in_dapper
 
