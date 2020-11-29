@@ -100,7 +100,7 @@ function validate_not_released() {
 function validate_release() {
     validate_release_fields
 
-    version=${release['version']}
+    local version=${release['version']}
     if ! git check-ref-format "refs/tags/${version}"; then
         printerr "Version ${version@Q} is not a valid tag name"
         return 1
