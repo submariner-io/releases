@@ -1,0 +1,16 @@
+---
+name: Validation
+
+on:
+  pull_request:
+
+jobs:
+  yamls:
+    name: Release YAMLs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Validate release YAMLs
+        run: make validate
