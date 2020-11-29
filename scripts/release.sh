@@ -48,6 +48,12 @@ function create_project_release() {
     fi
 }
 
+function clone_and_create_branch() {
+    local branch=$1
+    clone_repo
+    _git checkout -B ${branch} origin/master
+}
+
 function update_go_mod() {
     local target="$1"
     if [[ ! -f projects/${project}/go.mod ]]; then
@@ -75,8 +81,7 @@ function create_pr() {
 }
 
 function pin_to_shipyard() {
-    clone_repo
-    _git checkout -B pin_shipyard origin/master
+    clone_and_create_branch pin_shipyard
     sed -i -E "s/(shipyard-dapper-base):.*/\1:${release['version']#v}/" projects/${project}/Dockerfile.dapper
     update_go_mod shipyard
     create_pr pin_shipyard "Pin Shipyard to ${release['version']}"
@@ -101,8 +106,7 @@ function release_shipyard() {
 }
 
 function pin_to_admiral() {
-    clone_repo
-    _git checkout -B pin_admiral origin/master
+    clone_and_create_branch pin_admiral
     update_go_mod admiral
     create_pr pin_admiral "Pin Admiral to ${release['version']}"
 }
@@ -121,8 +125,7 @@ function release_admiral() {
 function update_operator_pr() {
     local project="submariner-operator"
 
-    clone_repo
-    _git checkout -B update_operator origin/master
+    clone_and_create_branch update_operator
     for target in ${OPERATOR_CONSUMES[*]} ; do
         update_go_mod "${target}"
     done
