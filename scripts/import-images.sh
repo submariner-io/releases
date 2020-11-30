@@ -9,6 +9,7 @@ source ${SCRIPTS_DIR}/lib/deploy_funcs
 
 for project in ${PROJECTS[*]}; do
     for image in ${project_images[${project}]}; do
+        [[ "$image" != "shipyard-dapper-base" ]] || continue
         import_image "${REPO}/${image}"
     done
 done
