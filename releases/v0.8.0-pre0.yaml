@@ -6,9 +6,11 @@ pre-release: true
 # GitHub uses
 release-notes: |
   Here be dragons
-status: projects
+status: released
 components:
   shipyard: 7e63ce8
   admiral: 434a610
   submariner: 7121adc
   lighthouse: 709bb81
+  submariner-operator: f19ece0
+  submariner-charts: c22af2a
