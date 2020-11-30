@@ -18,7 +18,7 @@ subctl: config-git
 e2e: deploy
 	./scripts/e2e.sh
 
-clusters: subctl
+clusters: images subctl
 
 deploy: import-images
 
