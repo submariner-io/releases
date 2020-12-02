@@ -23,6 +23,7 @@ release-notes: |
     * Lighthouse: prefer local cluster over remote (submariner-io/lighthouse#331)
     * Globalnet w/ OpenShift: exclude openshift-dns and openshift-monitoring namespeces
       (submariner-io/submariner-operator#845, submariner-io/submariner-operator#783)
-status: shipyard
+status: admiral
 components:
   shipyard: 0b33f7c
+  admiral: a91996d
