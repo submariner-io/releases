@@ -5,6 +5,8 @@ set -e
 source ${DAPPER_SOURCE}/scripts/lib/utils
 source ${SCRIPTS_DIR}/lib/debug_functions
 
+### Functions ###
+
 function _validate() {
     local key=$1
 
@@ -147,6 +149,8 @@ function validate_release() {
 #    validate_admiral_consumers "${release["components.admiral"]}"
 #    validate_shipyard_consumers "${release["components.shipyard"]#v}"
 }
+
+### Main ###
 
 determine_target_release
 read_release_file
