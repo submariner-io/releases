@@ -55,7 +55,7 @@ function create_pr() {
 
     _git commit -a -s -m "${msg}"
     _git push -f https://${GITHUB_ACTOR}:${RELEASE_TOKEN}@github.com/${org}/${project}.git ${branch}
-    gh pr create --repo "${org}/${project}" --head ${branch} --base master --title "${msg}" --body "${msg}"
+    reviews+=($(gh pr create --repo "${org}/${project}" --head ${branch} --base master --title "${msg}" --body "${msg}"))
 }
 
 function pin_to_shipyard() {
@@ -166,8 +166,24 @@ function release_all() {
     tag_all_images || errors=$((errors+1))
 }
 
+function post_reviews_comment() {
+    if [[ ${#reviews[@]} = 0 ]]; then
+        return
+    fi
+
+    local comment="Release for status '${release['status']}' is done, please review:"
+    for review in ${reviews[@]}; do
+        comment+=$(printf "\n * ${review}")
+    done
+
+    local pr_url=$(gh api -H 'Accept: application/vnd.github.groot-preview+json' \
+        repos/:owner/:repo/commits/$(git rev-parse HEAD)/pulls | jq -r '.[0] | .html_url')
+    gh pr review "${pr_url}" --comment --body "${comment}"
+}
+
 ### Main ###
 
+reviews=()
 errors=0
 determine_target_release
 read_release_file
@@ -190,6 +206,8 @@ released)
     exit 1
     ;;
 esac
+
+post_reviews_comment || echo "WARN: Can't post reviews comment"
 
 if [[ $errors > 0 ]]; then
     printerr "Encountered ${errors} errors while doing the release."
