@@ -20,7 +20,7 @@ function dapper_in_dapper() {
 
     # Commit and tag so that we get a correct "version" calculated
     git commit -a -m "DAPPER IN DAPPER"
-    git tag -f ${release["version"]}
+    git tag -a -f "${release['version']}" -m "${release['version']}"
 }
 
 function cleanup_dapper_in_dapper() {

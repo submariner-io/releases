@@ -138,7 +138,7 @@ function tag_images() {
     local images="$@"
 
     # Creating a local tag so that images are uploaded with it
-    git tag -f "${release['version']}"
+    git tag -a -f "${release['version']}" -m "${release['version']}"
 
     make release RELEASE_ARGS="$images --tag ${release['version']}"
 }
