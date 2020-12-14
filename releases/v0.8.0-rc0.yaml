@@ -1,6 +1,7 @@
 ---
 version: v0.8.0-rc0
 name: 0.8.0-rc0
+release-notes: Notes go here
 pre-release: true
 status: released
 components:
