@@ -3,6 +3,7 @@ version: v0.8.0-rc1
 name: 0.8.0-rc1
 release-notes: https://github.com/submariner-io/submariner-website/pull/393/files
 pre-release: true
-status: shipyard
+status: admiral
 components:
   shipyard: 1aea0d6
+  admiral: fdfb962
