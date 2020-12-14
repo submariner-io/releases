@@ -1,0 +1,28 @@
+---
+version: v0.8.0-rc1
+name: 0.8.0-rc1
+release-notes: |
+  * New Features:
+    * New route-agent plugin framework, kube-proxy iptables driver (submariner-io/submariner#946)
+    * Initial support for OVNKubernetes CNI (submariner-io/submariner#943)
+    * Gateway helthcheck (submariner-io/submariner#946)
+    * Libreswan connection metrics (submariner-io/submariner#942)
+    * subctl benchmark verbose (submariner-io/submariner-operator#766)
+    * subctl --image-override (submariner-io/submariner-operator#869)
+  * Upgrades:
+    * Libreswan cable-driver now the default (submariner-io/submariner#972)
+    * v0.7 to v0.8 upgrades, converting exported MCS services (submariner-io/submariner-operator#746)
+    * CRDs v1 (submariner-io/submariner-operator#789)
+    * Migration to MCS API/deprecation of Lighthouse specific CRDs
+      (submariner-io/submariner-operator#767, submariner-io/lighthouse#216, submariner-io/submariner-operator#798)
+    * Operator SDK v1 (submariner-io/submariner-operator#724)
+    * Helm v3 (submariner-io/submariner-charts#87)
+  * Bugfixes:
+    * Broker resiliency work (#370)
+    * Lighthouse: prefer local cluster over remote (submariner-io/lighthouse#331)
+    * Globalnet w/ OpenShift: exclude openshift-dns and openshift-monitoring namespeces
+      (submariner-io/submariner-operator#845, submariner-io/submariner-operator#783)
+pre-release: true
+status: shipyard
+components:
+  shipyard: 1aea0d6
