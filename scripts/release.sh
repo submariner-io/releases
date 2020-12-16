@@ -52,19 +52,26 @@ function create_pr() {
     local branch="$1"
     local msg="$2"
     local org=$(determine_org)
+    export GITHUB_TOKEN="${RELEASE_TOKEN}"
 
-    _git -c user.name='Automated Release' -c user.email='release@submariner.io' \
-        commit -a -s -m "${msg}"
+    _git commit -a -s -m "${msg}"
     _git push -f https://${GITHUB_ACTOR}:${RELEASE_TOKEN}@github.com/${org}/${project}.git ${branch}
-    gh pr create --repo "${org}/${project}" --head ${branch} --base master --title "${msg}" --body "${msg}"
+    reviews+=($(gh pr create --repo "${org}/${project}" --head ${branch} --base master --title "${msg}" --body "${msg}"))
 }
 
 function pin_to_shipyard() {
-    clone_repo master
+    clone_repo
     _git checkout -B pin_shipyard origin/master
     sed -i -E "s/(shipyard-dapper-base):.*/\1:${release['version']#v}/" projects/${project}/Dockerfile.dapper
     update_go_mod shipyard
     create_pr pin_shipyard "Pin Shipyard to ${release['version']}"
+}
+
+function unpin_from_shipyard() {
+    clone_repo
+    _git checkout -B unpin_shipyard origin/master
+    sed -i -E "s/(shipyard-dapper-base):.*/\1:devel/" projects/${project}/Dockerfile.dapper
+    create_pr unpin_shipyard "Un-Pin Shipyard after ${release['version']} released"
 }
 
 function release_shipyard() {
@@ -84,7 +91,7 @@ function release_shipyard() {
 }
 
 function pin_to_admiral() {
-    clone_repo master
+    clone_repo
     _git checkout -B pin_admiral origin/master
     update_go_mod admiral
     create_pr pin_admiral "Pin Admiral to ${release['version']}"
@@ -106,7 +113,7 @@ function release_admiral() {
 function update_operator_pr() {
     local project="submariner-operator"
 
-    clone_repo master
+    clone_repo
     _git checkout -B update_operator origin/master
     for target in ${OPERATOR_CONSUMES[*]} ; do
         update_go_mod "${target}"
@@ -164,11 +171,34 @@ function release_all() {
         create_project_release
     done
 
-    tag_images || errors=$((errors+1))
+    tag_all_images || errors=$((errors+1))
+
+    # Create a PR to un-pin Shipyard on every one of its consumers, but only on GA releases
+    if [[ "${release['pre-release']}" != "true" ]]; then
+        for project in ${SHIPYARD_CONSUMERS[*]}; do
+            unpin_from_shipyard || errors=$((errors+1))
+        done
+    fi
+}
+
+function post_reviews_comment() {
+    if [[ ${#reviews[@]} = 0 ]]; then
+        return
+    fi
+
+    local comment="Release for status '${release['status']}' is done, please review:"
+    for review in ${reviews[@]}; do
+        comment+=$(printf "\n * ${review}")
+    done
+
+    local pr_url=$(gh api -H 'Accept: application/vnd.github.groot-preview+json' \
+        repos/:owner/:repo/commits/$(git rev-parse HEAD)/pulls | jq -r '.[0] | .html_url')
+    gh pr review "${pr_url}" --comment --body "${comment}"
 }
 
 ### Main ###
 
+reviews=()
 errors=0
 determine_target_release
 read_release_file
@@ -191,6 +221,8 @@ released)
     exit 1
     ;;
 esac
+
+post_reviews_comment || echo "WARN: Can't post reviews comment"
 
 if [[ $errors > 0 ]]; then
     printerr "Encountered ${errors} errors while doing the release."

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 readonly PROJECTS=(admiral lighthouse shipyard submariner submariner-charts submariner-operator)
-readonly ADMIRAL_CONSUMERS=(lighthouse submariner)
+readonly ADMIRAL_CONSUMERS=(lighthouse submariner submariner-operator)
 readonly SHIPYARD_CONSUMERS=(admiral lighthouse submariner submariner-operator)
 readonly OPERATOR_CONSUMES=(submariner lighthouse)
 
@@ -49,7 +49,7 @@ function _git() {
 }
 
 function clone_repo() {
-    local branch="${1:-${release["components.${project}"]}}"
+    local branch="${release["components.${project}"]:-master}"
     if [[ -d "projects/${project}" ]]; then
         _git fetch -f --tags
     else

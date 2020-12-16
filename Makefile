@@ -8,26 +8,27 @@ CLUSTER_SETTINGS_FLAG = --cluster_settings $(DAPPER_SOURCE)/scripts/cluster_sett
 override CLUSTERS_ARGS += $(CLUSTER_SETTINGS_FLAG)
 override DEPLOY_ARGS += $(CLUSTER_SETTINGS_FLAG) --deploytool_broker_args '--service-discovery'
 
-subctl:
+config-git:
+	git config --global user.email "release@submariner.io";\
+	git config --global user.name "Automated Release"
+
+subctl: config-git
 	./scripts/subctl.sh $(SUBCTL_ARGS)
 
-_e2e: deploy
+e2e: deploy
 	./scripts/e2e.sh
-
-e2e:
-	source $${DAPPER_SOURCE}/scripts/lib/utils; \
-	determine_target_release; \
-	read_release_file; \
-	[ "$${release['status']}" != "released" ] || $(MAKE) _e2e
 
 clusters: subctl
 
-deploy: images
+deploy: import-images
 
 images:
 	./scripts/images.sh
 
-create-release:
+import-images: images
+	./scripts/import-images.sh
+
+create-release: config-git images
 	./scripts/release.sh
 
 validate:

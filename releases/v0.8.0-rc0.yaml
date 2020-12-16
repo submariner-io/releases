@@ -1,0 +1,13 @@
+---
+version: v0.8.0-rc0
+name: 0.8.0-rc0
+release-notes: Notes go here
+pre-release: true
+status: released
+components:
+  shipyard: 0b33f7c
+  admiral: a91996d
+  submariner: 5cb10c9
+  lighthouse: 709bb81
+  submariner-operator: 8d9b4d8
+  submariner-charts: c22af2a
