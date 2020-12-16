@@ -28,9 +28,24 @@ function create_release() {
 }
 
 function create_project_release() {
+    local project=$1
+    clone_repo
+
+    # Skip trying to tag a project that's already tagged as we've already released it
+    if _git rev-parse "${release['version']}" >/dev/null 2>&1; then
+        echo "WARN: '${project}' is already tagged with version '${release['version']}', skipping it..."
+        return
+    fi
+
+    # Release the project on GitHub so that it gets tagged
     export GITHUB_TOKEN="${RELEASE_TOKEN}"
     commit_ref=$(_git rev-parse --verify HEAD)
     create_release "${project}" "${commit_ref}" || errors=$((errors+1))
+
+    # Tag the project's container images, if there are any to tag
+    if [[ -n "${project_images[${project}]}" ]]; then
+        tag_images "${project_images[${project}]}" || errors=$((errors+1))
+    fi
 }
 
 function update_go_mod() {
@@ -75,14 +90,9 @@ function unpin_from_shipyard() {
 }
 
 function release_shipyard() {
-    local project=shipyard
 
     # Release Shipyard first so that we get the tag
-    clone_repo
-    create_project_release || errors=$((errors+1))
-
-    # Tag Shipyard images so they're available to use
-    tag_images "${project_images['shipyard']}" || errors=$((errors+1))
+    create_project_release shipyard
 
     # Create a PR to pin Shipyard on every one of its consumers
     for project in ${SHIPYARD_CONSUMERS[*]}; do
@@ -98,11 +108,9 @@ function pin_to_admiral() {
 }
 
 function release_admiral() {
-    local project=admiral
 
     # Release Admiral first so that we get the tag
-    clone_repo
-    create_project_release || errors=$((errors+1))
+    create_project_release admiral
 
     # Create a PR to pin Admiral on every one of it's consumers
     for project in ${ADMIRAL_CONSUMERS[*]}; do
@@ -126,8 +134,7 @@ function update_operator_pr() {
 function release_projects() {
     # Release projects first so that we get them tagged
     for project in ${OPERATOR_CONSUMES[*]}; do
-        clone_repo
-        create_project_release || errors=$((errors+1))
+        create_project_release $project
     done
 
     # Create a PR for operator to use these versions
@@ -143,35 +150,14 @@ function tag_images() {
     make release RELEASE_ARGS="$images --tag ${release['version']}"
 }
 
-function tag_all_images() {
-    local images=""
-
-    for project in ${PROJECTS[*]}; do
-        for image in ${project_images[${project}]}; do
-            images+=" $image"
-        done
-    done
-
-    tag_images "$images"
-}
-
 function release_all() {
     local commit_ref=$(git rev-parse --verify HEAD)
     make subctl SUBCTL_ARGS=cross
     create_release releases "${commit_ref}" projects/submariner-operator/dist/subctl-* || errors=$((errors+1))
 
     for project in ${PROJECTS[*]}; do
-        clone_repo
-
-        # Skip trying to tag a project that's already tagged as we've already released it
-        if _git rev-parse "${release['version']}" >/dev/null 2>&1; then
-            continue
-        fi
-
-        create_project_release
+        create_project_release $project
     done
-
-    tag_all_images || errors=$((errors+1))
 
     # Create a PR to un-pin Shipyard on every one of its consumers, but only on GA releases
     if [[ "${release['pre-release']}" != "true" ]]; then
