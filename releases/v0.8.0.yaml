@@ -8,3 +8,5 @@ components:
   admiral: 2d75020
   lighthouse: 9965fac
   submariner: e3eee3c
+  submariner-operator: 8c047a8
+  submariner-charts: v0.8.0-rc1
