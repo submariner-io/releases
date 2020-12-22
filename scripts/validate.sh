@@ -88,6 +88,15 @@ function validate_shipyard_consumers() {
     done
 }
 
+function validate_not_released() {
+    local project="${1:-${project}}"
+
+    if _git rev-parse "${release['version']}" >/dev/null 2>&1; then
+        printerr "'${project}' is already released with version '${release['version']}'."
+        return 1
+    fi
+}
+
 function validate_release() {
     validate_release_fields
 
@@ -111,20 +120,25 @@ function validate_release() {
     shipyard)
         local project=shipyard
         clone_repo
+        validate_not_released
         ;;
     admiral)
         local project=admiral
         clone_repo
+        validate_not_released
         ;;
     projects)
         for project in ${OPERATOR_CONSUMES[*]}; do
             clone_repo
+            validate_not_released
         done
         ;;
     released)
         for project in ${PROJECTS[*]}; do
             clone_repo
         done
+
+        validate_not_released submariner-operator
         ;;
     esac
 
@@ -133,7 +147,6 @@ function validate_release() {
 #    validate_shipyard_consumers "${release["components.shipyard"]#v}"
 }
 
-for file in $(find releases -type f); do
-    read_release_file
-    validate_release
-done
+determine_target_release
+read_release_file
+validate_release
