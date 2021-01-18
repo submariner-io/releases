@@ -5,6 +5,8 @@ readonly ADMIRAL_CONSUMERS=(lighthouse submariner submariner-operator)
 readonly SHIPYARD_CONSUMERS=(admiral lighthouse submariner submariner-operator)
 readonly OPERATOR_CONSUMES=(submariner lighthouse)
 
+readonly ORG=$(git config --get remote.origin.url | awk -F'[:/]' '{print $(NF-1)}')
+
 function printerr() {
     local err_msg="$*"
 
@@ -54,7 +56,7 @@ function clone_repo() {
         _git fetch -f --tags
     else
         mkdir -p projects
-        git clone "https://github.com/submariner-io/${project}" "projects/${project}"
+        git clone "https://github.com/${ORG}/${project}" "projects/${project}"
         _git config advice.detachedHead false
     fi
 
