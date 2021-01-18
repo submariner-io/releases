@@ -8,21 +8,16 @@ source ${SCRIPTS_DIR}/lib/debug_functions
 
 ### Functions: General ###
 
-function determine_org() {
-    git config --get remote.origin.url | awk -F'[:/]' '{print $(NF-1)}'
-}
-
 function create_release() {
     local project="$1"
     local target="$2"
     local files="${@:3}"
-    local org=$(determine_org)
     [[ "${release['pre-release']}" = "true" ]] && local prerelease="--prerelease"
 
     gh config set prompt disabled
     gh release create "${release['version']}" $files $prerelease \
         --title "${release['name']}" \
-        --repo "${org}/${project}" \
+        --repo "${ORG}/${project}" \
         --target "${target}" \
         --notes "${release['release-notes']}"
 }
@@ -72,12 +67,11 @@ function update_go_mod() {
 function create_pr() {
     local branch="$1"
     local msg="$2"
-    local org=$(determine_org)
     export GITHUB_TOKEN="${RELEASE_TOKEN}"
 
     _git commit -a -s -m "${msg}"
-    _git push -f https://${GITHUB_ACTOR}:${RELEASE_TOKEN}@github.com/${org}/${project}.git ${branch}
-    reviews+=($(gh pr create --repo "${org}/${project}" --head ${branch} --base master --title "${msg}" --body "${msg}"))
+    _git push -f https://${GITHUB_ACTOR}:${RELEASE_TOKEN}@github.com/${ORG}/${project}.git ${branch}
+    reviews+=($(gh pr create --repo "${ORG}/${project}" --head ${branch} --base master --title "${msg}" --body "${msg}"))
 }
 
 function tag_images() {
