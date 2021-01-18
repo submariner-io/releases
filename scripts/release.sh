@@ -25,6 +25,7 @@ function create_release() {
 function create_project_release() {
     local project=$1
     clone_repo
+    checkout_project_branch
 
     # Skip trying to tag a project that's already tagged as we've already released it
     if _git rev-parse "${release['version']}" >/dev/null 2>&1; then
@@ -45,8 +46,10 @@ function create_project_release() {
 
 function clone_and_create_branch() {
     local branch=$1
+    local base_branch="${2:-${release['branch']:-master}}"
+
     clone_repo
-    _git checkout -B ${branch} origin/master
+    _git checkout -B "${branch}" "origin/${base_branch}"
 }
 
 function update_go_mod() {
@@ -64,14 +67,21 @@ function update_go_mod() {
     )
 }
 
+function push_to_repo() {
+    local branch="$1"
+
+    _git push -f "https://${GITHUB_ACTOR}:${RELEASE_TOKEN}@github.com/${ORG}/${project}.git" "${branch}"
+}
+
 function create_pr() {
     local branch="$1"
     local msg="$2"
+    local base_branch="${release['branch']:-master}"
     export GITHUB_TOKEN="${RELEASE_TOKEN}"
 
     _git commit -a -s -m "${msg}"
-    _git push -f https://${GITHUB_ACTOR}:${RELEASE_TOKEN}@github.com/${ORG}/${project}.git ${branch}
-    reviews+=($(gh pr create --repo "${ORG}/${project}" --head ${branch} --base master --title "${msg}" --body "${msg}"))
+    push_to_repo "${branch}"
+    reviews+=($(gh pr create --repo "${ORG}/${project}" --head ${branch} --base "${base_branch}" --title "${msg}" --body "${msg}"))
 }
 
 function tag_images() {
@@ -81,6 +91,23 @@ function tag_images() {
     git tag -a -f "${release['version']}" -m "${release['version']}"
 
     make release RELEASE_ARGS="$images --tag ${release['version']}"
+}
+
+### Functions: Branch Stage ###
+
+function adjust_shipyard() {
+    sed -e "s/devel/${branch}/" -i projects/shipyard/Makefile.versions
+    _git commit -a -s -m "Update Shipyard to use stable branch '${branch}'"
+}
+
+function create_branches() {
+    local branch="${release['branch']}"
+
+    for project in ${PROJECTS[*]}; do
+        clone_and_create_branch "${branch}" master
+        [[ "${project}" != "shipyard" ]] || adjust_shipyard
+        push_to_repo "${branch}"
+    done
 }
 
 ### Functions: Shipyard Stage ###
@@ -195,6 +222,9 @@ determine_target_release
 read_release_file
 
 case "${release['status']}" in
+branch)
+    create_branches
+    ;;
 shipyard)
     release_shipyard
     ;;

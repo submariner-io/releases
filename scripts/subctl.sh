@@ -38,6 +38,7 @@ read_release_file
 
 project=submariner-operator
 clone_repo
+checkout_project_branch
 
 pushd projects/submariner-operator
 dapper_in_dapper
