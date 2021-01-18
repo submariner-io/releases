@@ -17,6 +17,7 @@ function _pull_image() {
 function pull_images() {
     for project in ${PROJECTS[*]}; do
         clone_repo
+        checkout_project_branch
         local project_version=$(_git describe --tags --exclude="${CUTTING_EDGE}" --exclude="latest")
 
         for image in ${project_images[${project}]}; do
@@ -27,4 +28,8 @@ function pull_images() {
 
 determine_target_release
 read_release_file
+
+# If we're creating branches, no need to pull images as they won't exist and aren't needed yet anyhow
+[[ "${release['state']}" != "branch" ]] || exit 0
+
 pull_images

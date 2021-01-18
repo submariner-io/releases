@@ -40,6 +40,7 @@ function read_release_file() {
     _read 'pre-release'
     _read 'release-notes'
     _read 'status'
+    _read 'branch'
     _read 'components'
     for project in ${PROJECTS[*]}; do
         _read "components.${project}"
@@ -51,7 +52,6 @@ function _git() {
 }
 
 function clone_repo() {
-    local branch="${release["components.${project}"]:-master}"
     if [[ -d "projects/${project}" ]]; then
         _git fetch -f --tags
     else
@@ -59,6 +59,12 @@ function clone_repo() {
         git clone "https://github.com/${ORG}/${project}" "projects/${project}"
         _git config advice.detachedHead false
     fi
+
+}
+
+function checkout_project_branch() {
+    local base_branch="origin/${release['branch']:-master}"
+    local branch="${release["components.${project}"]:-${base_branch}}"
 
     _git checkout "${branch}"
 }

@@ -40,6 +40,9 @@ function validate_release_fields() {
     _validate 'components'
 
     case "${release['status']}" in
+    branch)
+        _validate "branch"
+        ;;
     shipyard)
         _validate_component "shipyard"
         ;;
@@ -57,7 +60,7 @@ function validate_release_fields() {
         done
         ;;
     *)
-        printerr "Status '${release['status']}' should be one of: 'shipyard', 'admiral', 'projects' or 'released'."
+        printerr "Status '${release['status']}' should be one of: 'branch', 'shipyard', 'admiral', 'projects' or 'released'."
         return 2
         ;;
     esac
@@ -90,6 +93,13 @@ function validate_shipyard_consumers() {
     done
 }
 
+function validate_no_branch() {
+    if _git rev-parse "remotes/origin/${release['branch']}" >/dev/null 2>&1; then
+        printerr "'${project}' already has stable branch '${release['branch']}'."
+        return 1
+    fi
+}
+
 function validate_not_released() {
     local project="${1:-${project}}"
 
@@ -120,25 +130,35 @@ function validate_release() {
     fi
 
     case "${release['status']}" in
+    branch)
+        for project in ${PROJECTS[*]}; do
+            clone_repo
+            validate_no_branch
+        done
+        ;;
     shipyard)
         local project=shipyard
         clone_repo
+        checkout_project_branch
         validate_not_released
         ;;
     admiral)
         local project=admiral
         clone_repo
         validate_not_released
+        checkout_project_branch
         ;;
     projects)
         for project in ${OPERATOR_CONSUMES[*]}; do
             clone_repo
+            checkout_project_branch
             validate_not_released
         done
         ;;
     released)
         for project in ${PROJECTS[*]}; do
             clone_repo
+            checkout_project_branch
         done
 
         validate_not_released submariner-operator
