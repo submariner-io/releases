@@ -105,6 +105,22 @@ function adjust_shipyard() {
     sed -e "s/devel/${branch}/" -i projects/shipyard/Makefile.versions
     update_shipyard_base
     _git commit -a -s -m "Update Shipyard to use stable branch '${branch}'"
+
+    # Run in subshell so we don't change the working directory even on failure
+    (
+        set -e
+
+        # Trick our own Makefile to think we're running outside dapper
+        export DAPPER_HOST_ARCH=""
+
+        # Rebuild Shipyard image with the changes we made for stable branches
+        cd projects/shipyard
+        make images
+    )
+
+    # Upload shipyard base image so that other projects have it immediately
+    # Otherwise, image building jobs are likely to fail when creating the branches
+    make release RELEASE_ARGS="shipyard-dapper-base --tag='${release['branch']}'"
 }
 
 function create_branches() {
