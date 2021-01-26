@@ -34,15 +34,19 @@ function validate_release_fields() {
     local errors=0
 
     _validate 'version'
+    _validate 'status'
+    local status="${release['status']}"
+
+    if [[ "${status}" = "branch" ]]; then
+        _validate "branch"
+        return $errors
+    fi
+
     _validate 'name'
     _validate 'release-notes'
-    _validate 'status'
     _validate 'components'
 
-    case "${release['status']}" in
-    branch)
-        _validate "branch"
-        ;;
+    case "${status}" in
     shipyard)
         _validate_component "shipyard"
         ;;
@@ -60,15 +64,12 @@ function validate_release_fields() {
         done
         ;;
     *)
-        printerr "Status '${release['status']}' should be one of: 'branch', 'shipyard', 'admiral', 'projects' or 'released'."
-        return 2
+        printerr "Status '${status}' should be one of: 'branch', 'shipyard', 'admiral', 'projects' or 'released'."
+        errors=1
         ;;
     esac
 
-    if [[ $errors -gt 0 ]]; then
-        printerr "Found ${errors} errors in the file"
-        return 1
-    fi
+    return $errors
 }
 
 function validate_admiral_consumers() {
@@ -110,7 +111,10 @@ function validate_not_released() {
 }
 
 function validate_release() {
-    validate_release_fields
+    if ! validate_release_fields; then
+        printerr "File is missing expected fields"
+        return 1
+    fi
 
     local version=${release['version']}
     if ! git check-ref-format "refs/tags/${version}"; then
