@@ -63,7 +63,7 @@ function clone_repo() {
 }
 
 function checkout_project_branch() {
-    local base_branch="origin/${release['branch']:-master}"
+    local base_branch="origin/${release['branch']:-devel}"
     local branch="${release["components.${project}"]:-${base_branch}}"
 
     _git checkout "${branch}"

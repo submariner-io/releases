@@ -46,7 +46,7 @@ function create_project_release() {
 
 function clone_and_create_branch() {
     local branch=$1
-    local base_branch="${2:-${release['branch']:-master}}"
+    local base_branch="${2:-${release['branch']:-devel}}"
 
     clone_repo
     _git checkout -B "${branch}" "origin/${base_branch}"
@@ -76,7 +76,7 @@ function push_to_repo() {
 function create_pr() {
     local branch="$1"
     local msg="$2"
-    local base_branch="${release['branch']:-master}"
+    local base_branch="${release['branch']:-devel}"
     export GITHUB_TOKEN="${RELEASE_TOKEN}"
 
     _git commit -a -s -m "${msg}"
@@ -127,7 +127,7 @@ function create_branches() {
     local branch="${release['branch']}"
 
     for project in ${PROJECTS[*]}; do
-        clone_and_create_branch "${branch}" master
+        clone_and_create_branch "${branch}" devel
     done
 
     adjust_shipyard
