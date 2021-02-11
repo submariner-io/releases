@@ -102,11 +102,14 @@ function update_shipyard_base() {
 function adjust_shipyard() {
     local project=shipyard
 
+    clone_and_create_branch "${branch}" devel
     sed -e "s/devel/${branch}/" -i projects/shipyard/Makefile.versions
     update_shipyard_base
     _git commit -a -s -m "Update Shipyard to use stable branch '${branch}'"
+    push_to_repo "${branch}"
 
-    # Run in subshell so we don't change the working directory even on failure
+    # Build & upload shipyard base image so that other projects have it immediately
+    # Otherwise, image building jobs are likely to fail when creating the branches
     (
         set -e
 
@@ -114,29 +117,26 @@ function adjust_shipyard() {
         export DAPPER_HOST_ARCH=""
 
         # Rebuild Shipyard image with the changes we made for stable branches
+        # Make sure subctl is taken from devel, as it won't be available yet
         cd projects/shipyard
-        make images
+        make images IMAGES_ARGS="--buildargs 'SUBCTL_VERSION=devel'"
     )
 
-    # Upload shipyard base image so that other projects have it immediately
-    # Otherwise, image building jobs are likely to fail when creating the branches
     make release RELEASE_ARGS="shipyard-dapper-base --tag='${release['branch']}'"
 }
 
 function create_branches() {
     local branch="${release['branch']}"
 
-    for project in ${PROJECTS[*]}; do
-        clone_and_create_branch "${branch}" devel
-    done
-
+    # Shipyard needs some extra care since everything else relies on it
     adjust_shipyard
-    for project in ${SHIPYARD_CONSUMERS[*]}; do
+
+    for project in ${PROJECTS[*]}; do
+        [[ "$project" != "shipyard" ]] || continue
+
+        clone_and_create_branch "${branch}" devel
         update_shipyard_base
         _git commit -a -s -m "Update Shipyard base image to use stable branch '${branch}'"
-    done
-
-    for project in ${PROJECTS[*]}; do
         push_to_repo "${branch}" || errors=$((errors+1))
     done
 }
