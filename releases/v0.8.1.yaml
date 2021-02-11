@@ -3,6 +3,7 @@ version: v0.8.1
 name: 0.8.1
 branch: release-0.8
 release-notes: https://github.com/submariner-io/submariner-website/pull/439
-status: shipyard
+status: admiral
 components:
   shipyard: a1029c394d0efc4f83af0a9ac53d8a28239de5c0
+  admiral: 1b6fa1e8ffb2a080773f2770e58eb5946f4dd203
