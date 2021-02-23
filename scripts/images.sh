@@ -5,7 +5,6 @@ set -e
 source ${DAPPER_SOURCE}/scripts/lib/image_defs
 source ${DAPPER_SOURCE}/scripts/lib/utils
 source ${SCRIPTS_DIR}/lib/debug_functions
-source ${SCRIPTS_DIR}/lib/version
 
 function _pull_image() {
     local hash="${1#v}"
