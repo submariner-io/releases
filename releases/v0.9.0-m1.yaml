@@ -3,7 +3,9 @@ version: v0.9.0-m1
 name: 0.9.0-m1
 pre-release: true
 release-notes: TBD
-status: admiral
+status: projects
 components:
   shipyard: 6b1c4df45bf3396e1557bcb38086b69891237aed
   admiral: 2c6dbba8983969536561239e0ef6e114dbcd7340
+  submariner: 34000d2bd53001f3d385c3823eb40734cd9fc382
+  lighthouse: efc5f8a3f0977ae4aeb91972722237ae9ff99f57
