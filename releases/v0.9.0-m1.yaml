@@ -3,6 +3,7 @@ version: v0.9.0-m1
 name: 0.9.0-m1
 pre-release: true
 release-notes: TBD
-status: shipyard
+status: admiral
 components:
   shipyard: 6b1c4df45bf3396e1557bcb38086b69891237aed
+  admiral: 2c6dbba8983969536561239e0ef6e114dbcd7340
