@@ -8,6 +8,10 @@ CLUSTER_SETTINGS_FLAG = --cluster_settings $(DAPPER_SOURCE)/scripts/cluster_sett
 override CLUSTERS_ARGS += $(CLUSTER_SETTINGS_FLAG)
 override DEPLOY_ARGS += $(CLUSTER_SETTINGS_FLAG) --deploytool_broker_args '--service-discovery'
 
+ifneq (,$(filter dryrun,$(_using)))
+override CREATE_RELEASE_ARGS += --dryrun
+endif
+
 config-git:
 	git config --global user.email "release@submariner.io";\
 	git config --global user.name "Automated Release"
@@ -29,7 +33,7 @@ import-images: images
 	./scripts/import-images.sh
 
 create-release: config-git images
-	./scripts/release.sh
+	./scripts/release.sh $(CREATE_RELEASE_ARGS)
 
 validate:
 	./scripts/validate.sh
