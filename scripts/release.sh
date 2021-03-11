@@ -95,8 +95,9 @@ function tag_images() {
 
 ### Functions: Branch Stage ###
 
-function update_shipyard_base() {
+function update_base_branch() {
     sed -i -E "s/(shipyard-dapper-base):.*/\1:${release['branch']}/" projects/${project}/Dockerfile.dapper
+    sed -i -E "s/^(BASE_BRANCH.*= *)devel$/\1${release['branch']}/" projects/${project}/Makefile
 }
 
 function adjust_shipyard() {
@@ -104,7 +105,7 @@ function adjust_shipyard() {
 
     clone_and_create_branch "${branch}" devel
     sed -e "s/devel/${branch}/" -i projects/shipyard/Makefile.versions
-    update_shipyard_base
+    update_base_branch
     _git commit -a -s -m "Update Shipyard to use stable branch '${branch}'"
     push_to_repo "${branch}"
 
@@ -135,7 +136,7 @@ function create_branches() {
         [[ "$project" != "shipyard" ]] || continue
 
         clone_and_create_branch "${branch}" devel
-        update_shipyard_base
+        update_base_branch
         _git commit -a -s -m "Update Shipyard base image to use stable branch '${branch}'"
         push_to_repo "${branch}" || errors=$((errors+1))
     done
