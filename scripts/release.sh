@@ -25,7 +25,7 @@ function dryrun() {
         return
     fi
 
-    $@
+    "$@"
 }
 
 function create_release() {
@@ -285,4 +285,3 @@ if [[ $errors > 0 ]]; then
     printerr "Encountered ${errors} errors while doing the release."
     exit 1
 fi
-
