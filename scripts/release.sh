@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 
+## Process command line flags ##
+
+source ${SCRIPTS_DIR}/lib/shflags
+DEFINE_boolean 'dryrun' false "Set to 'true' to run without affecting any online repositories"
+
+FLAGS "$@" || exit $?
+eval set -- "${FLAGS_ARGV}"
+
+[[ "${FLAGS_dryrun}" = "${FLAGS_TRUE}" ]] && dryrun=true || dryrun=false
+
 set -e
 
 source ${DAPPER_SOURCE}/scripts/lib/image_defs
@@ -8,6 +18,16 @@ source ${SCRIPTS_DIR}/lib/debug_functions
 
 ### Functions: General ###
 
+# Use this function to dry run a command (in dry run mode), instead of actually running the command
+function dryrun() {
+    if [[ "$dryrun" = "true" ]]; then
+        echo DRY RUNNING: "${@:Q}"
+        return
+    fi
+
+    "$@"
+}
+
 function create_release() {
     local project="$1"
     local target="$2"
@@ -15,7 +35,7 @@ function create_release() {
     [[ "${release['pre-release']}" = "true" ]] && local prerelease="--prerelease"
 
     gh config set prompt disabled
-    gh release create "${release['version']}" $files $prerelease \
+    dryrun gh release create "${release['version']}" $files $prerelease \
         --title "${release['name']}" \
         --repo "${ORG}/${project}" \
         --target "${target}" \
@@ -70,7 +90,7 @@ function update_go_mod() {
 function push_to_repo() {
     local branch="$1"
 
-    _git push -f "https://${GITHUB_ACTOR}:${RELEASE_TOKEN}@github.com/${ORG}/${project}.git" "${branch}"
+    dryrun _git push -f "https://${GITHUB_ACTOR}:${RELEASE_TOKEN}@github.com/${ORG}/${project}.git" "${branch}"
 }
 
 function create_pr() {
@@ -81,7 +101,7 @@ function create_pr() {
 
     _git commit -a -s -m "${msg}"
     push_to_repo "${branch}"
-    reviews+=($(gh pr create --repo "${ORG}/${project}" --head ${branch} --base "${base_branch}" --title "${msg}" --body "${msg}"))
+    reviews+=($(dryrun gh pr create --repo "${ORG}/${project}" --head ${branch} --base "${base_branch}" --title "${msg}" --body "${msg}"))
 }
 
 function tag_images() {
@@ -90,7 +110,7 @@ function tag_images() {
     # Creating a local tag so that images are uploaded with it
     git tag -a -f "${release['version']}" -m "${release['version']}"
 
-    make release RELEASE_ARGS="$images --tag ${release['version']}"
+    dryrun make release RELEASE_ARGS="$images --tag ${release['version']}"
 }
 
 ### Functions: Branch Stage ###
@@ -124,7 +144,7 @@ function adjust_shipyard() {
         make images IMAGES_ARGS="--buildargs 'SUBCTL_VERSION=devel'"
     )
 
-    make release RELEASE_ARGS="shipyard-dapper-base --tag='${release['branch']}'"
+    dryrun make release RELEASE_ARGS="shipyard-dapper-base --tag='${release['branch']}'"
 }
 
 function create_branches() {
@@ -229,7 +249,7 @@ function post_reviews_comment() {
 
     local pr_url=$(gh api -H 'Accept: application/vnd.github.groot-preview+json' \
         repos/:owner/:repo/commits/$(git rev-parse HEAD)/pulls | jq -r '.[0] | .html_url')
-    gh pr review "${pr_url}" --comment --body "${comment}"
+    dryrun gh pr review "${pr_url}" --comment --body "${comment}"
 }
 
 ### Main ###
@@ -267,4 +287,3 @@ if [[ $errors > 0 ]]; then
     printerr "Encountered ${errors} errors while doing the release."
     exit 1
 fi
-
