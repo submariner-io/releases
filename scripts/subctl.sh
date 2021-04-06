@@ -43,6 +43,7 @@ checkout_project_branch
 pushd projects/submariner-operator
 dapper_in_dapper
 
+export DEFAULT_IMAGE_VERSION=${release["version"]}
 [[ "$1" == "cross" ]] && make build-cross
 make bin/subctl
 
