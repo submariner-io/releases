@@ -3,7 +3,9 @@ version: v0.9.0-m2
 name: 0.9.0-m2
 pre-release: true
 release-notes: https://github.com/submariner-io/submariner-website/pull/457
-status: admiral
+status: projects
 components:
   shipyard: 0a66625075ed8114d09221a8d6c9a78718794031
   admiral: 4abac3d9a5604f1ea56488d03e399dbb83fb52ef
+  submariner: 5e6cb045bc18ed10159d10f6466e476eb818f930
+  lighthouse: 04abb08012a004b131474f4f81332839159fe5cd
