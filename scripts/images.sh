@@ -17,8 +17,7 @@ function pull_images() {
     for project in ${PROJECTS[*]}; do
         clone_repo
         checkout_project_branch
-        local base_branch="${release['branch']:-devel}"
-        local project_version=${base_branch}-$(_git rev-parse --short HEAD)
+        local project_version=$(cd projects/${project} && make print-version | grep -oP "(?<=CALCULATED_VERSION=).+")
 
         for image in ${project_images[${project}]}; do
             _pull_image "$project_version"
