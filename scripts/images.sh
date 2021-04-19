@@ -17,7 +17,8 @@ function pull_images() {
     for project in ${PROJECTS[*]}; do
         clone_repo
         checkout_project_branch
-        local project_version=$(_git describe --tags --exclude="${CUTTING_EDGE}" --exclude="subctl-devel" --exclude="latest")
+        local base_branch="${release['branch']:-devel}"
+        local project_version=${base_branch}-$(_git rev-parse --short HEAD)
 
         for image in ${project_images[${project}]}; do
             _pull_image "$project_version"
