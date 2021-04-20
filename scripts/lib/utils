@@ -19,10 +19,10 @@ function get_value() {
 }
 
 function determine_target_release() {
-    file=$(readlink -f releases/target)
+    file=$(git diff-tree --name-only -r HEAD | grep -m1 "releases/v.*\.yaml" || :)
 
-    if [[ ! -f "$file" ]]; then
-        echo "WARN: Target release file doesn't exist, skipping."
+    if [[ -z "$file" ]]; then
+        echo "WARN: Couldn't detect a target release file, skipping."
         exit 0
     fi
 }
