@@ -14,6 +14,8 @@ ifneq (,$(filter dryrun,$(_using)))
 override CREATE_RELEASE_ARGS += --dryrun
 endif
 
+TARGET_RELEASE = $(shell . scripts/lib/utils && determine_target_release 2&> /dev/null && echo $${file})
+
 config-git:
 	git config --global user.email "release@submariner.io";\
 	git config --global user.name "Automated Release"
@@ -21,7 +23,7 @@ config-git:
 subctl: config-git
 	./scripts/subctl.sh $(SUBCTL_ARGS)
 
-e2e: deploy
+e2e: $(if $(TARGET_RELEASE),deploy)
 	./scripts/e2e.sh
 
 clusters: images subctl
