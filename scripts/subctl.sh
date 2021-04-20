@@ -17,18 +17,6 @@ function dapper_in_dapper() {
 
     # Trick our own Makefile to think we're running outside dapper
     export DAPPER_HOST_ARCH=""
-
-    # Commit and tag so that we get a correct "version" calculated
-    git commit -a -m "DAPPER IN DAPPER"
-    git tag -a -f "${release['version']}" -m "${release['version']}"
-}
-
-function cleanup_dapper_in_dapper() {
-    # Remove last commit which was needed to run dapper in dapper
-    git reset --hard HEAD^
-
-    # Remove local tag so not to interfere
-    git tag -d ${release["version"]}
 }
 
 ### Main ###
@@ -44,10 +32,10 @@ pushd projects/submariner-operator
 dapper_in_dapper
 
 export DEFAULT_IMAGE_VERSION=${release["version"]}
+export VERSION=${release["version"]}
 [[ "$1" == "cross" ]] && make build-cross
 make bin/subctl
 
 ln -f -s $(pwd)/bin/subctl /go/bin/subctl
 ./bin/subctl version
-cleanup_dapper_in_dapper
 
