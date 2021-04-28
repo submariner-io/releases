@@ -22,4 +22,5 @@ components:
   shipyard: 2254d86 # Only used if status is 'shipyard'
   admiral: a69b58d # Only used if status is 'admiral'
   submariner: 7ffe614 # Only used if status is 'projects'
+  cloud-prepare: 6729657 # Only used if status is 'projects'
   lighthouse: 6c78a05 # Only used if status is 'projects'
