@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-readonly PROJECTS=(admiral lighthouse shipyard submariner submariner-charts submariner-operator)
-readonly ADMIRAL_CONSUMERS=(lighthouse submariner submariner-operator)
+readonly PROJECTS=(admiral cloud-prepare lighthouse shipyard submariner submariner-charts submariner-operator)
+readonly ADMIRAL_CONSUMERS=(cloud-prepare lighthouse submariner submariner-operator)
 readonly SHIPYARD_CONSUMERS=(admiral lighthouse submariner submariner-operator)
 readonly OPERATOR_CONSUMES=(submariner lighthouse)
 
