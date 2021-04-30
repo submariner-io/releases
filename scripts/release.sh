@@ -69,7 +69,7 @@ function clone_and_create_branch() {
     local base_branch="${2:-${release['branch']:-devel}}"
 
     clone_repo
-    _git checkout -B "${branch}" "origin/${base_branch}"
+    _git checkout -B "${branch}" "remotes/origin/${base_branch}"
 }
 
 function update_go_mod() {
