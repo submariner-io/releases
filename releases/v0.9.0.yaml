@@ -3,9 +3,11 @@ version: v0.9.0
 name: 0.9.0
 branch: release-0.9
 release-notes: https://github.com/submariner-io/submariner-website/pull/457
-status: projects
+status: released
 components:
   shipyard: 44d5d9e
   admiral: b860739
   submariner: 18e5c08
   lighthouse: d5c3f0e
+  submariner-charts: 4126e0f
+  submariner-operator: 198fe39
