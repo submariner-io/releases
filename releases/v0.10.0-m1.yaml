@@ -3,6 +3,7 @@ version: v0.10.0-m1
 name: 0.10.0-m1
 pre-release: true
 release-notes:
-status: shipyard
+status: admiral
 components:
   shipyard: 924eaaf
+  admiral: aca632d
