@@ -3,9 +3,11 @@ version: v0.10.0-m1
 name: 0.10.0-m1
 pre-release: true
 release-notes:
-status: projects
+status: released
 components:
   shipyard: 924eaaf
   admiral: aca632d
   submariner: ed47389
   lighthouse: 6b54f63
+  submariner-charts: 12c8e9b
+  submariner-operator: 883cc90
