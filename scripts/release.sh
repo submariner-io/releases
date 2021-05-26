@@ -101,7 +101,9 @@ function create_pr() {
 
     _git commit -a -s -m "${msg}"
     push_to_repo "${branch}"
-    reviews+=($(dryrun gh pr create --repo "${ORG}/${project}" --head ${branch} --base "${base_branch}" --title "${msg}" --body "${msg}"))
+    local to_review=$(dryrun gh pr create --repo "${ORG}/${project}" --head ${branch} --base "${base_branch}" --title "${msg}" --body "${msg}")
+    dryrun gh pr merge --auto --repo "${ORG}/${project}" --squash "${to_review}" || echo "WARN: Failed to enable auto merge on ${to_review}"
+    reviews+=("${to_review}")
 }
 
 function tag_images() {
