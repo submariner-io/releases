@@ -40,6 +40,9 @@ images:
 import-images: images
 	./scripts/import-images.sh
 
+release:
+	./scripts/release.sh $(RELEASE_ARGS)
+
 validate:
 	./scripts/validate.sh
 

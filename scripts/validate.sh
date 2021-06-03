@@ -122,6 +122,8 @@ function validate_release() {
         return 1
     fi
 
+    is_semver "${version#v}" || return 1
+
     local pre_release="${release['pre-release']}"
     if [[ "$pre_release" = "true" ]] && [[ ! "$version" =~ -[0-9a-z\.]+$ ]]; then
         printerr "Version ${version@Q} should have a hyphen followed by identifiers as it's marked as pre-release"
