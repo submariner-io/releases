@@ -22,18 +22,15 @@ function set_stable_branch() {
 }
 
 function set_status() {
-    write "status: $1"
+    if [[ -z "${release['status']}" ]]; then
+        write "status: ${1}"
+        return
+    fi
+
+    sed -i -E "s/(status: ).*/\1${1}/" "${file}"
 }
 
 ### Functions: Creating initial release ###
-
-function init_components() {
-    local project=shipyard
-    clone_repo
-    checkout_project_branch
-    write "components:"
-    write "  shipyard: $(_git rev-parse HEAD)"
-}
 
 function create_initial() {
     declare -gA release
@@ -44,8 +41,6 @@ version: v${VERSION}
 name: ${VERSION}
 EOF
 
-    extract_semver "$VERSION"
- 
     if [[ -n "${semver['pre']}" ]]; then
         write "pre-release: true"
     elif [[ "${semver['patch']}" = "0" ]]; then
@@ -60,20 +55,67 @@ EOF
         set_stable_branch
     fi
 
-    set_status "shipyard"
-    init_components
+    # We're not branching, so just move on to shipyard
+    advance_branch
 }
 
 ### Functions: Advancing release to next stage ###
 
+function write_component() {
+    local project=${1:-${project}}
+    clone_repo
+    checkout_project_branch
+    write "  ${project}: $(_git rev-parse HEAD)"
+}
+
+function advance_branch() {
+    set_status "shipyard"
+    write "components:"
+    write_component "shipyard"
+}
+
+function advance_shipyard() {
+    set_status "admiral"
+    write_component "admiral"
+}
+
+function advance_admiral() {
+    set_status "projects"
+    for project in ${OPERATOR_CONSUMES[*]}; do
+        write_component
+    done
+}
+
+function advance_projects() {
+    set_status "released"
+    write_component "submariner-operator"
+    write_component "submariner-charts"
+}
+
 function advance_stage() {
     echo "Advancing release to the next stage (file=${file})"
+
+    read_release_file
+    case "${release['status']}" in
+    branch|shipyard|admiral|projects)
+        # shellcheck disable=SC2086
+        advance_${release['status']}
+        ;;
+    released)
+        echo "The release ${VERSION} has been released, nothing to do."
+        ;;
+    *)
+        printerr "Unknown status '${release['status']}'"
+        exit 1
+        ;;
+    esac
 }
 
 ### Main ###
 
 validate
 file="releases/v${VERSION}.yaml"
+extract_semver "$VERSION"
 if [[ ! -f "${file}" ]]; then
     create_initial
     echo "Created initial release file ${file}"
