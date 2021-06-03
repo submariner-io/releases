@@ -66,3 +66,12 @@ function checkout_project_branch() {
     _git checkout "${branch}"
 }
 
+function is_semver() {
+    local ver="(0|[1-9][0-9]*)"
+    local regex="^${ver}\.${ver}\.${ver}(-([0-9a-zA-Z.-]*))?$"
+    if [[ ! "$1" =~ ${regex} ]]; then
+        printerr "Version ${1@Q} is not a valid semantic version"
+        return 1
+    fi
+}
+
