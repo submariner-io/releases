@@ -33,4 +33,4 @@ jobs:
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
           QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
           RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-        run: make create-release dryrun=true
+        run: make do-release dryrun=true
