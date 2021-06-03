@@ -10,3 +10,4 @@ ENV DAPPER_OUTPUT=${DAPPER_SOURCE}/output \
 RUN curl -L https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_${ARCH}.tar.gz | tar xzf - && mv gh_${GH_VERSION}_linux_${ARCH}/bin/gh /usr/bin/ && rm -rf gh_${GH_VERSION}_linux_${ARCH}
 
 WORKDIR ${DAPPER_SOURCE}
+ENTRYPOINT ["/opt/shipyard/scripts/entry"]
