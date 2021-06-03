@@ -60,6 +60,11 @@ Makefile.dapper:
 
 include Makefile.dapper
 
+git-sync:
+	-git fetch --all --tags
+
+release: git-sync
+
 endif
 
 # Disable rebuilding Makefile
