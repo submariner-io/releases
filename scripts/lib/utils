@@ -75,3 +75,8 @@ function is_semver() {
     fi
 }
 
+function extract_semver() {
+    declare -gA semver
+    IFS=".-" read -r semver['major'] semver['minor'] semver['patch'] semver['pre'] <<< "$1"
+}
+

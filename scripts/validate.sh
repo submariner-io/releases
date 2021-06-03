@@ -44,7 +44,6 @@ function validate_release_fields() {
     fi
 
     _validate 'name'
-    _validate 'release-notes'
     _validate 'components'
 
     case "${status}" in
