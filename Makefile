@@ -31,14 +31,15 @@ clusters: images subctl
 
 deploy: import-images
 
+# [do-release] will run the release process for the current stage, creating tags and releasing images as needed
+do-release: config-git images
+	./scripts/do-release.sh
+
 images:
 	./scripts/images.sh
 
 import-images: images
 	./scripts/import-images.sh
-
-create-release: config-git images
-	./scripts/release.sh
 
 validate:
 	./scripts/validate.sh
