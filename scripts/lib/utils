@@ -47,6 +47,17 @@ function read_release_file() {
     done
 }
 
+# Use this function to dry run a command (in dry run mode), instead of actually running the command.
+# Based on global "dryrun" variable
+function dryrun() {
+    if [[ "$dryrun" = "true" ]]; then
+        echo DRY RUNNING: "${@:Q}"
+        return
+    fi
+
+    "$@"
+}
+
 function _git() {
     git -C "projects/${project}" "$@"
 }

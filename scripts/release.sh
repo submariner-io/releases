@@ -6,10 +6,23 @@ source ${DAPPER_SOURCE}/scripts/lib/image_defs
 source ${DAPPER_SOURCE}/scripts/lib/utils
 source ${SCRIPTS_DIR}/lib/debug_functions
 
+### Variables ###
+
+declare -A next_status=( [branch]=shipyard [shipyard]=admiral [admiral]=projects [projects]=released )
+
 ### Functions: General ###
+
+function expect_env() {
+    local env_var="$1"
+    if [[ -z "${!env_var}" ]]; then
+        printerr "Expected environment variable ${env_var@Q} is not set"
+        exit 1
+    fi
+}
 
 function validate() {
     is_semver "$VERSION"
+    expect_env "GITHUB_TOKEN"
 }
 
 function write() {
@@ -30,6 +43,23 @@ function set_status() {
 }
 
 ### Functions: Creating initial release ###
+
+function create_pr() {
+    local branch="$1"
+    local msg="$2"
+    local base_branch="${release['branch']:-devel}"
+    local project="$(basename $(pwd))"
+    local repo="submariner-io/${project}"
+
+    git add "${file}"
+    git commit -s -m "${msg}"
+    dryrun git push -f "https://${GITHUB_TOKEN}:x-oauth-basic@github.com/${ORG}/${project}.git" "HEAD:${branch}"
+    local pr_to_review=$(dryrun gh pr create --repo "${repo}" --head "${ORG}:${branch}" --base "${base_branch}" --title "${msg}" --body "${msg}")
+    dryrun gh pr merge --auto --repo "${repo}" --rebase "${pr_to_review}" \
+        || echo "WARN: Failed to enable auto merge on ${pr_to_review}"
+    echo "Created Pull Request: ${pr_to_review}"
+}
+
 
 function create_initial() {
     declare -gA release
@@ -55,6 +85,7 @@ EOF
     fi
 
     # We're not branching, so just move on to shipyard
+    set_status "shipyard"
     advance_branch
 }
 
@@ -68,25 +99,21 @@ function write_component() {
 }
 
 function advance_branch() {
-    set_status "shipyard"
     write "components:"
     write_component "shipyard"
 }
 
 function advance_shipyard() {
-    set_status "admiral"
     write_component "admiral"
 }
 
 function advance_admiral() {
-    set_status "projects"
     for project in ${OPERATOR_CONSUMES[*]}; do
         write_component
     done
 }
 
 function advance_projects() {
-    set_status "released"
     write_component "submariner-operator"
     write_component "submariner-charts"
 }
@@ -97,7 +124,10 @@ function advance_stage() {
     read_release_file
     case "${release['status']}" in
     branch|shipyard|admiral|projects)
+        local next="${next_status[${release['status']}]}"
+        set_status "${next}"
         advance_${release['status']}
+        create_pr "releasing-${VERSION}" "Advancing ${VERSION} release to status: ${next}"
         ;;
     released)
         echo "The release ${VERSION} has been released, nothing to do."
@@ -117,6 +147,7 @@ extract_semver "$VERSION"
 if [[ ! -f "${file}" ]]; then
     create_initial
     echo "Created initial release file ${file}"
+    create_pr "releasing-${VERSION}" "Initiating release of ${VERSION}"
 else
     advance_stage
     echo "Advanced release to the next stage (file=${file})"
