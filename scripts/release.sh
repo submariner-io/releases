@@ -106,13 +106,19 @@ function create_pr() {
     reviews+=("${to_review}")
 }
 
+function release_images{} {
+    local args="$1"
+    make release-images RELEASE_ARGS="${args}" || \
+        make release RELEASE_ARGS="${args}"
+}
+
 function tag_images() {
     local images="$@"
 
     # Creating a local tag so that images are uploaded with it
     git tag -a -f "${release['version']}" -m "${release['version']}"
 
-    dryrun make release RELEASE_ARGS="$images --tag ${release['version']}"
+    dryrun release_images "$images --tag ${release['version']}"
 }
 
 ### Functions: Branch Stage ###
@@ -146,7 +152,7 @@ function adjust_shipyard() {
         make images IMAGES_ARGS="--buildargs 'SUBCTL_VERSION=devel'"
     )
 
-    dryrun make release RELEASE_ARGS="shipyard-dapper-base --tag='${release['branch']}'"
+    dryrun release_images "shipyard-dapper-base --tag='${release['branch']}'"
 }
 
 function create_branches() {
