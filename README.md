@@ -6,4 +6,12 @@
 [![Periodic](https://github.com/submariner-io/releases/workflows/Periodic/badge.svg)](https://github.com/submariner-io/releases/actions?query=workflow%3APeriodic)
 <!-- markdownlint-enable line-length -->
 
-This repository is WIP, but will eventually contain release process logic for submariner-io projects.
+To create or advance a release, simply run `make release VERSION='$semver'`, e.g.
+
+* `make release VERSION='1.2.3'
+* `make release VERSION='1.2.3-rc1'
+
+To run the process without pushing the changes to GitHub, run the command with `dryrun=true`.
+
+Make sure you set the `GITHUB_TOKEN` environment variable to a [Personal Access Token](https://github.com/settings/tokens) which has
+at least `public_repo` access to your repository.
