@@ -15,3 +15,8 @@ To run the process without pushing the changes to GitHub, run the command with `
 
 Make sure you set the `GITHUB_TOKEN` environment variable to a [Personal Access Token](https://github.com/settings/tokens) which has
 at least `public_repo` access to your repository.
+
+By default, the action will try to push to the GitHub account used in the `origin` remote.
+If you want to use a specific GitHub account, set `GITHUB_ACTOR` to the desired account, e.g.
+
+* `make release VERSION='1.2.3' GITHUB_ACTOR='octocat'`
