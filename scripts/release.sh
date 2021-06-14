@@ -55,11 +55,12 @@ function create_pr() {
     # shellcheck disable=SC2046
     project="$(basename $(pwd))"
     local repo="submariner-io/${project}"
+    local gh_user=${GITHUB_ACTOR:-${ORG}}
 
     git add "${file}"
     git commit -s -m "${msg}"
-    dryrun git push -f "https://${GITHUB_TOKEN}:x-oauth-basic@github.com/${ORG}/${project}.git" "HEAD:${branch}"
-    pr_to_review=$(dryrun gh pr create --repo "${repo}" --head "${ORG}:${branch}" --base "${base_branch}" --title "${msg}" --body "${msg}")
+    dryrun git push -f "https://${GITHUB_TOKEN}:x-oauth-basic@github.com/${gh_user}/${project}.git" "HEAD:${branch}"
+    pr_to_review=$(dryrun gh pr create --repo "${repo}" --head "${gh_user}:${branch}" --base "${base_branch}" --title "${msg}" --body "${msg}")
     dryrun gh pr merge --auto --repo "${repo}" --rebase "${pr_to_review}" \
         || echo "WARN: Failed to enable auto merge on ${pr_to_review}"
     echo "Created Pull Request: ${pr_to_review}"
