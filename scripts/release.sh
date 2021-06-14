@@ -106,7 +106,7 @@ function create_pr() {
     reviews+=("${to_review}")
 }
 
-function release_images{} {
+function release_images() {
     local args="$1"
     make release-images RELEASE_ARGS="${args}" || \
         make release RELEASE_ARGS="${args}"
