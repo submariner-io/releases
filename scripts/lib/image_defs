@@ -1,3 +1,6 @@
+# shellcheck shell=bash
+# shellcheck disable=SC2034 # We declare some shared variables here
+
 REPO="quay.io/submariner"
 
 declare -A project_images

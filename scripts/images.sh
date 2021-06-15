@@ -2,9 +2,11 @@
 
 set -e
 
-source ${DAPPER_SOURCE}/scripts/lib/image_defs
-source ${DAPPER_SOURCE}/scripts/lib/utils
-source ${SCRIPTS_DIR}/lib/debug_functions
+# shellcheck source=scripts/lib/image_defs
+. "${DAPPER_SOURCE}/scripts/lib/image_defs"
+# shellcheck source=scripts/lib/utils
+. "${DAPPER_SOURCE}/scripts/lib/utils"
+. "${SCRIPTS_DIR}/lib/debug_functions"
 
 function _pull_image() {
     local hash="${1#v}"
@@ -15,9 +17,10 @@ function _pull_image() {
 
 function pull_images() {
     for project in ${PROJECTS[*]}; do
+        local project_version
         clone_repo
         checkout_project_branch
-        local project_version=$(cd projects/${project} && make print-version | grep -oP "(?<=CALCULATED_VERSION=).+")
+        project_version=$(cd "projects/${project}" && make print-version | grep -oP "(?<=CALCULATED_VERSION=).+")
 
         for image in ${project_images[${project}]}; do
             _pull_image "$project_version"
