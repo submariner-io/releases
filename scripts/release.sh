@@ -1,15 +1,5 @@
 #!/usr/bin/env bash
 
-## Process command line flags ##
-
-source ${SCRIPTS_DIR}/lib/shflags
-DEFINE_boolean 'dryrun' false "Set to 'true' to run without affecting any online repositories"
-
-FLAGS "$@" || exit $?
-eval set -- "${FLAGS_ARGV}"
-
-[[ "${FLAGS_dryrun}" = "${FLAGS_TRUE}" ]] && dryrun=true || dryrun=false
-
 set -e
 
 source ${DAPPER_SOURCE}/scripts/lib/image_defs
@@ -108,8 +98,8 @@ function create_pr() {
 
 function release_images() {
     local args="$1"
-    make release-images RELEASE_ARGS="${args}" || \
-        make release RELEASE_ARGS="${args}"
+    dryrun make release-images RELEASE_ARGS="${args}" || \
+        dryrun make release RELEASE_ARGS="${args}"
 }
 
 function tag_images() {
@@ -118,7 +108,7 @@ function tag_images() {
     # Creating a local tag so that images are uploaded with it
     git tag -a -f "${release['version']}" -m "${release['version']}"
 
-    dryrun release_images "$images --tag ${release['version']}"
+    release_images "$images --tag ${release['version']}"
 }
 
 ### Functions: Branch Stage ###
@@ -152,7 +142,7 @@ function adjust_shipyard() {
         make images IMAGES_ARGS="--buildargs 'SUBCTL_VERSION=devel'"
     )
 
-    dryrun release_images "shipyard-dapper-base --tag='${release['branch']}'"
+    release_images "shipyard-dapper-base --tag='${release['branch']}'"
 }
 
 function create_branches() {
