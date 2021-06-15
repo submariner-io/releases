@@ -14,3 +14,23 @@ jobs:
 
       - name: Validate release YAMLs
         run: make validate
+
+  # This job runs the script in "dryrun" mode, not doing any changes to the repo.
+  # This should make sure the script at least works as intended (given a valid yaml).
+  release:
+    name: Dry-run the Release
+    needs: yamls
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Create the release in dry-run mode
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+          QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
+          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: make create-release dryrun=true

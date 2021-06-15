@@ -37,7 +37,7 @@ import-images: images
 	./scripts/import-images.sh
 
 create-release: config-git images
-	./scripts/release.sh $(CREATE_RELEASE_ARGS)
+	./scripts/release.sh
 
 validate:
 	./scripts/validate.sh
