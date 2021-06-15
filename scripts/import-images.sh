@@ -2,10 +2,12 @@
 
 set -e
 
-source ${DAPPER_SOURCE}/scripts/lib/image_defs
-source ${DAPPER_SOURCE}/scripts/lib/utils
-source ${SCRIPTS_DIR}/lib/debug_functions
-source ${SCRIPTS_DIR}/lib/deploy_funcs
+# shellcheck source=scripts/lib/image_defs
+. "${DAPPER_SOURCE}/scripts/lib/image_defs"
+# shellcheck source=scripts/lib/utils
+. "${DAPPER_SOURCE}/scripts/lib/utils"
+. "${SCRIPTS_DIR}/lib/debug_functions"
+. "${SCRIPTS_DIR}/lib/deploy_funcs"
 
 for project in ${PROJECTS[*]}; do
     for image in ${project_images[${project}]}; do

@@ -1,0 +1,5 @@
+# Disabled SC1090 as source-paths should work properly in 0.7.2 which isn't available (to us) yet
+# Revisit this once we have 0.7.2 to see if we can use source-paths
+disable=SC1090
+# SC2154 is excluded to avoid false positives based on our use of global variables
+disable=SC2154
