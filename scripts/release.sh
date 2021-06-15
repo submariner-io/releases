@@ -114,7 +114,6 @@ function tag_images() {
 ### Functions: Branch Stage ###
 
 function update_base_branch() {
-    sed -i -E "s/(shipyard-dapper-base):.*/\1:${release['branch']}/" projects/${project}/Dockerfile.dapper
     sed -i -E "s/^(BASE_BRANCH.*= *)devel$/\1${release['branch']}/" projects/${project}/Makefile
     sed -i -E "s/\<devel\>/${release['branch']}/" projects/${project}/.github/workflows/*
 }
