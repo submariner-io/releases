@@ -34,10 +34,9 @@ checkout_project_branch
 pushd projects/submariner-operator
 dapper_in_dapper
 
-export DEFAULT_IMAGE_VERSION=${release["version"]}
-export VERSION=${release["version"]}
-[[ "$1" == "cross" ]] && make build-cross
-make bin/subctl
+target=( bin/subctl )
+[[ "$1" == "cross" ]] && target+=( build-cross )
+make "${target[@]}" VERSION="${release['version']}" DEFAULT_IMAGE_VERSION="${release['version']}"
 
 ln -f -s "$(pwd)/bin/subctl" /go/bin/subctl
 ./bin/subctl version
