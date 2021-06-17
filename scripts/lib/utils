@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+# shellcheck shell=bash
+# shellcheck disable=SC2034 # We declare some shared variables here
 
 readonly PROJECTS=(admiral cloud-prepare lighthouse shipyard submariner submariner-charts submariner-operator)
 readonly ADMIRAL_CONSUMERS=(cloud-prepare lighthouse submariner submariner-operator)
@@ -12,10 +13,6 @@ function printerr() {
 
     [[ -z "${file}" ]] || err_msg+=" (${file})"
     printf "ERROR: %s\n" "${err_msg}" >&2
-}
-
-function get_value() {
-    yq r $file $key
 }
 
 function determine_target_release() {
@@ -32,7 +29,7 @@ function read_release_file() {
 
     function _read() {
         local key=$1
-        release[$key]=$(get_value $file $key)
+        release[$key]=$(yq r "$file" "$key")
     }
 
     _read 'version'

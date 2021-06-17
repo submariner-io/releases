@@ -1,4 +1,5 @@
 BASE_BRANCH ?= devel
+SHELLCHECK_ARGS := scripts/lib/* scripts/*.sh
 
 ifneq (,$(DAPPER_SOURCE))
 

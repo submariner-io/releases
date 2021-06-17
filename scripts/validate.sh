@@ -2,8 +2,9 @@
 
 set -e
 
-source ${DAPPER_SOURCE}/scripts/lib/utils
-source ${SCRIPTS_DIR}/lib/debug_functions
+# shellcheck source=scripts/lib/utils
+. "${DAPPER_SOURCE}/scripts/lib/utils"
+. "${SCRIPTS_DIR}/lib/debug_functions"
 
 ### Functions ###
 
@@ -75,7 +76,8 @@ function validate_release_fields() {
 function validate_admiral_consumers() {
     local expected_version="$1"
     for project in ${ADMIRAL_CONSUMERS[*]}; do
-        local actual_version=$(grep admiral "projects/${project}/go.mod" | cut -f2 -d' ')
+        local actual_version
+        actual_version=$(grep admiral "projects/${project}/go.mod" | cut -f2 -d' ')
         if [[ "${expected_version}" != "${actual_version}" ]]; then
             printerr "Expected Admiral version ${expected_version} but found ${actual_version} in ${project}"
             return 1
@@ -86,7 +88,8 @@ function validate_admiral_consumers() {
 function validate_shipyard_consumers() {
     local expected_version="$1"
     for project in ${SHIPYARD_CONSUMERS[*]}; do
-        local actual_version=$(head -1 "projects/${project}/Dockerfile.dapper" | cut -f2 -d':')
+        local actual_version
+        actual_version=$(head -1 "projects/${project}/Dockerfile.dapper" | cut -f2 -d':')
         if [[ "${expected_version}" != "${actual_version}" ]]; then
             printerr "Expected Shipyard version ${expected_version} but found ${actual_version} in ${project}"
             return 1

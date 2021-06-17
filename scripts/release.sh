@@ -2,9 +2,11 @@
 
 set -e
 
-source ${DAPPER_SOURCE}/scripts/lib/image_defs
-source ${DAPPER_SOURCE}/scripts/lib/utils
-source ${SCRIPTS_DIR}/lib/debug_functions
+# shellcheck source=scripts/lib/image_defs
+. "${DAPPER_SOURCE}/scripts/lib/image_defs"
+# shellcheck source=scripts/lib/utils
+. "${DAPPER_SOURCE}/scripts/lib/utils"
+. "${SCRIPTS_DIR}/lib/debug_functions"
 
 ### Functions: General ###
 
@@ -21,11 +23,11 @@ function dryrun() {
 function create_release() {
     local project="$1"
     local target="$2"
-    local files="${@:3}"
+    local files=( "${@:3}" )
     [[ "${release['pre-release']}" = "true" ]] && local prerelease="--prerelease"
 
     gh config set prompt disabled
-    dryrun gh release create "${release['version']}" $files $prerelease \
+    dryrun gh release create "${release['version']}" "${files[@]}" "$prerelease" \
         --title "${release['name']}" \
         --repo "${ORG}/${project}" \
         --target "${target}" \
@@ -71,7 +73,7 @@ function update_go_mod() {
     # Run in subshell so we don't change the working directory even on failure
     (
         pushd "projects/${project}"
-        go get github.com/submariner-io/${target}@${release['version']}
+        go get "github.com/submariner-io/${target}@${release['version']}"
         go mod vendor
         go mod tidy
     )
@@ -87,11 +89,12 @@ function create_pr() {
     local branch="$1"
     local msg="$2"
     local base_branch="${release['branch']:-devel}"
+    local to_review
     export GITHUB_TOKEN="${RELEASE_TOKEN}"
 
     _git commit -a -s -m "${msg}"
     push_to_repo "${branch}"
-    local to_review=$(dryrun gh pr create --repo "${ORG}/${project}" --head ${branch} --base "${base_branch}" --title "${msg}" --body "${msg}")
+    to_review=$(dryrun gh pr create --repo "${ORG}/${project}" --head "${branch}" --base "${base_branch}" --title "${msg}" --body "${msg}")
     dryrun gh pr merge --auto --repo "${ORG}/${project}" --squash "${to_review}" || echo "WARN: Failed to enable auto merge on ${to_review}"
     reviews+=("${to_review}")
 }
@@ -103,19 +106,17 @@ function release_images() {
 }
 
 function tag_images() {
-    local images="$@"
-
     # Creating a local tag so that images are uploaded with it
     git tag -a -f "${release['version']}" -m "${release['version']}"
 
-    release_images "$images --tag ${release['version']}"
+    release_images "$* --tag ${release['version']}"
 }
 
 ### Functions: Branch Stage ###
 
 function update_base_branch() {
-    sed -i -E "s/^(BASE_BRANCH.*= *)devel$/\1${release['branch']}/" projects/${project}/Makefile
-    sed -i -E "s/\<devel\>/${release['branch']}/" projects/${project}/.github/workflows/*
+    sed -i -E "s/^(BASE_BRANCH.*= *)devel$/\1${release['branch']}/" "projects/${project}/Makefile"
+    sed -i -E "s/\<devel\>/${release['branch']}/" "projects/${project}/.github/workflows"/*
 }
 
 function adjust_shipyard() {
@@ -208,14 +209,14 @@ function update_operator_pr() {
         update_go_mod "${target}"
     done
 
-    sed -i -E "s/(.*Version +=) .*/\1 \"${release['version']#v}\"/" projects/${project}/pkg/versions/versions.go
+    sed -i -E "s/(.*Version +=) .*/\1 \"${release['version']#v}\"/" "projects/${project}/pkg/versions/versions.go"
     create_pr update_operator "Update Operator to use version ${release['version']}"
 }
 
 function release_projects() {
     # Release projects first so that we get them tagged
     for project in ${OPERATOR_CONSUMES[*]}; do
-        create_project_release $project
+        create_project_release "$project"
     done
 
     # Create a PR for operator to use these versions
@@ -225,12 +226,13 @@ function release_projects() {
 ### Functions: Released Stage ###
 
 function release_all() {
-    local commit_ref=$(git rev-parse --verify HEAD)
+    local commit_ref
+    commit_ref=$(git rev-parse --verify HEAD)
     make subctl SUBCTL_ARGS=cross
     create_release releases "${commit_ref}" projects/submariner-operator/dist/subctl-* || errors=$((errors+1))
 
     for project in ${PROJECTS[*]}; do
-        create_project_release $project
+        create_project_release "$project"
     done
 }
 
@@ -240,12 +242,13 @@ function post_reviews_comment() {
     fi
 
     local comment="Release for status '${release['status']}' is done, please review:"
-    for review in ${reviews[@]}; do
-        comment+=$(printf "\n * ${review}")
+    for review in "${reviews[@]}"; do
+        comment+=$(printf "\n * %s" "${review}")
     done
 
-    local pr_url=$(gh api -H 'Accept: application/vnd.github.groot-preview+json' \
-        repos/:owner/:repo/commits/$(git rev-parse HEAD)/pulls | jq -r '.[0] | .html_url')
+    local pr_url
+    pr_url=$(gh api -H 'Accept: application/vnd.github.groot-preview+json' \
+        "repos/:owner/:repo/commits/$(git rev-parse HEAD)/pulls" | jq -r '.[0] | .html_url')
     dryrun gh pr review "${pr_url}" --comment --body "${comment}"
 }
 
@@ -280,7 +283,7 @@ esac
 
 post_reviews_comment || echo "WARN: Can't post reviews comment"
 
-if [[ $errors > 0 ]]; then
+if [[ $errors -gt 0 ]]; then
     printerr "Encountered ${errors} errors while doing the release."
     exit 1
 fi
