@@ -1,6 +1,7 @@
 ---
 version: v1.20.1
 name: 1.20.1
-status: shipyard
+status: admiral
 components:
   shipyard: c1b879a328474e3b68f3be50f682c29762162cda
+  admiral: 41b86d65b7e840ee3c76d971e0f622b5216372ed
