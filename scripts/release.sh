@@ -7,10 +7,6 @@ source "${DAPPER_SOURCE}/scripts/lib/image_defs"
 source "${DAPPER_SOURCE}/scripts/lib/utils"
 source "${SCRIPTS_DIR}/lib/debug_functions"
 
-### Variables ###
-
-declare -A next_status=( [branch]=shipyard [shipyard]=admiral [admiral]=projects [projects]=released )
-
 ### Functions: General ###
 
 function expect_env() {
@@ -130,7 +126,7 @@ function advance_stage() {
     read_release_file
     case "${release['status']}" in
     branch|shipyard|admiral|projects)
-        local next="${next_status[${release['status']}]}"
+        local next="${NEXT_STATUS[${release['status']}]}"
         set_status "${next}"
         # shellcheck disable=SC2086
         advance_${release['status']}

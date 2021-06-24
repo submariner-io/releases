@@ -48,6 +48,9 @@ import-images: images
 release: config-git
 	./scripts/release.sh $(RELEASE_ARGS)
 
+test-release:
+	./scripts/test/release.sh
+
 validate:
 	./scripts/validate.sh
 
