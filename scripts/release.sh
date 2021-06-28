@@ -88,6 +88,7 @@ EOF
 
     # We're not branching, so just move on to shipyard
     set_status "shipyard"
+    read_release_file
     advance_branch
 }
 
