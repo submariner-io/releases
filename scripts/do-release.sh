@@ -28,8 +28,8 @@ function create_release() {
 #    [[ -n "${release['release-notes']}" ]] && local notes="--notes ${release['release-notes']}"
 
     gh config set prompt disabled
-    # shellcheck disable=SC2086
-    dryrun gh release create "${release['version']}" "${files[@]}" "${prerelease}" \
+    # shellcheck disable=SC2086,SC2068 # Some things have to be expanded or GH CLI flips out
+    dryrun gh release create "${release['version']}" ${files[@]} ${prerelease} \
         --title "${release['name']}" \
         --repo "${ORG}/${project}" \
         --target "${target}"
