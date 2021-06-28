@@ -25,13 +25,14 @@ function create_release() {
     local target="$2"
     local files=( "${@:3}" )
     [[ "${release['pre-release']}" = "true" ]] && local prerelease="--prerelease"
+#    [[ -n "${release['release-notes']}" ]] && local notes="--notes ${release['release-notes']}"
 
     gh config set prompt disabled
-    dryrun gh release create "${release['version']}" "${files[@]}" "$prerelease" \
+    # shellcheck disable=SC2086
+    dryrun gh release create "${release['version']}" "${files[@]}" "${prerelease}" \
         --title "${release['name']}" \
         --repo "${ORG}/${project}" \
-        --target "${target}" \
-        --notes "${release['release-notes']}"
+        --target "${target}"
 }
 
 function create_project_release() {
