@@ -17,7 +17,11 @@ function printerr() {
 }
 
 function determine_target_release() {
-    file=$(git diff-tree --name-only -r HEAD | grep -m1 "releases/v.*\.yaml" || :)
+    local commit_id=HEAD
+
+    # In case of a merge commit, select the commit before it from the 2nd head (the tree being merged)
+    [[ $(git cat-file -p HEAD | grep -e"^parent " | wc -l) -gt 1 ]] && commit_id="HEAD^2"
+    file=$(git diff-tree --name-only -r "${commit_id}" | grep -m1 "releases/v.*\.yaml" || :)
 
     if [[ -z "$file" ]]; then
         echo "WARN: Couldn't detect a target release file, skipping."
