@@ -20,7 +20,7 @@ function determine_target_release() {
     local commit_id=HEAD
 
     # In case of a merge commit, select the commit before it from the 2nd head (the tree being merged)
-    [[ $(git cat-file -p HEAD | grep -e"^parent " | wc -l) -gt 1 ]] && commit_id="HEAD^2"
+    [[ $(git cat-file -p HEAD | grep -c "^parent ") -gt 1 ]] && commit_id="HEAD^2"
     file=$(git diff-tree --name-only -r "${commit_id}" | grep -m1 "releases/v.*\.yaml" || :)
 
     if [[ -z "$file" ]]; then
@@ -96,4 +96,3 @@ function extract_semver() {
     declare -gA semver
     IFS=".-" read -r semver['major'] semver['minor'] semver['patch'] semver['pre'] <<< "$1"
 }
-
