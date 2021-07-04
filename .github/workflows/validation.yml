@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Validate release YAMLs
         run: make validate
