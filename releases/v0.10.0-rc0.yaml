@@ -1,0 +1,7 @@
+---
+version: v0.10.0-rc0
+name: 0.10.0-rc0
+pre-release: true
+status: shipyard
+components:
+  shipyard: a241462f1f590d8b415698cd35da0592b3f1be31
