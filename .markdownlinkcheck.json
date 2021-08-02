@@ -4,6 +4,12 @@
       "pattern": "^https://github.com/\\S+/\\S+/(issues|pull)/[0-9]+"
     },
     {
+      "pattern": "^https://github.com/\\S+/\\S+/actions"
+    },
+    {
+      "pattern": "^https://github.com/settings/tokens"
+    },
+    {
       "pattern": "^https://github.com/submariner-io/releases/workflows/(.*)/badge.svg"
     },
     {
