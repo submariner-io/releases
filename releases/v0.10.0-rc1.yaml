@@ -2,6 +2,7 @@
 version: v0.10.0-rc1
 name: 0.10.0-rc1
 pre-release: true
-status: shipyard
+status: admiral
 components:
   shipyard: d57324518bcb5a954c0f5cf500742a1953059de6
+  admiral: d931643dcc2957235ce8ac209f4828c0f450c944
