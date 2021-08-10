@@ -5,4 +5,4 @@ branch: release-0.10
 status: admiral
 components:
   shipyard: d2185879002edbce5c58ccf485220c62a364ad1e
-  admiral: 0b33116ec77d680b3d2d9a60e22a090593015b37
+  admiral: cb72016f1f5211bae2d4c9a1eb4e7549985c41ba
