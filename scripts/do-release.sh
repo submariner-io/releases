@@ -74,7 +74,7 @@ function update_go_mod() {
     # Run in subshell so we don't change the working directory even on failure
     (
         pushd "projects/${project}"
-        go get "github.com/submariner-io/${target}@${release['version']}"
+        GOPROXY=direct go get "github.com/submariner-io/${target}@${release['version']}"
         go mod vendor
         go mod tidy
     )
