@@ -79,6 +79,10 @@ function checkout_project_branch() {
     local base_branch="origin/${release['branch']:-devel}"
     local branch="${release["components.${project}"]:-${base_branch}}"
 
+    if [[ "${release['status']}" = "branch" ]]; then
+        branch=devel
+    fi
+
     _git reset --hard HEAD
     _git checkout "${branch}"
 }
