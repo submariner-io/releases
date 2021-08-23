@@ -8,4 +8,7 @@ rules:
   truthy:
     ignore: '.github/workflows/*.yml'
 
+ignore: |
+  /projects
+
 strict: true
