@@ -6,7 +6,7 @@ readonly ADMIRAL_CONSUMERS=(cloud-prepare lighthouse submariner submariner-opera
 readonly SHIPYARD_CONSUMERS=(admiral lighthouse submariner submariner-operator)
 readonly OPERATOR_CONSUMES=(submariner cloud-prepare lighthouse)
 
-readonly ORG=$(git config --get remote.origin.url | awk -F'[:/]' '{print $(NF-1)}')
+ORG=$(git config --get remote.origin.url | awk -F'[:/]' '{print $(NF-1)}')
 declare -A NEXT_STATUS=( [branch]=shipyard [shipyard]=admiral [admiral]=projects [projects]=released )
 
 function printerr() {
