@@ -6,7 +6,7 @@ readonly ADMIRAL_CONSUMERS=(cloud-prepare lighthouse submariner submariner-opera
 readonly SHIPYARD_CONSUMERS=(admiral lighthouse submariner submariner-operator)
 readonly OPERATOR_CONSUMES=(submariner cloud-prepare lighthouse)
 
-readonly ORG=$(git config --get remote.origin.url | awk -F'[:/]' '{print $(NF-1)}')
+ORG=$(git config --get remote.origin.url | awk -F'[:/]' '{print $(NF-1)}')
 declare -A NEXT_STATUS=( [branch]=shipyard [shipyard]=admiral [admiral]=projects [projects]=released )
 
 function printerr() {
@@ -65,14 +65,11 @@ function _git() {
 }
 
 function clone_repo() {
-    if [[ -d "projects/${project}" ]]; then
-        _git fetch -f --tags
-    else
-        mkdir -p projects
-        git clone "https://github.com/${ORG}/${project}" "projects/${project}"
-        _git config advice.detachedHead false
-    fi
+    [[ -d "projects/${project}" ]] && rm -rf "projects/${project}"
 
+    mkdir -p projects
+    git clone "https://github.com/${ORG}/${project}" "projects/${project}"
+    _git config advice.detachedHead false
 }
 
 function checkout_project_branch() {
