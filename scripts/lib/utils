@@ -93,3 +93,7 @@ function extract_semver() {
     declare -gA semver
     IFS=".-" read -r semver['major'] semver['minor'] semver['patch'] semver['pre'] <<< "$1"
 }
+
+function exit_on_branching() {
+    [[ "${release['status']}" != "branch" ]] || exit 0
+}

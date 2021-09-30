@@ -30,8 +30,5 @@ function pull_images() {
 
 determine_target_release
 read_release_file
-
-# If we're creating branches, no need to pull images as they won't exist and aren't needed yet anyhow
-[[ "${release['status']}" != "branch" ]] || exit 0
-
+exit_on_branching
 pull_images
