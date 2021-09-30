@@ -19,7 +19,10 @@ ifneq (,$(filter dryrun,$(_using)))
 override CREATE_RELEASE_ARGS += --dryrun
 endif
 
-TARGET_RELEASE = $(shell . scripts/lib/utils && determine_target_release 2&> /dev/null && echo $${file})
+E2E_NEEDED = $(shell . scripts/lib/utils && \
+    determine_target_release 2&> /dev/null && \
+    read_release_file && \
+    exit_on_branching && echo true)
 
 config-git:
 	git config --global user.email "$(GIT_EMAIL)";\
@@ -28,8 +31,12 @@ config-git:
 subctl: config-git
 	./scripts/subctl.sh $(SUBCTL_ARGS)
 
-e2e: $(if $(TARGET_RELEASE),deploy)
+ifeq (true, $(E2E_NEEDED))
+e2e: deploy
 	./scripts/e2e.sh
+else
+e2e: ;
+endif
 
 clusters: images subctl
 
