@@ -22,6 +22,9 @@ function expect_env() {
 function validate() {
     is_semver "$VERSION"
     dryrun expect_env "GITHUB_TOKEN"
+
+    # Run a harmless command to make sure the token we have is valid
+    dryrun gh repo view > /dev/null
 }
 
 function write() {
