@@ -15,10 +15,6 @@ CLUSTER_SETTINGS_FLAG = --cluster_settings $(DAPPER_SOURCE)/scripts/cluster_sett
 override CLUSTERS_ARGS += $(CLUSTER_SETTINGS_FLAG)
 override DEPLOY_ARGS += $(CLUSTER_SETTINGS_FLAG) --deploytool_broker_args '--service-discovery'
 
-ifneq (,$(filter dryrun,$(_using)))
-override CREATE_RELEASE_ARGS += --dryrun
-endif
-
 E2E_NEEDED = $(shell . scripts/lib/utils && \
     determine_target_release 2&> /dev/null && \
     read_release_file && \
@@ -53,7 +49,7 @@ import-images: images
 	./scripts/import-images.sh
 
 release: config-git
-	./scripts/release.sh $(RELEASE_ARGS)
+	./scripts/release.sh
 
 test-release:
 	./scripts/test/release.sh
