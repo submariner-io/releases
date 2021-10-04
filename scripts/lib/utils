@@ -53,7 +53,7 @@ function read_release_file() {
 # Based on global "dryrun" variable
 function dryrun() {
     if [[ "$dryrun" = "true" ]]; then
-        echo DRY RUNNING: "${@:Q}"
+        echo DRY RUNNING: "${@:1}"
         return
     fi
 

@@ -10,16 +10,6 @@ set -e
 
 ### Functions: General ###
 
-# Use this function to dry run a command (in dry run mode), instead of actually running the command
-function dryrun() {
-    if [[ "$dryrun" = "true" ]]; then
-        echo DRY RUNNING: "${@:Q}"
-        return
-    fi
-
-    "$@"
-}
-
 function create_release() {
     local project="$1"
     local target="$2"
