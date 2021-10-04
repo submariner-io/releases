@@ -7,7 +7,6 @@ set -e
 # shellcheck source=scripts/lib/utils
 . "${DAPPER_SOURCE}/scripts/lib/utils"
 . "${SCRIPTS_DIR}/lib/debug_functions"
-. "${SCRIPTS_DIR}/lib/utils"
 
 ### Functions: General ###
 
@@ -77,7 +76,7 @@ function update_go_mod() {
         pushd "projects/${project}"
 
         go mod tidy
-        with_retries 50 go get "github.com/submariner-io/${target}@${release['version']}"
+        GOPROXY=direct go get "github.com/submariner-io/${target}@${release['version']}"
         go mod vendor
         go mod tidy
     )
