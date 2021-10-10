@@ -203,7 +203,7 @@ function update_operator_pr() {
         update_go_mod "${target}"
     done
 
-    sed -i -E "s/(.*Version +=) .*/\1 \"${release['version']#v}\"/" "projects/${project}/pkg/versions/versions.go"
+    sed -i -E "s/(.*Version +=) .*/\1 \"${release['version']#v}\"/" "projects/${project}/apis/submariner/v1alpha1/versions.go"
     create_pr update_operator "Update Operator to use version ${release['version']}"
 }
 
