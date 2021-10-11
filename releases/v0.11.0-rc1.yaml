@@ -2,7 +2,10 @@
 version: v0.11.0-rc1
 name: 0.11.0-rc1
 pre-release: true
-status: admiral
+status: projects
 components:
   shipyard: bc55c6c5dcf3fdee4078e4a95f05f17fe32309fa
   admiral: fdce8f885ee7a5eea926107887c13c22ac891943
+  submariner: f6b539b912d8fc7d7648b4ca03050c167204b432
+  cloud-prepare: 38994521cbbc61b0ff07dc699128d8429238c36f
+  lighthouse: 1c9a14613cba0e6d3053b835b21e04801df98fda
