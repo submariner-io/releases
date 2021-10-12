@@ -49,7 +49,8 @@ function set_status() {
 function create_pr() {
     local branch="$1"
     local msg="$2"
-    local base_branch="${release['branch']:-devel}"
+    # shellcheck disable=SC2153
+    local base_branch="${BASE_BRANCH}"
     local pr_to_review
     local project
 
