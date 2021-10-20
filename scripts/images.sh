@@ -20,7 +20,8 @@ function pull_images() {
         local project_version
         clone_repo
         checkout_project_branch
-        project_version=$(cd "projects/${project}" && make print-version | grep -oP "(?<=CALCULATED_VERSION=).+")
+        project_version=$(cd "projects/${project}" && make print-version BASE_BRANCH="${release['branch']:-devel}" | \
+                          grep -oP "(?<=CALCULATED_VERSION=).+")
 
         for image in ${project_images[${project}]}; do
             _pull_image "$project_version"
