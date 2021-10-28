@@ -1,0 +1,7 @@
+---
+version: v0.12.0-m0
+name: 0.12.0-m0
+pre-release: true
+status: shipyard
+components:
+  shipyard: 5f3ceac7b116de56df886ebab0e5b1690da8b846
