@@ -80,11 +80,13 @@ EOF
 
     if [[ -n "${semver['pre']}" ]]; then
         write "pre-release: true"
-    elif [[ "${semver['patch']}" = "0" ]]; then
-        # On first GA or a major.minor we'll branch out first
-        set_stable_branch
-        set_status "branch"
-        return
+
+        # On first RC we'll branch to allow development to continue while doing the release
+        if [[ "${semver['pre']}" = "rc0" ]]; then
+            set_stable_branch
+            set_status "branch"
+            return
+        fi
     fi
 
     # Detect stable branch and set it if necessary

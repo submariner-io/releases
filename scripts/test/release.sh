@@ -108,8 +108,9 @@ for version in "${faulty_versions[@]}"; do
     test_semver_faulty "$version"
 done
 
-test_release '100.0.0' 'branch' 'branch: release-100.0'
+test_release '100.0.0' 'shipyard'
 test_release '100.0.1' 'shipyard'
+test_release '100.0.0-rc0' 'branch' 'pre-release: true'
 test_release '100.0.0-rc1' 'shipyard' 'pre-release: true'
 test_release '100.0.1-rc1' 'shipyard' 'pre-release: true'
 
