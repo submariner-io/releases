@@ -34,7 +34,7 @@ function read_release_file() {
 
     function _read() {
         local key=$1
-        release[$key]=$(yq r "$file" "$key")
+        release[$key]=$(yq e ".${key} // \"\"" "$file")
     }
 
     _read 'version'

@@ -1,4 +1,4 @@
-FROM mikefarah/yq:3.3.2 as yq
+FROM mikefarah/yq:4.14.1 as yq
 FROM quay.io/submariner/shipyard-dapper-base:devel
 
 COPY --from=yq /usr/bin/yq /usr/bin/
