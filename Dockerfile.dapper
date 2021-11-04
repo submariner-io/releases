@@ -1,7 +1,5 @@
-FROM mikefarah/yq:4.14.1 as yq
 FROM quay.io/submariner/shipyard-dapper-base:devel
 
-COPY --from=yq /usr/bin/yq /usr/bin/
 ENV DAPPER_SOURCE=/releases PATH=/releases/scripts:$PATH DAPPER_DOCKER_SOCKET=true \
     DAPPER_ENV="GIT_EMAIL GIT_NAME GITHUB_ACTOR GITHUB_TOKEN MAKEFLAGS QUAY_USERNAME QUAY_PASSWORD RELEASE_TOKEN"
 ENV DAPPER_OUTPUT=${DAPPER_SOURCE}/output
