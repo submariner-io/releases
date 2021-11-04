@@ -12,7 +12,7 @@ ifneq (,$(DAPPER_SOURCE))
 
 include $(SHIPYARD_DIR)/Makefile.inc
 
-CLUSTER_SETTINGS_FLAG = --cluster_settings $(DAPPER_SOURCE)/.shipyard.e2e.yml
+CLUSTER_SETTINGS_FLAG = --settings $(DAPPER_SOURCE)/.shipyard.e2e.yml
 override CLUSTERS_ARGS += $(CLUSTER_SETTINGS_FLAG)
 override DEPLOY_ARGS += $(CLUSTER_SETTINGS_FLAG) --deploytool_broker_args '--service-discovery'
 
