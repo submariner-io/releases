@@ -14,7 +14,7 @@ include $(SHIPYARD_DIR)/Makefile.inc
 
 CLUSTER_SETTINGS_FLAG = --settings $(DAPPER_SOURCE)/.shipyard.e2e.yml
 override CLUSTERS_ARGS += $(CLUSTER_SETTINGS_FLAG)
-override DEPLOY_ARGS += $(CLUSTER_SETTINGS_FLAG) --deploytool_broker_args '--service-discovery'
+override DEPLOY_ARGS += $(CLUSTER_SETTINGS_FLAG)
 
 E2E_NEEDED = $(shell . scripts/lib/utils && \
     determine_target_release 2&> /dev/null && \
