@@ -149,6 +149,9 @@ function advance_admiral() {
 function advance_projects() {
     write_component "submariner-operator"
     write_component "submariner-charts"
+    if [[ -z "${semver['pre']}" ]]; then
+        set_bundle
+    fi
 }
 
 function advance_stage() {
@@ -172,6 +175,12 @@ function advance_stage() {
         exit 1
         ;;
     esac
+}
+
+function set_bundle() {
+    write "bundle:"
+    write "  from_version: ${FROM_VERSION:-0.0.0}"
+    write "  channel: ${CHANNEL:-alpha-${semver['major']}.${semver['minor']}}"
 }
 
 ### Main ###

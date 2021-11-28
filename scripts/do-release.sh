@@ -8,6 +8,14 @@ set -e
 . "${DAPPER_SOURCE}/scripts/lib/utils"
 . "${SCRIPTS_DIR}/lib/debug_functions"
 
+### Constants ###
+
+readonly BUNDLE_SOURCE_DIR=${BUNDLE_SOURCE_DIR:-"projects/submariner-operator/packagemanifests"}
+readonly BUNDLE_TARGET_DIR=${BUNDLE_TARGET_DIR:-"projects/community-operators/operators/submariner"}
+readonly BUNDLE_TARGET_ORG=${BUNDLE_TARGET_ORG:-"k8s-operatorhub"}
+readonly BUNDLE_TARGET_REPO=${BUNDLE_TARGET_REPO:-"${BUNDLE_TARGET_ORG}/community-operators"}
+readonly BUNDLE_PR_TEMPLATE="https://raw.githubusercontent.com/${BUNDLE_TARGET_REPO}/main/docs/pull_request_template.md"
+
 ### Functions: General ###
 
 function create_release() {
@@ -81,14 +89,16 @@ function push_to_repo() {
 function create_pr() {
     local branch="$1"
     local msg="$2"
-    local base_branch="${release['branch']:-devel}"
+    local title="$3"
+    local base_branch="${4:-${release['branch']}}"
+    local base_branch="${base_branch:-devel}"
     local to_review
     export GITHUB_TOKEN="${RELEASE_TOKEN}"
 
-    _git commit -a -s -m "${msg}"
+    _git commit -a -s -m "${title}" -m "${msg}"
     push_to_repo "${branch}"
-    to_review=$(dryrun gh pr create --repo "${ORG}/${project}" --head "${branch}" --base "${base_branch}" --title "${msg}" \
-                --label "ready-to-test" --label "e2e-all-k8s" --body "${msg}" 2>&1)
+    to_review=$(dryrun gh pr create --repo "${ORG}/${project}" --head "${branch}" --base "${base_branch}" --title "${title}" \
+                --label "ready-to-test" --label "e2e-all-k8s" --body "${msg}")
 
     # shellcheck disable=SC2181 # The command is too long already, this is more readable
     if [[ $? -ne 0 ]]; then
@@ -215,6 +225,9 @@ function update_operator_pr() {
     [[ -n "${versions_file}" ]] || { printerr "Can't find file for default image versions"; return 1; }
 
     sed -i -E "s/(Default.*Version *=) .*/\1 \"${release['version']#v}\"/" "${versions_file}"
+    if [[ "${release['pre-release']}" != "true" ]]; then
+        release_bundle || errors=$((errors+1))
+    fi
     create_pr update_operator "Update Operator to use version ${release['version']}"
 }
 
@@ -255,6 +268,54 @@ function post_reviews_comment() {
     pr_url=$(gh api -H 'Accept: application/vnd.github.groot-preview+json' \
         "repos/:owner/:repo/commits/$(git rev-parse HEAD)/pulls" | jq -r '.[0] | .html_url')
     dryrun gh pr review "${pr_url}" --comment --body "${comment}"
+}
+
+function get_bundle_pr_body() {
+   echo "Release Submariner v$1"
+   curl -s "${BUNDLE_PR_TEMPLATE}" | sed -E "s/\[ \]/\[x\]/g; 0,/Is operator/d"
+}
+
+function release_bundle() {
+    local bundle_version="${release['version']#v}"
+    local bundle_from_version="${release['bundle.from_version']:-0.0.0}"
+    local bundle_channel
+    bundle_channel="${release['bundle.channel']:-$(echo alpha-"${bundle_version}" | cut -d'.' -f1,2)}"
+
+    local pr_body
+    pr_body=$(get_bundle_pr_body "${bundle_version}")
+
+    (
+        project=submariner-operator
+        pushd projects/${project}
+        dapper_in_dapper
+
+        make packagemanifests \
+            VERSION="${bundle_version}" \
+            FROM_VERSION="${bundle_from_version}" \
+            CHANNEL="${bundle_channel}"
+
+        # Running dapper_in_dapper changes the Dockerfile, make sure to reset it.
+        _git checkout HEAD Dockerfile.dapper
+    )
+
+    if [ ! -d "${BUNDLE_SOURCE_DIR}/${bundle_version}" ]; then
+        echo "ERROR: The bundle version ${bundle_version} was not found in ${BUNDLE_SOURCE_DIR}/${bundle_version}"
+        return 1
+    fi
+
+    (
+        project=community-operators
+        ORG="${BUNDLE_TARGET_ORG}"
+        clone_and_create_branch "submariner-update" "main"
+        cp -r "${BUNDLE_SOURCE_DIR}/${bundle_version}" "${BUNDLE_TARGET_DIR}"
+        cp "${BUNDLE_SOURCE_DIR}/submariner.package.yaml" "${BUNDLE_TARGET_DIR}"
+        pushd projects/${project}
+        tree "${BUNDLE_TARGET_DIR}"
+        create_pr "submariner-update" \
+            "${pr_body}" \
+            "[upstream] Update submariner-operator to ${bundle_version}" \
+            "main"
+    )
 }
 
 ### Main ###
