@@ -204,10 +204,10 @@ function update_operator_pr() {
     done
 
     local versions_file
-    versions_file=$(grep -l -r 'Default.*Version *=' projects/${project}/ | grep '.go$')
+    versions_file=$(grep -l -r --include='*.go' 'Default.*Version *=' projects/${project}/)
     [[ -n "${versions_file}" ]] || { printerr "Can't find file for default image versions"; return 1; }
 
-    sed -i -E "s/(.*Version +=) .*/\1 \"${release['version']#v}\"/" "${versions_file}"
+    sed -i -E "s/(Default.*Version *=) .*/\1 \"${release['version']#v}\"/" "${versions_file}"
     create_pr update_operator "Update Operator to use version ${release['version']}"
 }
 
