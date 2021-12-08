@@ -82,7 +82,10 @@ function test_release() {
     done
 
     # Since the branch is expected to exist, the script will fail, so remove it for testing
-    [[ "${status}" == 'branch' ]] && sed -i '/^branch:.*/d' "releases/v${version}.yaml"
+    if [[ "${status}" == 'branch' ]]; then
+        sed -i '/^branch:.*/d' "releases/v${version}.yaml"
+        git commit -a -m "Remove branch or make release will fail" > /dev/null
+    fi
 
     while [[ -n "${NEXT_STATUS[${status}]}" ]]; do
         status="${NEXT_STATUS[${status}]}"

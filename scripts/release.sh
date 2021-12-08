@@ -44,13 +44,19 @@ function set_status() {
     sed -i -E "s/(status: ).*/\1${1}/" "${file}"
 }
 
+function sync_upstream() {
+    local gh_user="${GITHUB_ACTOR:-${ORG}}"
+    git remote rm upstream_releases 2> /dev/null || :
+    git remote add upstream_releases "https://github.com/${gh_user}/releases.git"
+    git fetch upstream_releases "${BASE_BRANCH}"
+    git rebase "upstream_releases/${BASE_BRANCH}"
+}
+
 ### Functions: Creating initial release ###
 
 function create_pr() {
     local branch="$1"
     local msg="$2"
-    # shellcheck disable=SC2153
-    local base_branch="${BASE_BRANCH}"
     local pr_to_review
     local project
 
@@ -62,7 +68,7 @@ function create_pr() {
     git add "${file}"
     git commit -s -m "${msg}"
     dryrun git push -f "https://${GITHUB_TOKEN}:x-oauth-basic@github.com/${gh_user}/${project}.git" "HEAD:${branch}"
-    pr_to_review=$(dryrun gh pr create --repo "${repo}" --head "${gh_user}:${branch}" --base "${base_branch}" --title "${msg}" --body "${msg}")
+    pr_to_review=$(dryrun gh pr create --repo "${repo}" --head "${gh_user}:${branch}" --base "${BASE_BRANCH}" --title "${msg}" --body "${msg}")
     dryrun gh pr merge --auto --repo "${repo}" --rebase "${pr_to_review}" \
         || echo "WARN: Failed to enable auto merge on ${pr_to_review}"
     echo "Created Pull Request: ${pr_to_review}"
@@ -71,6 +77,7 @@ function create_pr() {
 
 function create_initial() {
     declare -gA release
+    sync_upstream
     echo "Creating initial release file ${file}"
     cat > "${file}" <<EOF
 ---
@@ -135,6 +142,7 @@ function advance_stage() {
     read_release_file
     case "${release['status']}" in
     branch|shipyard|admiral|projects)
+        sync_upstream
         local next="${NEXT_STATUS[${release['status']}]}"
         set_status "${next}"
         # shellcheck disable=SC2086

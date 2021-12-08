@@ -73,8 +73,8 @@ function clone_repo() {
 }
 
 function checkout_project_branch() {
-    local base_branch="origin/${release['branch']:-devel}"
-    local branch="${release["components.${project}"]:-${base_branch}}"
+    local default_branch="origin/${release['branch']:-devel}"
+    local branch="${release["components.${project}"]:-${default_branch}}"
 
     _git reset --hard HEAD
     _git checkout "${branch}"
