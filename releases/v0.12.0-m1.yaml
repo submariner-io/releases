@@ -2,7 +2,10 @@
 version: v0.12.0-m1
 name: 0.12.0-m1
 pre-release: true
-status: admiral
+status: projects
 components:
   shipyard: edbecd0ba223aa80253664c1c9bee290e4a3aec1
   admiral: d65a7904ef3b9c5eaddbae6ca946932e946f62dc
+  submariner: f4f3ed178d2d18f0afe152cc154b70ae426306c5
+  cloud-prepare: 62662df8c42b440f76acf403837a16b50bf91a5b
+  lighthouse: 8be290feb9b8d98c03032412dc5ab4ede68b50b2
