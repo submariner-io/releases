@@ -45,9 +45,8 @@ function set_status() {
 }
 
 function sync_upstream() {
-    local gh_user="${GITHUB_ACTOR:-${ORG}}"
     git remote rm upstream_releases 2> /dev/null || :
-    git remote add upstream_releases "https://github.com/${gh_user}/releases.git"
+    git remote add upstream_releases "https://github.com/${ORG}/releases.git"
     git fetch upstream_releases "${BASE_BRANCH}"
     git rebase "upstream_releases/${BASE_BRANCH}"
 }
