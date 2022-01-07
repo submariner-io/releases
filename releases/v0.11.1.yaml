@@ -2,7 +2,10 @@
 version: v0.11.1
 name: 0.11.1
 branch: release-0.11
-status: admiral
+status: projects
 components:
   shipyard: de7a06d8cb9418bc2e455536f44bdccc788b1b21
   admiral: fa663720d594d61980a54d7432728c20deeb08a2
+  submariner: a8279a7e9ff897345c494ac20c47b500dafa97c3
+  cloud-prepare: 4568cfbaa8fe23d8ccedaaa9ab5be3ffd348b302
+  lighthouse: 3948f2b3334b5b8f0a9d456a1c2f17c9fa07ab96
