@@ -166,7 +166,7 @@ extract_semver "$VERSION"
 if [[ ! -f "${file}" ]]; then
     create_initial
     echo "Created initial release file ${file}"
-    create_pr "releasing-${VERSION}" "Initiating release of ${VERSION}"
+    create_pr "releasing-${VERSION}" "Initiating release of ${VERSION}: Shipyard"
 else
     advance_stage
     echo "Advanced release to the next stage (file=${file})"
