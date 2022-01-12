@@ -204,7 +204,7 @@ function update_operator_pr() {
     done
 
     local versions_file
-    versions_file=$(grep -l -r --include='*.go' 'Default.*Version *=' projects/${project}/)
+    versions_file=$(grep -l -r --include='*.go' --exclude-dir=vendor 'Default.*Version *=' projects/${project}/)
     [[ -n "${versions_file}" ]] || { printerr "Can't find file for default image versions"; return 1; }
 
     sed -i -E "s/(Default.*Version *=) .*/\1 \"${release['version']#v}\"/" "${versions_file}"
