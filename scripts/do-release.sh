@@ -88,7 +88,7 @@ function create_pr() {
     _git commit -a -s -m "${msg}"
     push_to_repo "${branch}"
     to_review=$(dryrun gh pr create --repo "${ORG}/${project}" --head "${branch}" --base "${base_branch}" --title "${msg}" \
-                --label "ready-to-test" --body "${msg}")
+                --label "ready-to-test" --label "e2e-all-k8s" --body "${msg}")
     dryrun gh pr merge --auto --repo "${ORG}/${project}" --squash "${to_review}" || echo "WARN: Failed to enable auto merge on ${to_review}"
     reviews+=("${to_review}")
 }
