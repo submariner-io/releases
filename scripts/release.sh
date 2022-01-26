@@ -19,9 +19,19 @@ function expect_env() {
     fi
 }
 
+function expect_git() {
+    local git_config="$1"
+    if [[ -z "$(git config --get "${git_config}")" ]]; then
+        printerr "Expected Git config ${git_config@Q} is not set, please set it and try again"
+        exit 1
+    fi
+}
+
 function validate() {
     is_semver "$VERSION"
     dryrun expect_env "GITHUB_TOKEN"
+    expect_git "user.email"
+    expect_git "user.name"
 
     # Run a harmless command to make sure the token we have is valid
     dryrun gh repo view > /dev/null
