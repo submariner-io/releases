@@ -25,8 +25,8 @@ function _validate_component() {
     fi
 
     local commit_hash="${release["components.${project}"]}"
-    if [[ ! $commit_hash =~ ^([0-9a-f]{7,40}|v[0-9a-z\.\-]+)$ ]]; then
-        printerr "Version of ${project} should be either a valid git commit hash or in the form v1.2.3: ${commit_hash}"
+    if [[ ! $commit_hash =~ ^[0-9a-f]{7,40}$ ]]; then
+        printerr "Version of ${project} should be a valid git commit hash: ${commit_hash}"
         errors=$((errors+1))
     fi
 }
@@ -103,11 +103,25 @@ function validate_no_branch() {
     fi
 }
 
-function validate_not_released() {
+function validate_project_commits() {
     local project="${1:-${project}}"
+
+    clone_repo
 
     if _git rev-parse "${release['version']}" >/dev/null 2>&1; then
         printerr "'${project}' is already released with version '${release['version']}'."
+        return 1
+    fi
+
+    local latest_hash
+    if ! latest_hash=$(_git rev-parse "origin/${release['branch']:-devel}"); then
+        printerr "Failed to determine latest commit hash for ${project}"
+        return 1
+    fi
+
+    local commit_hash="${release["components.${project}"]}"
+    if [[ ! $latest_hash =~ ^${commit_hash} ]]; then
+        printerr "Version of ${project} (${commit_hash}) isn't the latest, consider using ${latest_hash}"
         return 1
     fi
 }
@@ -145,31 +159,20 @@ function validate_release() {
         done
         ;;
     shipyard)
-        local project=shipyard
-        clone_repo
-        checkout_project_branch
-        validate_not_released
+        validate_project_commits shipyard
         ;;
     admiral)
-        local project=admiral
-        clone_repo
-        validate_not_released
-        checkout_project_branch
+        validate_project_commits admiral
         ;;
     projects)
         for project in ${OPERATOR_CONSUMES[*]}; do
-            clone_repo
-            checkout_project_branch
-            validate_not_released
+            validate_project_commits
         done
         ;;
     released)
-        for project in ${PROJECTS[*]}; do
-            clone_repo
-            checkout_project_branch
+        for project in ${RELEASED_PROJECTS[*]}; do
+            validate_project_commits
         done
-
-        validate_not_released submariner-operator
         ;;
     esac
 
