@@ -98,3 +98,8 @@ function extract_semver() {
 function exit_on_branching() {
     [[ "${release['status']}" != "branch" ]] || exit 0
 }
+
+function gh_commit_sha() {
+    local ref="$1"
+    curl -sf -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${ORG}/${project}/commits/${ref}" | jq -r ".sha"
+}

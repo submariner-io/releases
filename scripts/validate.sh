@@ -104,11 +104,6 @@ function validate_no_branch() {
     fi
 }
 
-function gh_commit_sha() {
-    local ref="$1"
-    curl -sf -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${ORG}/${project}/commits/${ref}" | jq -r ".sha"
-}
-
 function validate_project_commits() {
     local project="${1:-${project}}"
 

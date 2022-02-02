@@ -2,6 +2,7 @@
 # shellcheck disable=SC2034 # We declare some shared variables here
 
 set -e
+set -o pipefail
 
 source "${DAPPER_SOURCE}/scripts/lib/image_defs"
 source "${DAPPER_SOURCE}/scripts/lib/utils"
@@ -120,9 +121,14 @@ EOF
 
 function write_component() {
     local project=${1:-${project}}
-    clone_repo
-    checkout_project_branch
-    write "  ${project}: $(_git rev-parse HEAD)"
+    local branch=${release['branch']:-devel}
+    local commit_hash
+    if ! commit_hash="$(gh_commit_sha "${branch}")"; then
+        printerr "Failed to determine latest commit hash for ${project} - make sure branch ${branch@Q} exists"
+        return 1
+    fi
+
+    write "  ${project}: ${commit_hash}"
 }
 
 function advance_branch() {
