@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
+set -o pipefail
 
 # shellcheck source=scripts/lib/utils
 . "${DAPPER_SOURCE}/scripts/lib/utils"
@@ -97,24 +98,27 @@ function validate_shipyard_consumers() {
 }
 
 function validate_no_branch() {
-    if _git rev-parse "remotes/origin/${release['branch']}" >/dev/null 2>&1; then
+    if gh_commit_sha "${release['branch']}" >/dev/null 2>&1; then
         printerr "'${project}' already has stable branch '${release['branch']}'."
         return 1
     fi
 }
 
+function gh_commit_sha() {
+    local ref="$1"
+    curl -sf -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${ORG}/${project}/commits/${ref}" | jq -r ".sha"
+}
+
 function validate_project_commits() {
     local project="${1:-${project}}"
 
-    clone_repo
-
-    if _git rev-parse "${release['version']}" >/dev/null 2>&1; then
+    if gh_commit_sha "${release['version']}" >/dev/null 2>&1; then
         printerr "'${project}' is already released with version '${release['version']}'."
         return 1
     fi
 
     local latest_hash
-    if ! latest_hash=$(_git rev-parse "origin/${release['branch']:-devel}"); then
+    if ! latest_hash="$(gh_commit_sha "${release['branch']:-devel}")"; then
         printerr "Failed to determine latest commit hash for ${project}"
         return 1
     fi
@@ -154,7 +158,6 @@ function validate_release() {
     case "${release['status']}" in
     branch)
         for project in ${PROJECTS[*]}; do
-            clone_repo
             validate_no_branch
         done
         ;;
