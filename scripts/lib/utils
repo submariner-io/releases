@@ -99,7 +99,12 @@ function exit_on_branching() {
     [[ "${release['status']}" != "branch" ]] || exit 0
 }
 
+function gh_api() {
+    local call="$1"
+    curl -sf -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${ORG}/${project}/${call}"
+}
+
 function gh_commit_sha() {
     local ref="$1"
-    curl -sf -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${ORG}/${project}/commits/${ref}" | jq -r ".sha"
+    gh_api "commits/${ref}" | jq -r ".sha"
 }

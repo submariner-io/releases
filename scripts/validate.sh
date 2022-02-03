@@ -126,6 +126,25 @@ function validate_project_commits() {
     done
 }
 
+function validate_no_pin_prs() {
+    local head="$1"
+    local projects=("${@:2}")
+    local pin_prs
+
+    for project in "${projects[@]}"; do
+        if ! pin_prs="$(gh_api "pulls?base=${release['branch']:-devel}&head=${ORG}:${head}&state=open" | jq -r ".[].url")"; then
+            printerr "Failed to list pull requests for ${project}."
+            return 1
+        fi
+
+        if [[ -n "${pin_prs}" ]]; then
+            printerr "Found open ${head@Q} pull requests on ${project}, make sure they're merged before proceeding"
+            echo "${pin_prs}"
+            return 1
+        fi
+    done
+}
+
 function validate_release() {
     if ! validate_release_fields; then
         printerr "File is missing expected fields"
@@ -162,12 +181,15 @@ function validate_release() {
         ;;
     admiral)
         validate_project_commits admiral
+        validate_no_pin_prs pin_shipyard "${SHIPYARD_CONSUMERS[@]}"
         ;;
     projects)
         validate_project_commits "${OPERATOR_CONSUMES[@]}"
+        validate_no_pin_prs pin_admiral "${ADMIRAL_CONSUMERS[@]}"
         ;;
     released)
         validate_project_commits "${RELEASED_PROJECTS[@]}"
+        validate_no_pin_prs update_operator submariner-operator
         ;;
     esac
 
