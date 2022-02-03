@@ -105,24 +105,25 @@ function validate_no_branch() {
 }
 
 function validate_project_commits() {
-    local project="${1:-${project}}"
-
-    if gh_commit_sha "${release['version']}" >/dev/null 2>&1; then
-        printerr "'${project}' is already released with version '${release['version']}'."
-        return 1
-    fi
-
     local latest_hash
-    if ! latest_hash="$(gh_commit_sha "${release['branch']:-devel}")"; then
-        printerr "Failed to determine latest commit hash for ${project}"
-        return 1
-    fi
 
-    local commit_hash="${release["components.${project}"]}"
-    if [[ ! $latest_hash =~ ^${commit_hash} ]]; then
-        printerr "Version of ${project} (${commit_hash}) isn't the latest, consider using ${latest_hash}"
-        return 1
-    fi
+    for project; do
+        if gh_commit_sha "${release['version']}" >/dev/null 2>&1; then
+            printerr "'${project}' is already released with version '${release['version']}'."
+            return 1
+        fi
+
+        if ! latest_hash="$(gh_commit_sha "${release['branch']:-devel}")"; then
+            printerr "Failed to determine latest commit hash for ${project}"
+            return 1
+        fi
+
+        local commit_hash="${release["components.${project}"]}"
+        if [[ ! $latest_hash =~ ^${commit_hash} ]]; then
+            printerr "Version of ${project} (${commit_hash}) isn't the latest, consider using ${latest_hash}"
+            return 1
+        fi
+    done
 }
 
 function validate_release() {
@@ -163,14 +164,10 @@ function validate_release() {
         validate_project_commits admiral
         ;;
     projects)
-        for project in ${OPERATOR_CONSUMES[*]}; do
-            validate_project_commits
-        done
+        validate_project_commits "${OPERATOR_CONSUMES[@]}"
         ;;
     released)
-        for project in ${RELEASED_PROJECTS[*]}; do
-            validate_project_commits
-        done
+        validate_project_commits "${RELEASED_PROJECTS[@]}"
         ;;
     esac
 
