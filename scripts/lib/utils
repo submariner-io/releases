@@ -7,7 +7,8 @@ readonly SHIPYARD_CONSUMERS=(admiral lighthouse submariner submariner-operator)
 readonly OPERATOR_CONSUMES=(submariner cloud-prepare lighthouse)
 readonly RELEASED_PROJECTS=(submariner-charts submariner-operator)
 
-ORG=${GITHUB_ACTOR:-$(git config --get remote.origin.url | awk -F'[:/]' '{print $(NF-1)}')}
+echo "GITHUB_REPOSITORY_OWNER=${GITHUB_REPOSITORY_OWNER}"
+ORG=${GITHUB_REPOSITORY_OWNER:-$(git config --get remote.origin.url | awk -F'[:/]' '{print $(NF-1)}')}
 declare -A NEXT_STATUS=( [branch]=shipyard [shipyard]=admiral [admiral]=projects [projects]=released )
 
 function printerr() {
