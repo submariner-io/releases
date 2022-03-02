@@ -3,5 +3,6 @@ version: v0.12.0-rc0
 name: 0.12.0-rc0
 pre-release: true
 branch: release-0.12
-status: branch
-# bump
+status: shipyard
+components:
+  shipyard: b47a1fb347cc3b14622e890ef3abefb07a2b1a19
