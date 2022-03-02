@@ -3,10 +3,12 @@ version: v0.12.0-rc0
 name: 0.12.0-rc0
 pre-release: true
 branch: release-0.12
-status: projects
+status: released
 components:
   shipyard: b47a1fb347cc3b14622e890ef3abefb07a2b1a19
   admiral: a8e5d200802e9ae354940dc684a0fd77c08e586a
   submariner: e41571f805977c86402916749feb9782157629b7
   cloud-prepare: 9c60bec0afbcc5ae00dd6f0e648631b45e7491c4
   lighthouse: 4cbf6ef99b15dc7e2ff78b39233cfb0fa3216d77
+  submariner-operator: 72a5ab5584fa5d93aef5dad8f554a86f64b225fb
+  submariner-charts: c15111b32949e47e7f6db8f4ed72f4ec897f1565
