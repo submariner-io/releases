@@ -75,7 +75,7 @@ function update_go_mod() {
 function push_to_repo() {
     local branch="$1"
 
-    dryrun _git push -f "https://${GITHUB_ACTOR}:${RELEASE_TOKEN}@github.com/${ORG}/${project}.git" "${branch}"
+    dryrun _git push -f "https://${GITHUB_REPOSITORY_OWNER}:${RELEASE_TOKEN}@github.com/${ORG}/${project}.git" "${branch}"
 }
 
 function create_pr() {
