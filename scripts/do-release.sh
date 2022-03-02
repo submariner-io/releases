@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
+set -o pipefail
 
 # shellcheck source=scripts/lib/image_defs
 . "${DAPPER_SOURCE}/scripts/lib/image_defs"
@@ -96,6 +97,7 @@ function create_pr() {
         return 1
     fi
 
+    to_review=$(echo "${to_review}" | dryrun grep "http.*")
     dryrun gh pr merge --auto --repo "${ORG}/${project}" --squash "${to_review}" || echo "WARN: Failed to enable auto merge on ${to_review}"
     reviews+=("${to_review}")
 }
