@@ -16,10 +16,11 @@ CLUSTER_SETTINGS_FLAG = --settings $(DAPPER_SOURCE)/.shipyard.e2e.yml
 override CLUSTERS_ARGS += $(CLUSTER_SETTINGS_FLAG)
 override DEPLOY_ARGS += $(CLUSTER_SETTINGS_FLAG)
 
+_E2E_CANARY = E2E CANARY
 E2E_NEEDED = $(shell . scripts/lib/utils && \
     determine_target_release 2&> /dev/null && \
     read_release_file && \
-    exit_on_branching && echo true)
+    exit_on_branching && echo $(_E2E_CANARY))
 
 config-git:
 	git config --global user.email "$(GIT_EMAIL)";\
@@ -28,11 +29,12 @@ config-git:
 subctl: config-git
 	./scripts/subctl.sh $(SUBCTL_ARGS)
 
-ifeq (true, $(E2E_NEEDED))
+ifneq (, $(findstring $(_E2E_CANARY),$(E2E_NEEDED)))
 e2e: deploy
 	./scripts/e2e.sh
 else
-e2e: ;
+e2e:
+	echo $(E2E_NEEDED)
 endif
 
 clusters: images subctl
