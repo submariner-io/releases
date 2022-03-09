@@ -3,6 +3,7 @@ version: v0.12.0-rc1
 name: 0.12.0-rc1
 pre-release: true
 branch: release-0.12
-status: shipyard
+status: admiral
 components:
   shipyard: 12563f51109e9b8ddd8b0cf31cbcffeb982548d6
+  admiral: eed6f8b36ad04003e204f39f6ae187d0fed99f0b
