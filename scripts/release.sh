@@ -107,7 +107,7 @@ EOF
     fi
 
     # Detect stable branch and set it if necessary
-    if git rev-parse "v${semver['major']}.${semver['minor']}.0" &> /dev/null ; then
+    if [[ -z "${semver['pre']}" || "${semver['pre']}" =~ rc.* ]]; then
         set_stable_branch
     fi
 
