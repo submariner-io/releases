@@ -148,7 +148,7 @@ function adjust_shipyard() {
     release_images "shipyard-dapper-base --tag='${release['branch']}'"
 }
 
-function create_branches() {
+function release_branch() {
     local branch="${release['branch']}"
 
     # Shipyard needs some extra care since everything else relies on it
@@ -230,9 +230,32 @@ function release_projects() {
     update_operator_pr || errors=$((errors+1))
 }
 
+### Functions: Installers Stage ###
+
+function update_subctl_pr() {
+    local project="subctl"
+
+    clone_and_create_branch update_subctl
+    for target in ${SUBCTL_CONSUMES[*]} ; do
+        update_go_mod "${target}"
+    done
+
+    create_pr update_subctl "Update subctl to use version ${release['version']}"
+}
+
+
+function release_installers() {
+    for project in ${INSTALLER_PROJECTS[*]}; do
+        create_project_release "$project"
+    done
+
+    # Create a PR for subctl to use these versions
+    update_subctl_pr || errors=$((errors+1))
+}
+
 ### Functions: Released Stage ###
 
-function release_all() {
+function release_released() {
     local commit_ref
     commit_ref=$(git rev-parse --verify HEAD)
     make subctl SUBCTL_ARGS=cross
@@ -268,20 +291,9 @@ read_release_file
 extract_semver "${release['version']#v}"
 
 case "${release['status']}" in
-branch)
-    create_branches
-    ;;
-shipyard)
-    release_shipyard
-    ;;
-admiral)
-    release_admiral
-    ;;
-projects)
-    release_projects
-    ;;
-released)
-    release_all
+branch|shipyard|admiral|projects|installers|released)
+    # shellcheck disable=SC2086
+    release_${release['status']}
     ;;
 *)
     printerr "Unknown status '${release['status']}'"

@@ -151,12 +151,16 @@ function advance_projects() {
     write_component "submariner-charts"
 }
 
+function advance_installers() {
+    write_component "subctl"
+}
+
 function advance_stage() {
     echo "Advancing release to the next stage (file=${file})"
 
     read_release_file
     case "${release['status']}" in
-    branch|shipyard|admiral|projects)
+    branch|shipyard|admiral|projects|installers)
         sync_upstream
         local next="${NEXT_STATUS[${release['status']}]}"
         set_status "${next}"

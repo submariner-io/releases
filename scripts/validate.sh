@@ -59,13 +59,18 @@ function validate_release_fields() {
             _validate_component "${project}"
         done
         ;;
+    installers)
+        for project in ${INSTALLER_PROJECTS[*]}; do
+            _validate_component "${project}"
+        done
+        ;;
     released)
         for project in ${PROJECTS[*]}; do
             _validate_component "${project}"
         done
         ;;
     *)
-        printerr "Status '${status}' should be one of: 'branch', 'shipyard', 'admiral', 'projects' or 'released'."
+        printerr "Status '${status}' should be one of: 'branch', 'shipyard', 'admiral', 'projects', 'installers' or 'released'."
         errors=1
         ;;
     esac
@@ -187,9 +192,13 @@ function validate_release() {
         validate_project_commits "${OPERATOR_CONSUMES[@]}"
         validate_no_pin_prs pin_admiral "${ADMIRAL_CONSUMERS[@]}"
         ;;
+    installers)
+        validate_project_commits "${SUBCTL_CONSUMES[@]}"
+        validate_no_pin_prs update_operator submariner-operator
+        ;;
     released)
         validate_project_commits "${RELEASED_PROJECTS[@]}"
-        validate_no_pin_prs update_operator submariner-operator
+        validate_no_pin_prs update_subctl subctl
         ;;
     esac
 
