@@ -22,7 +22,7 @@ function dapper_in_dapper() {
     local cur_pwd
     orig_pwd=$(docker inspect "$HOSTNAME" | jq -r ".[0].Mounts[] | select(.Destination == \"$DAPPER_SOURCE\") | .Source")
     cur_pwd=$(pwd | sed -E 's/[a-zA-Z0-9-]+/../g')
-    echo "ENV DAPPER_CP=${cur_pwd}/${orig_pwd}/projects/submariner-operator" >> Dockerfile.dapper
+    echo "ENV DAPPER_CP=${cur_pwd}/${orig_pwd}/projects/subctl" >> Dockerfile.dapper
 }
 
 ### Main ###
@@ -30,17 +30,17 @@ function dapper_in_dapper() {
 determine_target_release
 read_release_file
 
-project=submariner-operator
+project=subctl
 clone_repo
 checkout_project_branch
 
-pushd projects/submariner-operator
+pushd projects/subctl
 dapper_in_dapper
 
-target=( bin/subctl )
+target=( cmd/bin/subctl )
 [[ "$1" == "cross" ]] && target+=( build-cross )
 make "${target[@]}" VERSION="${release['version']}" DEFAULT_IMAGE_VERSION="${release['version']}"
 
-ln -f -s "$(pwd)/bin/subctl" /go/bin/subctl
-./bin/subctl version
+ln -f -s "$(pwd)/cmd/bin/subctl" /go/bin/subctl
+./cmd/bin/subctl version
 

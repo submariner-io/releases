@@ -1,15 +1,18 @@
 # shellcheck shell=bash
 # shellcheck disable=SC2034 # We declare some shared variables here
 
-readonly PROJECTS=(admiral cloud-prepare lighthouse shipyard submariner submariner-charts submariner-operator)
-readonly ADMIRAL_CONSUMERS=(cloud-prepare lighthouse submariner submariner-operator)
-readonly SHIPYARD_CONSUMERS=(admiral lighthouse submariner submariner-operator)
-readonly OPERATOR_CONSUMES=(submariner cloud-prepare lighthouse)
-readonly RELEASED_PROJECTS=(submariner-charts submariner-operator)
+readonly PROJECTS=(admiral cloud-prepare lighthouse shipyard subctl submariner submariner-charts submariner-operator)
+readonly ADMIRAL_CONSUMERS=(cloud-prepare lighthouse subctl submariner submariner-operator)
+readonly SHIPYARD_CONSUMERS=(admiral lighthouse subctl submariner submariner-operator)
+readonly OPERATOR_CONSUMES=(submariner lighthouse)
+readonly SUBCTL_CONSUMES=(submariner submariner-operator cloud-prepare lighthouse)
+readonly PROJECTS_PROJECTS=(cloud-prepare lighthouse submariner)
+readonly INSTALLER_PROJECTS=(submariner-charts submariner-operator)
+readonly RELEASED_PROJECTS=(subctl)
 
 echo "GITHUB_REPOSITORY_OWNER=${GITHUB_REPOSITORY_OWNER}" >&2
 ORG=${GITHUB_REPOSITORY_OWNER:-$(git config --get remote.origin.url | awk -F'[:/]' '{print $(NF-1)}')}
-declare -A NEXT_STATUS=( [branch]=shipyard [shipyard]=admiral [admiral]=projects [projects]=released )
+declare -A NEXT_STATUS=( [branch]=shipyard [shipyard]=admiral [admiral]=projects [projects]=installers [installers]=released )
 
 function printerr() {
     local err_msg="$*"
