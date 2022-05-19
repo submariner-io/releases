@@ -159,7 +159,7 @@ function create_stable_branch() {
     push_to_repo "${branch}" || errors=$((errors+1))
 }
 
-function create_branches() {
+function release_branch() {
 
     # Shipyard needs some extra care since everything else relies on it
     adjust_shipyard
@@ -225,15 +225,36 @@ function update_operator_pr() {
 
 function release_projects() {
     # Release projects first so that we get them tagged
-    for_every_project create_project_release "${OPERATOR_CONSUMES[@]}"
+    for_every_project create_project_release "${PROJECTS_PROJECTS[@]}"
 
     # Create a PR for operator to use these versions
     update_operator_pr || errors=$((errors+1))
 }
 
+### Functions: Installers Stage ###
+
+function update_subctl_pr() {
+    local project="subctl"
+
+    clone_and_create_branch update_subctl
+    for target in "${SUBCTL_CONSUMES[@]}" ; do
+        update_go_mod "${target}"
+    done
+
+    create_pr update_subctl "Update subctl to use version ${release['version']}"
+}
+
+
+function release_installers() {
+    for_every_project create_project_release "${INSTALLER_PROJECTS[@]}"
+
+    # Create a PR for subctl to use these versions
+    update_subctl_pr || errors=$((errors+1))
+}
+
 ### Functions: Released Stage ###
 
-function release_all() {
+function release_released() {
     local commit_ref
     commit_ref=$(git rev-parse --verify HEAD)
     make subctl SUBCTL_ARGS=cross
@@ -267,20 +288,8 @@ read_release_file
 extract_semver "${release['version']#v}"
 
 case "${release['status']}" in
-branch)
-    create_branches
-    ;;
-shipyard)
-    release_shipyard
-    ;;
-admiral)
-    release_admiral
-    ;;
-projects)
-    release_projects
-    ;;
-released)
-    release_all
+branch|shipyard|admiral|projects|installers|released)
+    "release_${release['status']}"
     ;;
 *)
     printerr "Unknown status '${release['status']}'"

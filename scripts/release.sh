@@ -141,12 +141,15 @@ function advance_shipyard() {
 }
 
 function advance_admiral() {
-    for_every_project write_component "${OPERATOR_CONSUMES[@]}"
+    for_every_project write_component "${PROJECTS_PROJECTS[@]}"
 }
 
 function advance_projects() {
-    write_component "submariner-operator"
-    write_component "submariner-charts"
+    for_every_project write_component "${INSTALLER_PROJECTS[@]}"
+}
+
+function advance_installers() {
+    write_component "subctl"
 }
 
 function advance_stage() {
@@ -154,7 +157,7 @@ function advance_stage() {
 
     read_release_file
     case "${release['status']}" in
-    branch|shipyard|admiral|projects)
+    branch|shipyard|admiral|projects|installers)
         sync_upstream
         local next="${NEXT_STATUS[${release['status']}]}"
         set_status "${next}"
