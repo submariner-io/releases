@@ -16,20 +16,18 @@ function _pull_image() {
 }
 
 function pull_images() {
-    for project in ${PROJECTS[*]}; do
-        local project_version
-        clone_repo
-        checkout_project_branch
-        project_version=$(cd "projects/${project}" && make print-version BASE_BRANCH="${release['branch']:-devel}" | \
-                          grep -oP "(?<=CALCULATED_VERSION=).+")
+    local project_version
+    clone_repo
+    checkout_project_branch
+    project_version=$(cd "projects/${project}" && make print-version BASE_BRANCH="${release['branch']:-devel}" | \
+                      grep -oP "(?<=CALCULATED_VERSION=).+")
 
-        for image in ${project_images[${project}]}; do
-            _pull_image "$project_version"
-        done
+    for image in ${project_images[${project}]}; do
+        _pull_image "$project_version"
     done
 }
 
 determine_target_release
 read_release_file
 exit_on_branching
-pull_images
+for_every_project pull_images "${PROJECTS[@]}"

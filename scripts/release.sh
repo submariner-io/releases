@@ -141,9 +141,7 @@ function advance_shipyard() {
 }
 
 function advance_admiral() {
-    for project in ${OPERATOR_CONSUMES[*]}; do
-        write_component
-    done
+    for_every_project write_component "${OPERATOR_CONSUMES[@]}"
 }
 
 function advance_projects() {
