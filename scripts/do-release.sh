@@ -123,6 +123,7 @@ function update_base_branch() {
 }
 
 function adjust_shipyard() {
+    local branch="${release['branch']}"
     local project=shipyard
 
     clone_and_create_branch "${branch}" devel
@@ -148,20 +149,22 @@ function adjust_shipyard() {
     release_images "shipyard-dapper-base --tag='${release['branch']}'"
 }
 
-function create_branches() {
+function create_stable_branch() {
     local branch="${release['branch']}"
+    [[ "$project" != "shipyard" ]] || return
+
+    clone_and_create_branch "${branch}" devel
+    update_base_branch
+    _git commit -a -s -m "Update base image to use stable branch '${branch}'"
+    push_to_repo "${branch}" || errors=$((errors+1))
+}
+
+function create_branches() {
 
     # Shipyard needs some extra care since everything else relies on it
     adjust_shipyard
 
-    for project in ${PROJECTS[*]}; do
-        [[ "$project" != "shipyard" ]] || continue
-
-        clone_and_create_branch "${branch}" devel
-        update_base_branch
-        _git commit -a -s -m "Update base image to use stable branch '${branch}'"
-        push_to_repo "${branch}" || errors=$((errors+1))
-    done
+    for_every_project create_stable_branch "${PROJECTS[@]}"
 }
 
 ### Functions: Shipyard Stage ###
@@ -222,9 +225,7 @@ function update_operator_pr() {
 
 function release_projects() {
     # Release projects first so that we get them tagged
-    for project in ${OPERATOR_CONSUMES[*]}; do
-        create_project_release "$project"
-    done
+    for_every_project create_project_release "${OPERATOR_CONSUMES[@]}"
 
     # Create a PR for operator to use these versions
     update_operator_pr || errors=$((errors+1))
@@ -238,9 +239,7 @@ function release_all() {
     make subctl SUBCTL_ARGS=cross
     create_release releases "${commit_ref}" projects/submariner-operator/dist/subctl-* || errors=$((errors+1))
 
-    for project in ${PROJECTS[*]}; do
-        create_project_release "$project"
-    done
+    for_every_project create_project_release "${PROJECTS[@]}"
 }
 
 function post_reviews_comment() {

@@ -20,7 +20,7 @@ function _validate() {
 }
 
 function _validate_component() {
-    local project=$1
+    local project="${1:-$project}"
     if ! _validate "components.${project}"; then
         return
     fi
@@ -55,14 +55,10 @@ function validate_release_fields() {
         _validate_component "admiral"
         ;;
     projects)
-        for project in ${OPERATOR_CONSUMES[*]}; do
-            _validate_component "${project}"
-        done
+        for_every_project _validate_component "${OPERATOR_CONSUMES[@]}"
         ;;
     released)
-        for project in ${PROJECTS[*]}; do
-            _validate_component "${project}"
-        done
+        for_every_project _validate_component "${PROJECTS[@]}"
         ;;
     *)
         printerr "Status '${status}' should be one of: 'branch', 'shipyard', 'admiral', 'projects' or 'released'."
@@ -172,9 +168,7 @@ function validate_release() {
 
     case "${release['status']}" in
     branch)
-        for project in ${PROJECTS[*]}; do
-            validate_no_branch
-        done
+        for_every_project validate_no_branch "${PROJECTS[@]}"
         ;;
     shipyard)
         validate_project_commits shipyard

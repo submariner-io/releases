@@ -109,3 +109,11 @@ function gh_commit_sha() {
     local ref="$1"
     gh_api "commits/${ref}" | jq -r ".sha"
 }
+
+function for_every_project() {
+    local func="$1"
+    shift
+    for project; do
+        "${func}"
+    done
+}
