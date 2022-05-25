@@ -75,7 +75,7 @@ function validate_release_fields() {
 
 function validate_admiral_consumers() {
     local expected_version="$1"
-    for project in ${ADMIRAL_CONSUMERS[*]}; do
+    for project in "${ADMIRAL_CONSUMERS[@]}"; do
         local actual_version
         actual_version=$(grep admiral "projects/${project}/go.mod" | cut -f2 -d' ')
         if [[ "${expected_version}" != "${actual_version}" ]]; then
@@ -87,7 +87,7 @@ function validate_admiral_consumers() {
 
 function validate_shipyard_consumers() {
     local expected_version="$1"
-    for project in ${SHIPYARD_CONSUMERS[*]}; do
+    for project in "${SHIPYARD_CONSUMERS[@]}"; do
         local actual_version
         actual_version=$(head -1 "projects/${project}/Dockerfile.dapper" | cut -f2 -d':')
         if [[ "${expected_version}" != "${actual_version}" ]]; then
@@ -128,10 +128,10 @@ function validate_project_commits() {
 
 function validate_no_pin_prs() {
     local head="$1"
-    local projects=("${@:2}")
     local pin_prs
+    shift
 
-    for project in "${projects[@]}"; do
+    for project; do
         if ! pin_prs="$(gh_api "pulls?base=${release['branch']:-devel}&head=${ORG}:${head}&state=open" | jq -r ".[].url")"; then
             printerr "Failed to list pull requests for ${project}."
             return 1
