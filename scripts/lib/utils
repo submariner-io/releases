@@ -46,7 +46,7 @@ function read_release_file() {
     _read 'status'
     _read 'branch'
     _read 'components'
-    for project in ${PROJECTS[*]}; do
+    for project in "${PROJECTS[@]}"; do
         _read "components.${project}"
     done
 }

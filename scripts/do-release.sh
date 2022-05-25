@@ -178,7 +178,7 @@ function release_shipyard() {
     create_project_release shipyard
 
     # Create a PR to pin Shipyard on every one of its consumers
-    for project in ${SHIPYARD_CONSUMERS[*]}; do
+    for project in "${SHIPYARD_CONSUMERS[@]}"; do
         pin_to_shipyard || errors=$((errors+1))
     done
 }
@@ -197,7 +197,7 @@ function release_admiral() {
     create_project_release admiral
 
     # Create a PR to pin Admiral on every one of it's consumers
-    for project in ${ADMIRAL_CONSUMERS[*]}; do
+    for project in "${ADMIRAL_CONSUMERS[@]}"; do
         pin_to_admiral || errors=$((errors+1))
     done
 }
@@ -208,7 +208,7 @@ function update_operator_pr() {
     local project="submariner-operator"
 
     clone_and_create_branch update_operator
-    for target in ${OPERATOR_CONSUMES[*]} ; do
+    for target in "${OPERATOR_CONSUMES[@]}" ; do
         update_go_mod "${target}"
     done
 
