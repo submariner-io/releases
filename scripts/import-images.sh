@@ -9,7 +9,7 @@ set -e
 . "${SCRIPTS_DIR}/lib/debug_functions"
 . "${SCRIPTS_DIR}/lib/deploy_funcs"
 
-for project in ${PROJECTS[*]}; do
+for project in "${PROJECTS[@]}"; do
     for image in ${project_images[${project}]}; do
         [[ "$image" != "shipyard-dapper-base" ]] || continue
         import_image "${REPO}/${image}"
