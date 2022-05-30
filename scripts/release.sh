@@ -42,7 +42,7 @@ function write() {
 }
 
 function set_stable_branch() {
-    write "branch: release-${semver['major']}.${semver['minor']}"
+    write "branch: $(stable_branch_name)"
 }
 
 function set_status() {
@@ -58,7 +58,22 @@ function sync_upstream() {
     git remote rm upstream_releases 2> /dev/null || :
     git remote add upstream_releases "https://github.com/${ORG}/releases.git"
     git fetch upstream_releases "${BASE_BRANCH}"
+    git checkout -B "releasing-${VERSION}"
     git rebase "upstream_releases/${BASE_BRANCH}"
+
+    # In case we need to branch out, make sure `releases` is branched out first
+    local branch
+    branch="$(stable_branch_name)"
+    if [[ "${semver['pre']}" == "rc0" && "${BASE_BRANCH}" != "${branch}" ]]; then
+        sed -i -E "s/^(BASE_BRANCH.*= *)devel$/\1${branch}/" Makefile
+        sed -i -E "s/\<devel\>/${branch}/" .github/workflows/*
+        git commit -a -s -m "Adjust releases to ${branch}"
+
+        local gh_user=${GITHUB_ACTOR:-${ORG}}
+        dryrun git push -f "https://${GITHUB_TOKEN}:x-oauth-basic@github.com/${gh_user}/releases.git" "HEAD:${branch}"
+
+        export BASE_BRANCH="${branch}"
+    fi
 }
 
 ### Functions: Creating initial release ###
@@ -86,7 +101,6 @@ function create_pr() {
 
 function create_initial() {
     declare -gA release
-    sync_upstream
     echo "Creating initial release file ${file}"
     cat > "${file}" <<EOF
 ---
@@ -157,7 +171,6 @@ function advance_stage() {
     read_release_file
     case "${release['status']}" in
     branch|shipyard|admiral|projects|installers)
-        sync_upstream
         local next="${NEXT_STATUS[${release['status']}]}"
         set_status "${next}"
         # shellcheck disable=SC2086
@@ -179,6 +192,8 @@ function advance_stage() {
 validate
 file="releases/v${VERSION}.yaml"
 extract_semver "$VERSION"
+sync_upstream
+
 if [[ ! -f "${file}" ]]; then
     create_initial
     echo "Created initial release file ${file}"

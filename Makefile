@@ -1,4 +1,4 @@
-BASE_BRANCH ?= devel
+BASE_BRANCH = devel
 GIT_EMAIL ?= release@submariner.io
 GIT_NAME ?= Automated Release
 SHELLCHECK_ARGS := scripts/lib/* scripts/*.sh
@@ -69,7 +69,7 @@ else
 
 Makefile.dapper:
 	@echo Downloading $@
-	@curl -sfLO https://raw.githubusercontent.com/submariner-io/shipyard/$(BASE_BRANCH)/$@
+	@curl -sfLO https://raw.githubusercontent.com/submariner-io/shipyard/devel/$@
 
 include Makefile.dapper
 

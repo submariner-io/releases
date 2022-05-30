@@ -21,6 +21,8 @@ function print_test() {
 function reset_git() {
     git checkout -- releases/*
     git reset --keep "${base_commit}" > /dev/null
+    git checkout "${orig_branch}"
+    [[ -z "${fake_remote_branch}" ]] || git branch -D "${fake_remote_branch}"
 }
 
 function make_release() {
@@ -85,6 +87,11 @@ function test_release() {
     if grep 'branch:' "releases/v${version}.yaml" > /dev/null ; then
         sed -i '/^branch:.*/d' "releases/v${version}.yaml"
         git commit -a -m "Remove branch or make release will fail" > /dev/null
+
+        # Create fake remote branch since we're expecting to rebase on it
+        extract_semver "${version}"
+        fake_remote_branch="upstream_releases/$(stable_branch_name)"
+        git branch -f "${fake_remote_branch}"
     fi
 
     while [[ -n "${NEXT_STATUS[${status}]}" ]]; do
@@ -94,11 +101,16 @@ function test_release() {
 
     # Run final step again to make sure it stays put
     _test_release_step "${version}" "${status}"
+
+    # Delete fake remote branch in case it was created, to leave a tidier system when running locally by devs.
+    [[ -z "${fake_remote_branch}" ]] || git branch -D "${fake_remote_branch}"
+    unset fake_remote_branch
 }
 
 ### Main ###
 
 base_commit=$(git rev-parse HEAD)
+orig_branch=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
 trap reset_git EXIT
 
 print_test 'no version argument'
