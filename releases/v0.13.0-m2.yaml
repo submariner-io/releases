@@ -2,6 +2,7 @@
 version: v0.13.0-m2
 name: 0.13.0-m2
 pre-release: true
-status: shipyard
+status: admiral
 components:
   shipyard: e82a3e3e849fce4d017f3a74d9a66789a1e1cc1c
+  admiral: a0207e0ca0c1cb8190691d9b3e05fc044bebe4d0
