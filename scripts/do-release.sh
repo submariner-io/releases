@@ -258,7 +258,7 @@ function release_released() {
     local commit_ref
     commit_ref=$(git rev-parse --verify HEAD)
     make subctl SUBCTL_ARGS=cross
-    create_release releases "${commit_ref}" projects/submariner-operator/dist/subctl-* || errors=$((errors+1))
+    create_release releases "${commit_ref}" projects/subctl/dist/subctl-* || errors=$((errors+1))
 
     for_every_project create_project_release "${PROJECTS[@]}"
 }
