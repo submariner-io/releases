@@ -27,7 +27,7 @@ function create_release() {
 }
 
 function create_project_release() {
-    local project=$1
+    local project=${1:-${project}}
     clone_repo
     checkout_project_branch
 
