@@ -2,7 +2,10 @@
 version: v0.13.0-m2
 name: 0.13.0-m2
 pre-release: true
-status: admiral
+status: projects
 components:
   shipyard: e82a3e3e849fce4d017f3a74d9a66789a1e1cc1c
   admiral: a0207e0ca0c1cb8190691d9b3e05fc044bebe4d0
+  cloud-prepare: a59e5b24dbf1435bdaaf6907c2ba45b90bbc5d15
+  lighthouse: d219dc061f53004b7ca87f1505a64f534712fec9
+  submariner: f55a4d1be40052059b68e1406bbab2e0973aff0c
