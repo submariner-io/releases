@@ -2,7 +2,7 @@
 version: v0.13.0-m2
 name: 0.13.0-m2
 pre-release: true
-status: installers
+status: released
 components:
   shipyard: e82a3e3e849fce4d017f3a74d9a66789a1e1cc1c
   admiral: a0207e0ca0c1cb8190691d9b3e05fc044bebe4d0
@@ -11,3 +11,4 @@ components:
   submariner: f55a4d1be40052059b68e1406bbab2e0973aff0c
   submariner-charts: f4510d182a379cbaf73affae568fe29cf1f69a4a
   submariner-operator: f3cca554a6044c06c2c375d235ad6b2cd41f82dc
+  subctl: df50aa0d2f413786a1a9858307f563e3763e6125
