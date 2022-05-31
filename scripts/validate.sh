@@ -185,7 +185,7 @@ function validate_release() {
         validate_no_pin_prs pin_admiral "${ADMIRAL_CONSUMERS[@]}"
         ;;
     installers)
-        validate_project_commits "${SUBCTL_CONSUMES[@]}"
+        validate_project_commits "${INSTALLER_PROJECTS[@]}"
         validate_no_pin_prs update_operator submariner-operator
         ;;
     released)
