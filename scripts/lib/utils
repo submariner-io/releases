@@ -120,7 +120,9 @@ function exit_on_branching() {
 
 function gh_api() {
     local call="$1"
-    curl -sf -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${ORG}/${project}/${call}"
+    local auth
+    [[ -z "${GITHUB_TOKEN}" ]] || auth=(-H "Authorization: token ${GITHUB_TOKEN}")
+    curl -sf "${auth[@]}" -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${ORG}/${project}/${call}"
 }
 
 function gh_commit_sha() {
