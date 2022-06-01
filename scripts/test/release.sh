@@ -111,13 +111,12 @@ for version in "${faulty_versions[@]}"; do
     test_semver_faulty "$version"
 done
 
-# TODO: Fix tests to account for stable branches somehow
-#test_release '100.0.0' 'shipyard'
-#test_release '100.0.1' 'shipyard'
-test_release '100.0.0-rc0' 'branch' 'pre-release: true'
-#test_release '100.0.0-rc1' 'shipyard' 'pre-release: true'
-#test_release '100.0.1-rc1' 'shipyard' 'pre-release: true'
+# Test with non-existing branches
+# Only pre-releases are expected to work as we expect RCs or formal releases to happen on a branch (which must exist)
+test_release '100.0.0-m0' 'shipyard' 'pre-release: true'
+test_release '100.0.0-rc0' 'branch' 'branch: release-100.0' 'pre-release: true'
 
 # Test with an existing known branch
-#test_release '0.9.100' 'shipyard' 'branch: release-0.9'
-#test_release '0.9.100-rc1' 'shipyard' 'branch: release-0.9' 'pre-release: true'
+# Only releases or release candidates are expected to work as we're not releasing milestones on stable branches
+test_release '0.9.100' 'shipyard' 'branch: release-0.9'
+test_release '0.9.100-rc1' 'shipyard' 'branch: release-0.9' 'pre-release: true'
