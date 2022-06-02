@@ -1,7 +1,7 @@
 BASE_BRANCH ?= devel
 GIT_EMAIL ?= release@submariner.io
 GIT_NAME ?= Automated Release
-SHELLCHECK_ARGS := scripts/lib/* scripts/*.sh
+SHELLCHECK_ARGS := scripts/*.sh scripts/lib/* scripts/test/*
 export BASE_BRANCH
 export GIT_EMAIL
 export GIT_NAME
