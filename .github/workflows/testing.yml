@@ -1,12 +1,29 @@
 ---
 name: Testing
 
+permissions:
+  actions: write
+  contents: read
+
 on:
   pull_request:
 
 jobs:
+  skip-check:
+    name: Run tests except on release
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@9d116fa7e55f295019cfab7e3ab72b478bcf7fdd
+        with:
+          paths_ignore: '["releases/**"]'
+
   release:
     name: Make release
+    needs: skip-check
+    if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
@@ -16,3 +33,28 @@ jobs:
 
       - name: Test the `make release` command
         run: make test-release
+
+  entire-release:
+    name: Entire release process
+    needs: skip-check
+    if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['100.0.0-m0', '100.0.0-rc0']
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          fetch-depth: 0
+
+      # Needed to properly build multi-arch Shipyard images when branching out
+      - name: Set up QEMU (to support building on non-native architectures)
+        uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8
+      - name: Set up buildx
+        uses: docker/setup-buildx-action@dc7b9719a96d48369863986a06765841d7ea23f6
+
+      - name: Test the entire release
+        run: make test-entire-release VERSION="${{ matrix.version }}"
