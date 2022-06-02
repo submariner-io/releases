@@ -9,8 +9,8 @@ set -e
 function _pull_image() {
     local hash="${1#v}"
     local full_image="${REPO}/${image}"
-    docker pull "${full_image}:${hash}"
-    docker tag "${full_image}:${hash}" "${full_image}:${DEV_VERSION}"
+    dryrun docker pull "${full_image}:${hash}"
+    dryrun docker tag "${full_image}:${hash}" "${full_image}:${DEV_VERSION}"
 }
 
 function pull_images() {

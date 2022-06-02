@@ -54,8 +54,8 @@ import-images: images
 release: config-git
 	./scripts/release.sh
 
-test-release:
-	./scripts/test/release.sh
+test-%:
+	./scripts/test/$*.sh
 
 validate:
 	./scripts/validate.sh
