@@ -38,7 +38,9 @@ pushd projects/subctl
 dapper_in_dapper
 
 target=( cmd/bin/subctl )
-[[ "$1" == "cross" ]] && target+=( build-cross )
+
+# If cross build requested perform it, except when dry-running as it takes a very long time and has little benefit when testing
+[[ "$1" == "cross" && "$dryrun" != "true" ]] && target+=( build-cross )
 make "${target[@]}" VERSION="${release['version']}" DEFAULT_IMAGE_VERSION="${release['version']}"
 
 ln -f -s "$(pwd)/cmd/bin/subctl" /go/bin/subctl
