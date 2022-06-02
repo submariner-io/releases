@@ -58,6 +58,13 @@ function clone_and_create_branch() {
     _git checkout -B "${branch}" "remotes/origin/${base_branch}"
 }
 
+function _update_go_mod() {
+    go mod tidy
+    GOPROXY=direct go get "github.com/submariner-io/${target}@${release['version']}"
+    go mod vendor
+    go mod tidy
+}
+
 function update_go_mod() {
     local target="$1"
     if [[ ! -f projects/${project}/go.mod ]]; then
@@ -66,12 +73,8 @@ function update_go_mod() {
 
     # Run in subshell so we don't change the working directory even on failure
     (
-        pushd "projects/${project}"
-
-        go mod tidy
-        GOPROXY=direct go get "github.com/submariner-io/${target}@${release['version']}"
-        go mod vendor
-        go mod tidy
+        cd "projects/${project}"
+        dryrun _update_go_mod
     )
 }
 
