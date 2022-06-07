@@ -3,8 +3,6 @@
 set -e
 set -o pipefail
 
-# shellcheck source=scripts/lib/image_defs
-. "${DAPPER_SOURCE}/scripts/lib/image_defs"
 # shellcheck source=scripts/lib/utils
 . "${DAPPER_SOURCE}/scripts/lib/utils"
 . "${SCRIPTS_DIR}/lib/utils"
@@ -44,8 +42,8 @@ function create_project_release() {
     create_release "${project}" "${commit_ref}" || errors=$((errors+1))
 
     # Tag the project's container images, if there are any to tag
-    if [[ -n "${project_images[${project}]}" ]]; then
-        tag_images "${project_images[${project}]}" || errors=$((errors+1))
+    if [[ -n "$(project_images)" ]]; then
+        tag_images "$(project_images)" || errors=$((errors+1))
     fi
 }
 

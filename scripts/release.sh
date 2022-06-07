@@ -4,7 +4,6 @@
 set -e
 set -o pipefail
 
-source "${DAPPER_SOURCE}/scripts/lib/image_defs"
 source "${DAPPER_SOURCE}/scripts/lib/utils"
 source "${SCRIPTS_DIR}/lib/debug_functions"
 
