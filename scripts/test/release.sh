@@ -3,33 +3,9 @@
 set -e
 
 source "${DAPPER_SOURCE}/scripts/lib/utils"
+source "${DAPPER_SOURCE}/scripts/test/utils"
 
 ### General Functions ###
-
-function exit_error() {
-    echo "--------- Captured output ---------"
-    echo "${output}"
-    echo "-----------------------------------"
-    echo "ERROR: $*"
-    exit 1
-}
-
-function print_test() {
-    echo "TEST: Running 'make release' - $*"
-}
-
-function reset_git() {
-    git checkout -- releases/*
-    git reset --keep "${base_commit}" > /dev/null
-}
-
-function make_release() {
-    declare -g output
-
-    output=$(make release "$1" dryrun=true 2>&1)
-
-    return "$?"
-}
 
 function expect_in_file() {
     local expected="^${1}$"
@@ -46,8 +22,8 @@ function expect_in_file() {
 ### Testing Functions ###
 
 function test_semver_faulty() {
-    print_test "faulty version '$1'"
-    if make_release "VERSION=$1"; then
+    print_test "Running 'make release' - faulty version '$1'"
+    if _make release "VERSION=$1"; then
         exit_error "Running 'make release' should've failed due to faulty version $1"
     fi
 
@@ -60,8 +36,8 @@ function _test_release_step() {
     local version="$1"
     local status="$2"
 
-    print_test "version '${version}' expecting status '${status}'"
-    if ! make_release "VERSION=${version}"; then
+    print_test "Running 'make release' - version '${version}' expecting status '${status}'"
+    if ! _make release "VERSION=${version}"; then
         exit_error "Running 'make release' failed for version '${version}'"
     fi
 
@@ -74,7 +50,7 @@ function test_release() {
     local status="$2"
     local expected_fields=("${@:3}")
 
-    print_test "entire release process for version ${version}"
+    print_test "Running 'make release' - entire release process for version ${version}"
     _test_release_step "${version}" "${status}"
 
     for field in "${expected_fields[@]}"; do
@@ -82,10 +58,7 @@ function test_release() {
     done
 
     # Since the branch is expected to exist, the script will fail, so remove it for testing
-    if grep 'branch:' "releases/v${version}.yaml" > /dev/null ; then
-        sed -i '/^branch:.*/d' "releases/v${version}.yaml"
-        git commit -a -m "Remove branch or make release will fail" > /dev/null
-    fi
+    VERSION="${version}" sanitize_branch
 
     while [[ -n "${NEXT_STATUS[${status}]}" ]]; do
         status="${NEXT_STATUS[${status}]}"
@@ -101,8 +74,8 @@ function test_release() {
 base_commit=$(git rev-parse HEAD)
 trap reset_git EXIT
 
-print_test 'no version argument'
-if make_release; then
+print_test "Running 'make release' - no version argument"
+if _make release; then
     exit_error 'should fail when no VERSION is given'
 fi
 
