@@ -2,6 +2,7 @@
 # shellcheck disable=SC2034 # We declare some shared variables here
 
 readonly PROJECTS=(admiral cloud-prepare lighthouse shipyard subctl submariner submariner-charts submariner-operator)
+readonly REPO="quay.io/submariner"
 readonly ADMIRAL_CONSUMERS=(cloud-prepare lighthouse subctl submariner submariner-operator)
 readonly SHIPYARD_CONSUMERS=(admiral lighthouse subctl submariner submariner-operator)
 readonly OPERATOR_CONSUMES=(submariner lighthouse)
@@ -119,4 +120,8 @@ function for_every_project() {
     for project; do
         "${func}"
     done
+}
+
+function project_images() {
+    make -C "projects/${project}" print-IMAGES | grep -oP "(?<=IMAGES = ).+"
 }
