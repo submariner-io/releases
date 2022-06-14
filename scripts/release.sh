@@ -35,6 +35,14 @@ function validate() {
 
     # Run a harmless command to make sure the token we have is valid
     dryrun gh repo view > /dev/null
+
+    # Make sure that stable release happen on stable branches, as the release process is different.
+    local branch
+    branch="$(stable_branch_name)"
+    if [[ "${BASE_BRANCH}" != "${branch}" ]] && git rev-parse upstream_releases/"${branch}" >/dev/null 2>&1; then
+        printerr "Stable releases must happen on stable branch ${branch@Q}, please switch the branch and try again"
+        exit 1
+    fi
 }
 
 function write() {
@@ -57,7 +65,10 @@ function set_status() {
 function sync_upstream() {
     git remote rm upstream_releases 2> /dev/null || :
     git remote add upstream_releases "https://github.com/${ORG}/releases.git"
-    git fetch upstream_releases "${BASE_BRANCH}"
+    git fetch upstream_releases
+}
+
+function branch_for_release() {
     git checkout -B "releasing-${VERSION}"
     git rebase "upstream_releases/${BASE_BRANCH}"
 
@@ -189,11 +200,12 @@ function advance_stage() {
 
 ### Main ###
 
-validate
-file="releases/v${VERSION}.yaml"
 extract_semver "$VERSION"
 sync_upstream
+validate
+branch_for_release
 
+file="releases/v${VERSION}.yaml"
 if [[ ! -f "${file}" ]]; then
     create_initial
     echo "Created initial release file ${file}"
