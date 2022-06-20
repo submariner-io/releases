@@ -108,7 +108,7 @@ function release_images() {
 
 function tag_images() {
     # Creating a local tag so that images are uploaded with it
-    git tag -a -f "${release['version']}" -m "${release['version']}"
+    _git tag -a -f "${release['version']}" -m "${release['version']}"
 
     in_project_repo release_images "$* --tag ${release['version']}"
 }
