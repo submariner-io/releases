@@ -141,10 +141,13 @@ function adjust_shipyard() {
         # Rebuild Shipyard image with the changes we made for stable branches
         # Make sure subctl is taken from devel, as it won't be available yet
         cd projects/shipyard
-        make images IMAGES_ARGS="--buildargs 'SUBCTL_VERSION=devel'"
-    )
+        make images multiarch-images IMAGES_ARGS="--buildargs 'SUBCTL_VERSION=devel'"
 
-    release_images "shipyard-dapper-base --tag='${release['branch']}'"
+        # This will release all of Shipyard's images
+        # TODO skitt revisit once "make release-images" accounts for images
+        # in RELEASE_ARGS
+        release_images "--tag='${release['branch']}'"
+    )
 }
 
 function create_stable_branch() {
