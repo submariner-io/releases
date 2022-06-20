@@ -151,7 +151,7 @@ function adjust_shipyard() {
 
 function create_stable_branch() {
     local branch="${release['branch']}"
-    [[ "$project" != "shipyard" ]] || return
+    [[ "$project" != "shipyard" ]] || return 0
 
     clone_and_create_branch "${branch}" devel
     update_base_branch
