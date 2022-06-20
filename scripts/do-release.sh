@@ -162,6 +162,7 @@ function adjust_shipyard() {
 }
 
 function create_stable_branch() {
+    local project=${1:-${project}}
     local branch="${release['branch']}"
     [[ "$project" != "shipyard" ]] || return 0
 
@@ -172,6 +173,10 @@ function create_stable_branch() {
 }
 
 function release_branch() {
+
+    # Branch out `releases` itself, in order to allow changes in release process on devel.
+    # Further release logic needs to happen on the stable branch.
+    create_stable_branch releases
 
     # Shipyard needs some extra care since everything else relies on it
     adjust_shipyard

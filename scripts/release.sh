@@ -35,14 +35,27 @@ function validate() {
 
     # Run a harmless command to make sure the token we have is valid
     dryrun gh repo view > /dev/null
+
+    # Make sure that the release targets the same base branch (if it exists), as the release process might be different.
+    local branch
+    branch="$(stable_branch_name)"
+    if [[ "${BASE_BRANCH}" != "${branch}" ]] && git fetch upstream_releases "${branch}" >/dev/null 2>&1; then
+        printerr "Releases for ${semver['major']}.${semver['minor']} must be based on the ${branch@Q} branch. " \
+            "Please rebase your branch on ${branch@Q} and try again."
+        exit 1
+    fi
 }
 
 function write() {
     echo "$*" >> "${file}"
 }
 
+function stable_branch_name() {
+    echo "release-${semver['major']}.${semver['minor']}"
+}
+
 function set_stable_branch() {
-    write "branch: release-${semver['major']}.${semver['minor']}"
+    write "branch: $(stable_branch_name)"
 }
 
 function set_status() {
@@ -86,7 +99,6 @@ function create_pr() {
 
 function create_initial() {
     declare -gA release
-    sync_upstream
     echo "Creating initial release file ${file}"
     cat > "${file}" <<EOF
 ---
@@ -157,7 +169,6 @@ function advance_stage() {
     read_release_file
     case "${release['status']}" in
     branch|shipyard|admiral|projects|installers)
-        sync_upstream
         local next="${NEXT_STATUS[${release['status']}]}"
         set_status "${next}"
         # shellcheck disable=SC2086
@@ -176,9 +187,11 @@ function advance_stage() {
 
 ### Main ###
 
-validate
-file="releases/v${VERSION}.yaml"
 extract_semver "$VERSION"
+sync_upstream
+validate
+
+file="releases/v${VERSION}.yaml"
 if [[ ! -f "${file}" ]]; then
     create_initial
     echo "Created initial release file ${file}"
