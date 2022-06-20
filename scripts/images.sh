@@ -2,8 +2,6 @@
 
 set -e
 
-# shellcheck source=scripts/lib/image_defs
-. "${DAPPER_SOURCE}/scripts/lib/image_defs"
 # shellcheck source=scripts/lib/utils
 . "${DAPPER_SOURCE}/scripts/lib/utils"
 . "${SCRIPTS_DIR}/lib/debug_functions"
@@ -22,7 +20,7 @@ function pull_images() {
     project_version=$(cd "projects/${project}" && make print-version BASE_BRANCH="${release['branch']:-devel}" | \
                       grep -oP "(?<=CALCULATED_VERSION=).+")
 
-    for image in ${project_images[${project}]}; do
+    for image in $(project_images); do
         _pull_image "$project_version"
     done
 }
