@@ -76,6 +76,12 @@ function _git() {
     git -C "projects/${project}" "$@"
 }
 
+function in_project_repo() {
+    local cmd="$1"
+    shift
+    (cd "projects/${project}" && "$cmd" "$@")
+}
+
 function clone_repo() {
     [[ -d "projects/${project}" ]] && rm -rf "projects/${project}"
 
