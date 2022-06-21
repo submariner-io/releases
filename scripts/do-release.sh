@@ -36,15 +36,17 @@ function create_project_release() {
         return
     fi
 
+    # If the project has container images, copy them to the release tag
+    # This will fail if the source images don't exist; abort then without trying to create the release
+    if [[ -n "$(project_images)" ]] && ! tag_images "$(project_images)"; then
+        ((errors++))
+        return 1
+    fi
+
     # Release the project on GitHub so that it gets tagged
     export GITHUB_TOKEN="${RELEASE_TOKEN}"
     commit_ref=$(_git rev-parse --verify HEAD)
     create_release "${project}" "${commit_ref}" || errors=$((errors+1))
-
-    # Tag the project's container images, if there are any to tag
-    if [[ -n "$(project_images)" ]]; then
-        tag_images "$(project_images)" || errors=$((errors+1))
-    fi
 }
 
 function clone_and_create_branch() {
@@ -108,10 +110,18 @@ function release_images() {
 }
 
 function tag_images() {
-    # Creating a local tag so that images are uploaded with it
-    _git tag -a -f "${release['version']}" -m "${release['version']}"
-
-    in_project_repo release_images "$* --tag ${release['version']}"
+    # Tag the images matching the release commit using the release tag
+    local project_version
+    project_version=$(cd "projects/${project}" && make print-version BASE_BRANCH="${release['branch']:-devel}" | \
+                      grep -oP "(?<=CALCULATED_VERSION=).+")
+    local hash="${project_version#v}"
+    
+    echo "$QUAY_PASSWORD" | dryrun skopeo login quay.io -u "$QUAY_USERNAME" --password-stdin
+    for image; do
+        local full_image="${REPO}/${image}"
+        # --all ensures we handle multi-arch images correctly; it works with single- and multi-arch
+        dryrun skopeo copy --all "docker://${full_image}:${hash}" "docker://${full_image}:${release['version']}"
+    done
 }
 
 ### Functions: Branch Stage ###
