@@ -110,7 +110,7 @@ function tag_images() {
     # Creating a local tag so that images are uploaded with it
     _git tag -a -f "${release['version']}" -m "${release['version']}"
 
-    release_images "$* --tag ${release['version']}"
+    in_project_repo release_images "$* --tag ${release['version']}"
 }
 
 ### Functions: Branch Stage ###
