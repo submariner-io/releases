@@ -1,9 +1,9 @@
 ---
-# Bump #2
 version: v0.13.0-rc0
 name: 0.13.0-rc0
 pre-release: true
 branch: release-0.13
-status: shipyard
+status: admiral
 components:
   shipyard: e63cdfc7cee944002e681a2db26fb45d12cb10c3
+  admiral: 40ae3710ee3af736303c639c312dc1c9a1fac2d8
