@@ -37,7 +37,8 @@ function create_project_release() {
 
     # If the project has container images, copy them to the release tag
     # This will fail if the source images don't exist; abort then without trying to create the release
-    if [[ -n "$(project_images)" ]] && ! tag_images "$(project_images)"; then
+    # shellcheck disable=SC2046 # We need to split $(project_images)
+    if [[ -n "$(project_images)" ]] && ! tag_images $(project_images); then
         ((errors++))
         return 1
     fi
