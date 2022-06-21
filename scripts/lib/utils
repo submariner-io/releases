@@ -71,9 +71,7 @@ function _git() {
 }
 
 function in_project_repo() {
-    local cmd="$1"
-    shift
-    (cd "projects/${project}" && "$cmd" "$@")
+    (cd "projects/${project}" && "$@")
 }
 
 function clone_repo() {
