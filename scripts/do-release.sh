@@ -120,7 +120,7 @@ function tag_images() {
     for image; do
         local full_image="${REPO}/${image}"
         # --all ensures we handle multi-arch images correctly; it works with single- and multi-arch
-        dryrun skopeo copy --all "docker://${full_image}:${hash}" "docker://${full_image}:${release['version']}"
+        dryrun skopeo copy --all "docker://${full_image}:${hash}" "docker://${full_image}:${release['version']#v}"
     done
 }
 
