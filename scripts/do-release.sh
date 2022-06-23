@@ -7,6 +7,7 @@ set -o pipefail
 . "${DAPPER_SOURCE}/scripts/lib/image_defs"
 # shellcheck source=scripts/lib/utils
 . "${DAPPER_SOURCE}/scripts/lib/utils"
+. "${SCRIPTS_DIR}/lib/utils"
 . "${SCRIPTS_DIR}/lib/debug_functions"
 
 ### Functions: General ###
@@ -20,7 +21,7 @@ function create_release() {
 
     gh config set prompt disabled
     # shellcheck disable=SC2086,SC2068 # Some things have to be expanded or GH CLI flips out
-    dryrun gh release create "${release['version']}" ${files[@]} ${prerelease} \
+    with_retries 3 dryrun gh release create "${release['version']}" ${files[@]} ${prerelease} \
         --title "${release['name']}" \
         --repo "${ORG}/${project}" \
         --target "${target}"
