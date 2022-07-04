@@ -1,0 +1,8 @@
+---
+version: v0.13.0-rc1
+name: 0.13.0-rc1
+pre-release: true
+branch: release-0.13
+status: shipyard
+components:
+  shipyard: 9b91c1e69cea262c5da51d20f1749d3ecb485246
