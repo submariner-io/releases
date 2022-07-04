@@ -67,15 +67,18 @@ function _update_go_mod() {
 
 function update_go_mod() {
     local target="$1"
-    if [[ ! -f projects/${project}/go.mod ]]; then
-        return 1
-    fi
 
-    # Run in subshell so we don't change the working directory even on failure
-    (
-        cd "projects/${project}"
-        dryrun _update_go_mod
-    )
+    shopt -s globstar
+    for gomod in projects/"${project}"/**/go.mod; do
+        dir="${gomod%/*}"
+        if [ ! -d "$dir" ]; then
+            # The project doesn't have any go.mod, dir is ".../**/go.mod"
+            return 1
+        fi
+
+        # Run in subshell so we don't change the working directory even on failure
+        ( cd "$dir" && dryrun _update_go_mod; )
+    done
 }
 
 function push_to_repo() {
