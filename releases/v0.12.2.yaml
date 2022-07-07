@@ -2,10 +2,12 @@
 version: v0.12.2
 name: 0.12.2
 branch: release-0.12
-status: projects
+status: released
 components:
   shipyard: cae989dd79ed4aa77fe317f4843b54bcf36dbff2
   admiral: d1e873df55a7378572058ce5fe2534ecd5425f6a
   submariner: df4d361f0de6f91a7c5d1b9acef1c237f179e3bf
   cloud-prepare: 6d9a21164dc74ff2bcbbd1c0ac3318796d49739d
   lighthouse: 49fd2ae293d8fcc6584e39af3bc34507c57bbea7
+  submariner-operator: 7e95cd5b864a47822fd5feb70dd2bb7c6004643e
+  submariner-charts: d91eae8312b6dfd26fedc3e465b192f29740aa3c
