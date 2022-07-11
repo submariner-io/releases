@@ -3,7 +3,7 @@ version: v0.13.0-rc2
 name: 0.13.0-rc2
 pre-release: true
 branch: release-0.13
-status: installers
+status: released
 components:
   shipyard: 9b91c1e69cea262c5da51d20f1749d3ecb485246
   admiral: 2239a501d8c1a03be1b7b08f722e74a8d32d2ca8
@@ -12,3 +12,4 @@ components:
   submariner: 7531271eaffb81219917dcb14a9fcebc3f498b68
   submariner-charts: dc3f31ab888b172f31d0a53c9572e67e80e648df
   submariner-operator: daa3a5268a491805d40f8e1bdac8fd50d43999e7
+  subctl: c29ddea2908c6367cbc544ab9fc1d1d4edf4da43
