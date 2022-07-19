@@ -16,11 +16,6 @@ function print_test() {
     echo "TEST: $*"
 }
 
-function reset_git() {
-    git checkout -- releases/*
-    git reset --keep "${base_commit}" > /dev/null
-}
-
 function _make() {
     declare -g output
     output=$(make "${@}" dryrun=true 2>&1)

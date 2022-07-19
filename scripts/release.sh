@@ -74,6 +74,15 @@ function sync_upstream() {
     git rebase "upstream_releases/${BASE_BRANCH}"
 }
 
+# Validates the created commit to make sure we're not missing anything
+function validate_commit {
+    if ! make validate; then
+        printerr "Failed to run validation for the commit, please attend any reported errors and try again."
+        reset_git
+        exit 1
+    fi
+}
+
 ### Functions: Creating initial release ###
 
 function create_pr() {
@@ -173,6 +182,7 @@ function advance_stage() {
         set_status "${next}"
         # shellcheck disable=SC2086
         advance_${release['status']}
+        validate_commit
         create_pr "releasing-${VERSION}" "Advancing ${VERSION} release to status: ${next}"
         ;;
     released)
@@ -188,6 +198,7 @@ function advance_stage() {
 ### Main ###
 
 extract_semver "$VERSION"
+base_commit=$(git rev-parse HEAD)
 sync_upstream
 validate
 

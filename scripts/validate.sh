@@ -131,7 +131,7 @@ function validate_no_pin_prs() {
     shift
 
     for project; do
-        if ! pin_prs="$(gh_api "pulls?base=${release['branch']:-devel}&head=${ORG}:${head}&state=open" | jq -r ".[].url")"; then
+        if ! pin_prs="$(gh_api "pulls?base=${release['branch']:-devel}&head=${ORG}:${head}&state=open" | jq -r ".[].html_url")"; then
             printerr "Failed to list pull requests for ${project}."
             return 1
         fi

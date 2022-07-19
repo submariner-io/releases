@@ -80,6 +80,11 @@ function _git() {
     git -C "projects/${project}" "$@"
 }
 
+function reset_git() {
+    git checkout -- releases/*
+    git reset --keep "${base_commit}" > /dev/null
+}
+
 function in_project_repo() {
     (cd "projects/${project}" && "$@")
 }

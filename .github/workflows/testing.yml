@@ -32,6 +32,9 @@ jobs:
           fetch-depth: 0
 
       - name: Test the `make release` command
+        env:
+          # Needed for testing as we're running validations which hit the GH API rate limit
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: make test-release
 
   entire-release:
@@ -57,4 +60,7 @@ jobs:
         uses: docker/setup-buildx-action@dc7b9719a96d48369863986a06765841d7ea23f6
 
       - name: Test the entire release
+        env:
+          # Needed for testing as we're running validations which hit the GH API rate limit
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: make test-entire-release VERSION="${{ matrix.version }}"
