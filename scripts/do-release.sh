@@ -157,9 +157,8 @@ function adjust_shipyard() {
         export DAPPER_HOST_ARCH=""
 
         # Rebuild Shipyard image with the changes we made for stable branches
-        # Make sure subctl is taken from devel, as it won't be available yet
         cd projects/shipyard
-        make images multiarch-images IMAGES_ARGS="--buildargs 'SUBCTL_VERSION=devel'"
+        make images multiarch-images
 
         # This will release all of Shipyard's images
         # TODO skitt revisit once "make release-images" accounts for images
