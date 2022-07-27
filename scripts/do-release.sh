@@ -110,12 +110,6 @@ function create_pr() {
     reviews+=("${to_review}")
 }
 
-function release_images() {
-    local args="$1"
-    dryrun make release-images RELEASE_ARGS="${args}" || \
-        dryrun make release RELEASE_ARGS="${args}"
-}
-
 function tag_images() {
     # Tag the images matching the release commit using the release tag
     local project_version
@@ -161,9 +155,7 @@ function adjust_shipyard() {
         make images multiarch-images
 
         # This will release all of Shipyard's images
-        # TODO skitt revisit once "make release-images" accounts for images
-        # in RELEASE_ARGS
-        release_images "--tag='${release['branch']}'"
+        dryrun make release-images TAG="${release['branch']}"
     )
 }
 

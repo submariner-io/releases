@@ -12,9 +12,7 @@ ifneq (,$(DAPPER_SOURCE))
 
 include $(SHIPYARD_DIR)/Makefile.inc
 
-CLUSTER_SETTINGS_FLAG = --settings $(DAPPER_SOURCE)/.shipyard.e2e.yml
-override CLUSTERS_ARGS += $(CLUSTER_SETTINGS_FLAG)
-override DEPLOY_ARGS += $(CLUSTER_SETTINGS_FLAG)
+export SETTINGS = $(DAPPER_SOURCE)/.shipyard.e2e.yml
 
 _E2E_CANARY = E2E CANARY
 E2E_NEEDED = $(shell . scripts/lib/utils && \
