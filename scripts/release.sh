@@ -134,7 +134,7 @@ EOF
     # We're not branching, so just move on to shipyard
     set_status "shipyard"
     read_release_file
-    advance_branch
+    advance_to_shipyard
 }
 
 ### Functions: Advancing release to next stage ###
@@ -151,24 +151,24 @@ function write_component() {
     write "  ${project}: ${commit_hash}"
 }
 
-function advance_branch() {
+function advance_to_shipyard() {
     write "components:"
     write_component "shipyard"
 }
 
-function advance_shipyard() {
+function advance_to_admiral() {
     write_component "admiral"
 }
 
-function advance_admiral() {
+function advance_to_projects() {
     for_every_project write_component "${PROJECTS_PROJECTS[@]}"
 }
 
-function advance_projects() {
+function advance_to_installers() {
     for_every_project write_component "${INSTALLER_PROJECTS[@]}"
 }
 
-function advance_installers() {
+function advance_to_released() {
     write_component "subctl"
 }
 
@@ -181,7 +181,7 @@ function advance_stage() {
         local next="${NEXT_STATUS[${release['status']}]}"
         set_status "${next}"
         # shellcheck disable=SC2086
-        advance_${release['status']}
+        advance_to_${next}
         validate_commit
         create_pr "releasing-${VERSION}" "Advancing ${VERSION} release to status: ${next}"
         ;;
