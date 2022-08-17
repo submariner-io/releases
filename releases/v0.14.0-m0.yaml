@@ -2,7 +2,7 @@
 version: v0.14.0-m0
 name: 0.14.0-m0
 pre-release: true
-status: installers
+status: released
 components:
   shipyard: 4d1252c3148034c2da19e53304a266972195ba27
   admiral: 069480a1e9b18d82f681b3f5ed673a442a7aef11
@@ -11,3 +11,4 @@ components:
   submariner: 1a8dab3f2eb2e7869881179788e076f2d240d743
   submariner-charts: 883d93c0be23de7c26a0b9aa04faf97a909e72e5
   submariner-operator: d4eafa0d808db37c93c1c46a145623727245e4dc
+  subctl: 6dec1481f05b03339de40a135e075bfa739458e3
