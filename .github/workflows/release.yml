@@ -8,6 +8,12 @@ on:
     paths:
       - 'releases/**'
 
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+  issues: write
+
 jobs:
   release:
     name: Release
