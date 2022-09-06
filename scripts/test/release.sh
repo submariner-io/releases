@@ -74,6 +74,9 @@ function test_release() {
 
 ### Main ###
 
+curl -I -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/submariner-io/shipyard/commits/devel"
+exit 1
+
 base_commit=$(git rev-parse HEAD)
 trap reset_git EXIT
 
