@@ -61,8 +61,8 @@ function clone_and_create_branch() {
 function _update_go_mod() {
     go mod tidy -compat=1.17
     GOPROXY=direct go get "github.com/submariner-io/${target}@${release['version']}"
-    go mod vendor
     go mod tidy -compat=1.17
+    go mod vendor
 }
 
 function update_go_mod() {
