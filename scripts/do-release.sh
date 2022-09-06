@@ -105,7 +105,7 @@ function create_pr() {
     export GITHUB_TOKEN="${RELEASE_TOKEN}"
 
     _git commit -a -s -m "${msg}"
-    branch=$(git rev-parse --abbrev-ref HEAD)
+    branch=$(_git rev-parse --abbrev-ref HEAD)
     push_to_repo "${branch}"
     to_review=$(dryrun gh pr create --repo "${ORG}/${project}" --head "${branch}" --base "${base_branch}" --title "${msg}" \
                 --label "automated" --label "ready-to-test" --label "e2e-all-k8s" --body "${msg}" 2>&1)
