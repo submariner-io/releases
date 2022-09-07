@@ -3,7 +3,7 @@
 set -e
 
 # Always run on "main" org and not on forks that can be stale
-export GITHUB_REPOSITORY_OWNER=submariner-io
+export ORG=submariner-io
 
 source "${DAPPER_SOURCE}/scripts/lib/utils"
 source "${DAPPER_SOURCE}/scripts/test/utils"
