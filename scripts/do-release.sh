@@ -82,6 +82,9 @@ function update_go_mod() {
 }
 
 function update_dependencies() {
+    local msg="$1"
+    shift
+
     clone_and_create_branch "update-dependencies-${release['branch']:-devel}"
 
     for dependency; do
@@ -89,7 +92,7 @@ function update_dependencies() {
     done
 
     run_if_defined "$update_dependencies_extra"
-    create_pr "Update dependencies ($*) to ${release['version']}"
+    create_pr "Update ${msg} to ${release['version']}"
 }
 
 function push_to_repo() {
@@ -206,7 +209,7 @@ function release_shipyard() {
 
     # Create a PR to pin Shipyard on every one of its consumers
     for project in "${SHIPYARD_CONSUMERS[@]}"; do
-        update_dependencies shipyard || errors=$((errors+1))
+        update_dependencies Shipyard shipyard || errors=$((errors+1))
     done
 }
 
@@ -219,7 +222,7 @@ function release_admiral() {
 
     # Create a PR to pin Admiral on every one of it's consumers
     for project in "${ADMIRAL_CONSUMERS[@]}"; do
-        update_dependencies admiral || errors=$((errors+1))
+        update_dependencies Admiral admiral || errors=$((errors+1))
     done
 }
 
@@ -240,7 +243,7 @@ function release_projects() {
     # Create a PR for operator to use these versions
     local project="submariner-operator"
     local update_dependencies_extra=update_operator_versions
-    update_dependencies "${OPERATOR_CONSUMES[@]}" || errors=$((errors+1))
+    update_dependencies Operator "${OPERATOR_CONSUMES[@]}" || errors=$((errors+1))
 }
 
 ### Functions: Installers Stage ###
@@ -250,7 +253,7 @@ function release_installers() {
 
     # Create a PR for subctl to use these versions
     local project="subctl"
-    update_dependencies "${SUBCTL_CONSUMES[@]}" || errors=$((errors+1))
+    update_dependencies Subctl "${SUBCTL_CONSUMES[@]}" || errors=$((errors+1))
 }
 
 ### Functions: Released Stage ###
