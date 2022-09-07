@@ -32,8 +32,8 @@ ifneq (, $(findstring $(_E2E_CANARY),$(E2E_NEEDED)))
 # TODO: Figure out how to dynamically load correct images
 override PRELOAD_IMAGES=submariner-gateway submariner-route-agent submariner-globalnet submariner-operator
 
-subctl: export DEFAULT_IMAGE_VERSION=devel
-
+# Make sure that for E2E subctl gets compiled with the base branch, or it'll try to deploy images that werent published yet.
+e2e: export DEFAULT_IMAGE_VERSION=$(BASE_BRANCH)
 e2e: deploy
 else
 e2e:
