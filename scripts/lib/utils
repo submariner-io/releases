@@ -15,6 +15,7 @@ ORG=${ORG:-${GITHUB_REPOSITORY_OWNER:-$(git config --get remote.origin.url | awk
 declare -A NEXT_STATUS=( [branch]=shipyard [shipyard]=admiral [admiral]=projects [projects]=installers [installers]=released )
 
 function printerr() {
+    local DEBUG_PRINT=false
     local err_msg="$*"
 
     [[ -z "${file}" ]] || err_msg+=" (${file})"
@@ -22,6 +23,7 @@ function printerr() {
 }
 
 function count_parents() {
+    local DEBUG_PRINT=false
     git cat-file -p "$1" | grep -c "^parent "
 }
 
@@ -45,6 +47,7 @@ function determine_target_release() {
 }
 
 function read_release_file() {
+    local DEBUG_PRINT=false
     declare -gA release
 
     function _read() {
@@ -105,6 +108,7 @@ function checkout_project_branch() {
 }
 
 function is_semver() {
+    local DEBUG_PRINT=false
     local ver="(0|[1-9][0-9]*)"
     local regex="^${ver}\.${ver}\.${ver}(-([0-9a-zA-Z.-]*))?$"
     if [[ ! "$1" =~ ${regex} ]]; then
@@ -114,6 +118,7 @@ function is_semver() {
 }
 
 function extract_semver() {
+    local DEBUG_PRINT=false
     declare -gA semver
     IFS=".-" read -r semver['major'] semver['minor'] semver['patch'] semver['pre'] <<< "$1"
 }
