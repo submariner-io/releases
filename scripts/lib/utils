@@ -68,7 +68,7 @@ function read_release_file() {
 # Based on global "dryrun" variable
 function dryrun() {
     if [[ "$dryrun" = "true" ]]; then
-        echo DRY RUNNING: "${@:1}"
+        >&2 echo DRY RUNNING: "${@:1}"
         return
     fi
 
