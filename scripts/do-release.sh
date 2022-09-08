@@ -82,6 +82,9 @@ function update_go_mod() {
 }
 
 function update_dependencies() {
+    local msg="$1"
+    shift
+
     clone_and_create_branch "update-dependencies-${release['branch']:-devel}"
 
     for dependency; do
@@ -89,7 +92,7 @@ function update_dependencies() {
     done
 
     run_if_defined "$update_dependencies_extra"
-    create_pr "Update dependencies ($*) to ${release['version']}"
+    create_pr "Update ${msg} to ${release['version']}"
 }
 
 function push_to_repo() {
@@ -101,24 +104,28 @@ function push_to_repo() {
 function create_pr() {
     local msg="$1"
     local base_branch="${release['branch']:-devel}"
-    local branch to_review
+    local branch output pr_url
     export GITHUB_TOKEN="${RELEASE_TOKEN}"
 
     _git commit -a -s -m "${msg}"
     branch=$(_git rev-parse --abbrev-ref HEAD)
     push_to_repo "${branch}"
-    to_review=$(dryrun gh pr create --repo "${ORG}/${project}" --head "${branch}" --base "${base_branch}" --title "${msg}" \
-                --label "automated" --label "ready-to-test" --label "e2e-all-k8s" --body "${msg}" 2>&1)
+    output=$(dryrun gh pr create --repo "${ORG}/${project}" --head "${branch}" --base "${base_branch}" --title "${msg}" \
+                --label automated --body "${msg}" 2>&1)
 
     # shellcheck disable=SC2181 # The command is too long already, this is more readable
     if [[ $? -ne 0 ]]; then
-        reviews+=("Error creating pull request to ${msg@Q} on ${project}: ${to_review@Q}")
+        reviews+=("Error creating pull request to ${msg@Q} on ${project}: ${output@Q}")
         return 1
     fi
 
-    to_review=$(echo "${to_review}" | dryrun grep "http.*")
-    dryrun gh pr merge --auto --repo "${ORG}/${project}" --squash "${to_review}" || echo "WARN: Failed to enable auto merge on ${to_review}"
-    reviews+=("${to_review}")
+    pr_url=$(echo "${output}" | dryrun grep "http.*")
+
+    # Apply labels separately, since each label trigger the CI separately anyway and that causes multiple runs clogging the CI up.
+    dryrun gh pr edit --add-label e2e-all-k8s "${pr_url}" || echo "INFO: Didn't label 'e2e-all-k8s', continuing without it."
+    dryrun gh pr edit --add-label ready-to-test "${pr_url}"
+    dryrun gh pr merge --auto --repo "${ORG}/${project}" --squash "${pr_url}" || echo "WARN: Failed to enable auto merge on ${pr_url}"
+    reviews+=("${pr_url}")
 }
 
 function tag_images() {
@@ -202,7 +209,7 @@ function release_shipyard() {
 
     # Create a PR to pin Shipyard on every one of its consumers
     for project in "${SHIPYARD_CONSUMERS[@]}"; do
-        update_dependencies shipyard || errors=$((errors+1))
+        update_dependencies Shipyard shipyard || errors=$((errors+1))
     done
 }
 
@@ -215,7 +222,7 @@ function release_admiral() {
 
     # Create a PR to pin Admiral on every one of it's consumers
     for project in "${ADMIRAL_CONSUMERS[@]}"; do
-        update_dependencies admiral || errors=$((errors+1))
+        update_dependencies Admiral admiral || errors=$((errors+1))
     done
 }
 
@@ -236,7 +243,7 @@ function release_projects() {
     # Create a PR for operator to use these versions
     local project="submariner-operator"
     local update_dependencies_extra=update_operator_versions
-    update_dependencies "${OPERATOR_CONSUMES[@]}" || errors=$((errors+1))
+    update_dependencies Operator "${OPERATOR_CONSUMES[@]}" || errors=$((errors+1))
 }
 
 ### Functions: Installers Stage ###
@@ -246,7 +253,7 @@ function release_installers() {
 
     # Create a PR for subctl to use these versions
     local project="subctl"
-    update_dependencies "${SUBCTL_CONSUMES[@]}" || errors=$((errors+1))
+    update_dependencies Subctl "${SUBCTL_CONSUMES[@]}" || errors=$((errors+1))
 }
 
 ### Functions: Released Stage ###
