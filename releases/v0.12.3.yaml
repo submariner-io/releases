@@ -1,0 +1,7 @@
+---
+version: v0.12.3
+name: 0.12.3
+branch: release-0.12
+status: shipyard
+components:
+  shipyard: 1b6d1270822360400abb8f6f4d4952bd2a5f401f
