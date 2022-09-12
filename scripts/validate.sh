@@ -130,7 +130,7 @@ function validate_no_update_prs() {
     local update_prs
 
     for project; do
-        if ! update_prs="$(gh_api "pulls?base=${release['branch']:-devel}&head=${ORG}:${head}&state=open" | jq -r ".[].html_url")"; then
+        if ! update_prs="$(dryrun gh_api "pulls?base=${release['branch']:-devel}&head=${ORG}:${head}&state=open" | jq -r ".[].html_url")"; then
             printerr "Failed to list pull requests for ${project}."
             return 1
         fi

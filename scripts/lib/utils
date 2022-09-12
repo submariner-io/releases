@@ -11,8 +11,7 @@ readonly PROJECTS_PROJECTS=(cloud-prepare lighthouse submariner)
 readonly INSTALLER_PROJECTS=(submariner-charts submariner-operator)
 readonly RELEASED_PROJECTS=(subctl)
 
-echo "GITHUB_REPOSITORY_OWNER=${GITHUB_REPOSITORY_OWNER}" >&2
-ORG=${GITHUB_REPOSITORY_OWNER:-$(git config --get remote.origin.url | awk -F'[:/]' '{print $(NF-1)}')}
+ORG=${ORG:-${GITHUB_REPOSITORY_OWNER:-$(git config --get remote.origin.url | awk -F'[:/]' '{print $(NF-1)}')}}
 declare -A NEXT_STATUS=( [branch]=shipyard [shipyard]=admiral [admiral]=projects [projects]=installers [installers]=released )
 
 function printerr() {
@@ -72,7 +71,7 @@ function read_release_file() {
 # Based on global "dryrun" variable
 function dryrun() {
     if [[ "$dryrun" = "true" ]]; then
-        echo DRY RUNNING: "${@:1}"
+        >&2 echo DRY RUNNING: "${@:1}"
         return
     fi
 
