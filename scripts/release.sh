@@ -4,10 +4,12 @@
 set -e
 set -o pipefail
 
-source "${DAPPER_SOURCE}/scripts/lib/utils"
-source "${SCRIPTS_DIR}/lib/debug_functions"
+export ORG="${ORG:-submariner-io}"
 
-ORG=submariner-io
+source "${DAPPER_SOURCE}/scripts/lib/utils"
+source "${SCRIPTS_DIR}/lib/utils"
+print_env ORG GITHUB_ACTOR GITHUB_REPOSITORY_OWNER
+source "${SCRIPTS_DIR}/lib/debug_functions"
 
 ### Functions: General ###
 
@@ -93,7 +95,7 @@ function create_pr() {
 
     # shellcheck disable=SC2046
     project="$(basename $(pwd))"
-    local repo="submariner-io/${project}"
+    local repo="${ORG}/${project}"
     local gh_user=${GITHUB_ACTOR:-${ORG}}
 
     git add "${file}"

@@ -125,20 +125,19 @@ function validate_project_commits() {
     done
 }
 
-function validate_no_pin_prs() {
-    local head="$1"
-    local pin_prs
-    shift
+function validate_no_update_prs() {
+    local head="update-dependencies-${release['branch']:-devel}"
+    local update_prs
 
     for project; do
-        if ! pin_prs="$(gh_api "pulls?base=${release['branch']:-devel}&head=${ORG}:${head}&state=open" | jq -r ".[].html_url")"; then
+        if ! update_prs="$(dryrun gh_api "pulls?base=${release['branch']:-devel}&head=${ORG}:${head}&state=open" | jq -r ".[].html_url")"; then
             printerr "Failed to list pull requests for ${project}."
             return 1
         fi
 
-        if [[ -n "${pin_prs}" ]]; then
+        if [[ -n "${update_prs}" ]]; then
             printerr "Found open ${head@Q} pull requests on ${project}, make sure they're merged before proceeding"
-            echo "${pin_prs}"
+            echo "${update_prs}"
             return 1
         fi
     done
@@ -178,19 +177,19 @@ function validate_release() {
         ;;
     admiral)
         validate_project_commits admiral
-        validate_no_pin_prs pin_shipyard "${SHIPYARD_CONSUMERS[@]}"
+        validate_no_update_prs "${SHIPYARD_CONSUMERS[@]}"
         ;;
     projects)
         validate_project_commits "${PROJECTS_PROJECTS[@]}"
-        validate_no_pin_prs pin_admiral "${ADMIRAL_CONSUMERS[@]}"
+        validate_no_update_prs "${ADMIRAL_CONSUMERS[@]}"
         ;;
     installers)
         validate_project_commits "${INSTALLER_PROJECTS[@]}"
-        validate_no_pin_prs update_operator submariner-operator
+        validate_no_update_prs "${INSTALLER_PROJECTS[@]}"
         ;;
     released)
         validate_project_commits "${RELEASED_PROJECTS[@]}"
-        validate_no_pin_prs update_subctl subctl
+        validate_no_update_prs "${RELEASED_PROJECTS[@]}"
         ;;
     esac
 

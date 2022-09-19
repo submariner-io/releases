@@ -59,10 +59,10 @@ function clone_and_create_branch() {
 }
 
 function _update_go_mod() {
-    go mod tidy
+    go mod tidy -compat=1.17
     GOPROXY=direct go get "github.com/submariner-io/${target}@${release['version']}"
+    go mod tidy -compat=1.17
     go mod vendor
-    go mod tidy
 }
 
 function update_go_mod() {
@@ -81,6 +81,20 @@ function update_go_mod() {
     done
 }
 
+function update_dependencies() {
+    local msg="$1"
+    shift
+
+    clone_and_create_branch "update-dependencies-${release['branch']:-devel}"
+
+    for dependency; do
+        update_go_mod "$dependency"
+    done
+
+    run_if_defined "$update_dependencies_extra"
+    create_pr "Update ${msg} to ${release['version']}"
+}
+
 function push_to_repo() {
     local branch="$1"
 
@@ -88,26 +102,30 @@ function push_to_repo() {
 }
 
 function create_pr() {
-    local branch="$1"
-    local msg="$2"
+    local msg="$1"
     local base_branch="${release['branch']:-devel}"
-    local to_review
+    local branch output pr_url
     export GITHUB_TOKEN="${RELEASE_TOKEN}"
 
     _git commit -a -s -m "${msg}"
+    branch=$(_git rev-parse --abbrev-ref HEAD)
     push_to_repo "${branch}"
-    to_review=$(dryrun gh pr create --repo "${ORG}/${project}" --head "${branch}" --base "${base_branch}" --title "${msg}" \
-                --label "automated" --label "ready-to-test" --label "e2e-all-k8s" --body "${msg}" 2>&1)
+    output=$(dryrun gh pr create --repo "${ORG}/${project}" --head "${branch}" --base "${base_branch}" --title "${msg}" \
+                --label automated --body "${msg}" 2>&1)
 
     # shellcheck disable=SC2181 # The command is too long already, this is more readable
     if [[ $? -ne 0 ]]; then
-        reviews+=("Error creating pull request to ${msg@Q} on ${project}: ${to_review@Q}")
+        reviews+=("Error creating pull request to ${msg@Q} on ${project}: ${output@Q}")
         return 1
     fi
 
-    to_review=$(echo "${to_review}" | dryrun grep "http.*")
-    dryrun gh pr merge --auto --repo "${ORG}/${project}" --squash "${to_review}" || echo "WARN: Failed to enable auto merge on ${to_review}"
-    reviews+=("${to_review}")
+    pr_url=$(echo "${output}" | dryrun grep "http.*")
+
+    # Apply labels separately, since each label trigger the CI separately anyway and that causes multiple runs clogging the CI up.
+    dryrun gh pr edit --add-label e2e-all-k8s "${pr_url}" || echo "INFO: Didn't label 'e2e-all-k8s', continuing without it."
+    dryrun gh pr edit --add-label ready-to-test "${pr_url}"
+    dryrun gh pr merge --auto --repo "${ORG}/${project}" --squash "${pr_url}" || echo "WARN: Failed to enable auto merge on ${pr_url}"
+    reviews+=("${pr_url}")
 }
 
 function tag_images() {
@@ -184,12 +202,6 @@ function release_branch() {
 
 ### Functions: Shipyard Stage ###
 
-function pin_to_shipyard() {
-    clone_and_create_branch pin_shipyard
-    update_go_mod shipyard
-    create_pr pin_shipyard "Pin Shipyard to ${release['version']}"
-}
-
 function release_shipyard() {
 
     # Release Shipyard first so that we get the tag
@@ -197,17 +209,11 @@ function release_shipyard() {
 
     # Create a PR to pin Shipyard on every one of its consumers
     for project in "${SHIPYARD_CONSUMERS[@]}"; do
-        pin_to_shipyard || errors=$((errors+1))
+        update_dependencies Shipyard shipyard || errors=$((errors+1))
     done
 }
 
 ### Functions: Admiral Stage ###
-
-function pin_to_admiral() {
-    clone_and_create_branch pin_admiral
-    update_go_mod admiral
-    create_pr pin_admiral "Pin Admiral to ${release['version']}"
-}
 
 function release_admiral() {
 
@@ -216,26 +222,18 @@ function release_admiral() {
 
     # Create a PR to pin Admiral on every one of it's consumers
     for project in "${ADMIRAL_CONSUMERS[@]}"; do
-        pin_to_admiral || errors=$((errors+1))
+        update_dependencies Admiral admiral || errors=$((errors+1))
     done
 }
 
 ### Functions: Projects Stage ###
 
-function update_operator_pr() {
-    local project="submariner-operator"
-
-    clone_and_create_branch update_operator
-    for target in "${OPERATOR_CONSUMES[@]}" ; do
-        update_go_mod "${target}"
-    done
-
+function update_operator_versions() {
     local versions_file
-    versions_file=$(grep -l -r --include='*.go' --exclude-dir=vendor 'Default.*Version *=' projects/${project}/)
+    versions_file=$(grep -l -r --include='*.go' --exclude-dir=vendor 'Default.*Version *=' "projects/${project}/")
     [[ -n "${versions_file}" ]] || { printerr "Can't find file for default image versions"; return 1; }
 
     sed -i -E "s/(Default.*Version *=) .*/\1 \"${release['version']#v}\"/" "${versions_file}"
-    create_pr update_operator "Update Operator to use version ${release['version']}"
 }
 
 function release_projects() {
@@ -243,28 +241,19 @@ function release_projects() {
     for_every_project create_project_release "${PROJECTS_PROJECTS[@]}"
 
     # Create a PR for operator to use these versions
-    update_operator_pr || errors=$((errors+1))
+    local project="submariner-operator"
+    local update_dependencies_extra=update_operator_versions
+    update_dependencies Operator "${OPERATOR_CONSUMES[@]}" || errors=$((errors+1))
 }
 
 ### Functions: Installers Stage ###
-
-function update_subctl_pr() {
-    local project="subctl"
-
-    clone_and_create_branch update_subctl
-    for target in "${SUBCTL_CONSUMES[@]}" ; do
-        update_go_mod "${target}"
-    done
-
-    create_pr update_subctl "Update subctl to use version ${release['version']}"
-}
-
 
 function release_installers() {
     for_every_project create_project_release "${INSTALLER_PROJECTS[@]}"
 
     # Create a PR for subctl to use these versions
-    update_subctl_pr || errors=$((errors+1))
+    local project="subctl"
+    update_dependencies Subctl "${SUBCTL_CONSUMES[@]}" || errors=$((errors+1))
 }
 
 ### Functions: Released Stage ###

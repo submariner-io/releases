@@ -28,26 +28,26 @@ subctl: config-git
 	./scripts/subctl.sh $(SUBCTL_ARGS)
 
 ifneq (, $(findstring $(_E2E_CANARY),$(E2E_NEEDED)))
+
+# TODO: Figure out how to dynamically load correct images
+override PRELOAD_IMAGES=submariner-gateway submariner-route-agent submariner-globalnet submariner-operator
+
+# Make sure that for E2E subctl gets compiled with the base branch, or it'll try to deploy images that werent published yet.
+e2e: export DEFAULT_IMAGE_VERSION=$(BASE_BRANCH)
 e2e: deploy
-	./scripts/e2e.sh
 else
 e2e:
-	echo $(E2E_NEEDED)
+	@echo No release detected, not running E2E
 endif
 
 clusters: images subctl
 
-deploy: import-images
+images:
+	./scripts/images.sh
 
 # [do-release] will run the release process for the current stage, creating tags and releasing images as needed
 do-release: config-git
 	./scripts/do-release.sh
-
-images:
-	./scripts/images.sh
-
-import-images: images
-	./scripts/import-images.sh
 
 release: config-git
 	./scripts/release.sh

@@ -41,7 +41,7 @@ target=( cmd/bin/subctl )
 
 # If cross build requested perform it, except when dry-running as it takes a very long time and has little benefit when testing
 [[ "$1" == "cross" && "$dryrun" != "true" ]] && target+=( build-cross )
-make "${target[@]}" VERSION="${release['version']}" DEFAULT_IMAGE_VERSION="${release['version']}"
+make "${target[@]}" VERSION="${release['version']}" DEFAULT_IMAGE_VERSION="${DEFAULT_IMAGE_VERSION:-${release['version']}}"
 
 ln -f -s "$(pwd)/cmd/bin/subctl" /go/bin/subctl
 ./cmd/bin/subctl version
