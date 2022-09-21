@@ -10,9 +10,10 @@ on:
 
 permissions:
   contents: write
+  issues: write
   packages: write
   pull-requests: write
-  issues: write
+  repository-projects: read
 
 jobs:
   release:
