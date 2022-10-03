@@ -16,7 +16,7 @@ jobs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
       - id: skip_check
-        uses: fkirc/skip-duplicate-actions@b8076051474d234b9bf70d23464609b88d271060
+        uses: fkirc/skip-duplicate-actions@f11521568414503656a5af807dc3018c012552c4
         with:
           paths_ignore: '["releases/**"]'
 
