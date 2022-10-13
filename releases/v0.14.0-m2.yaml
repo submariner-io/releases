@@ -2,10 +2,12 @@
 version: v0.14.0-m2
 name: 0.14.0-m2
 pre-release: true
-status: projects
+status: installers
 components:
   shipyard: d96023ced86f39ab726fcde20788ad51195daa37
   admiral: 7e3a532683036a51379ddf9762e33349c0e2e7e1
   cloud-prepare: f5fb3d7e5c7f35cb7c1e4cc5c750cb2242f65e07
   lighthouse: 4b7536b7113a8dcd2ab1cf2e0bcba56d49560493
   submariner: 479720480de97ecf611a44fa4bc2f6c793f94dbe
+  submariner-charts: 34065476744543c5f27ebf0a26478fd60b4e5bd5
+  submariner-operator: 739ce73cd9152fc22432a6226959550a3715ab40
