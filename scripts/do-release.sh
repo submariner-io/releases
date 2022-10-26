@@ -164,15 +164,13 @@ function adjust_shipyard() {
     # Otherwise, image building jobs are likely to fail when creating the branches
     (
         set -e
-
-        # Trick our own Makefile to think we're running outside dapper
-        export DAPPER_HOST_ARCH=""
+        cd projects/shipyard
 
         # Rebuild Shipyard image with the changes we made for stable branches
-        cd projects/shipyard
         make images multiarch-images
 
-        # This will release all of Shipyard's images
+        # This will release all of Shipyard's images (it runs in the "release" container, which is what we want in order to avoid
+        # dapper-in-dapper problems)
         dryrun make release-images TAG="${release['branch']}"
     )
 }
