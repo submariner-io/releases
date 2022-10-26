@@ -39,7 +39,7 @@ function create_project_release() {
     # If the project has container images, copy them to the release tag
     # This will fail if the source images don't exist; abort then without trying to create the release
     # shellcheck disable=SC2046 # We need to split $(project_images)
-    if [[ -n "$(project_images)" ]] && ! tag_images $(project_images); then
+    if [[ -n "$(project_images)" ]] && ! tag_images "${release['version']}" $(project_images); then
         ((errors++))
         return 1
     fi
@@ -128,18 +128,18 @@ function create_pr() {
     reviews+=("${pr_url}")
 }
 
+# Tag the images matching the release commit using the release tag
 function tag_images() {
-    # Tag the images matching the release commit using the release tag
+    local tag=$1
+    shift
     local project_version
-    project_version=$(cd "projects/${project}" && make print-version BASE_BRANCH="${release['branch']:-devel}" | \
-                      grep -oP "(?<=CALCULATED_VERSION=).+")
-    local hash="${project_version#v}"
+    project_version=$(cd "projects/${project}" && make print-version | grep -oP "(?<=CALCULATED_VERSION=).+")
     
     echo "$QUAY_PASSWORD" | dryrun skopeo login quay.io -u "$QUAY_USERNAME" --password-stdin
     for image; do
         local full_image="${REPO}/${image}"
         # --all ensures we handle multi-arch images correctly; it works with single- and multi-arch
-        dryrun skopeo copy --all "docker://${full_image}:${hash}" "docker://${full_image}:${release['version']#v}"
+        dryrun skopeo copy --all "docker://${full_image}:${project_version#v}" "docker://${full_image}:${tag#v}"
     done
 }
 
@@ -155,24 +155,17 @@ function adjust_shipyard() {
     local project=shipyard
 
     clone_and_create_branch "${branch}" devel
+
+    # Make sure all Shipyard's base images are immediately available to consuming projects with the expected tag (the stable branch name),
+    # otherwise image building jobs are likely to fail when creating the branches.
+    # We do this before changing the base branch, so that we'll use the latest `devel` images.
+    # shellcheck disable=SC2046 # We need to split $(project_images)
+    tag_images "$branch" $(project_images)
+
     sed -e "s/devel/${branch}/" -i projects/shipyard/Makefile.versions
     update_base_branch
     _git commit -a -s -m "Update Shipyard to use stable branch '${branch}'"
     push_to_repo "${branch}"
-
-    # Build & upload shipyard base image so that other projects have it immediately
-    # Otherwise, image building jobs are likely to fail when creating the branches
-    (
-        set -e
-        cd projects/shipyard
-
-        # Rebuild Shipyard image with the changes we made for stable branches
-        make images multiarch-images
-
-        # This will release all of Shipyard's images (it runs in the "release" container, which is what we want in order to avoid
-        # dapper-in-dapper problems)
-        dryrun make release-images TAG="${release['branch']}"
-    )
 }
 
 function create_stable_branch() {
