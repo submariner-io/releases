@@ -25,6 +25,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up QEMU (to support building on non-native architectures)
+        uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
+
       - name: Perform the release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
