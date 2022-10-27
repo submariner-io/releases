@@ -3,7 +3,10 @@ version: v0.14.0-rc1
 name: 0.14.0-rc1
 pre-release: true
 branch: release-0.14
-status: admiral
+status: projects
 components:
   shipyard: 8bb84a20e0492020f3d3bd38f5ecb9c8ab5ab4e8
   admiral: 46221168dd3c0a4729ede53085fe9547fb446007
+  cloud-prepare: cdd5ba4890c07f69bf6904a46a83a5fc839d4d9c
+  lighthouse: f0a743161d92a1d53115c5f247e01f4cbdf29fbd
+  submariner: e61885ad47e7c694c0ec16d83ec4575642710caa
