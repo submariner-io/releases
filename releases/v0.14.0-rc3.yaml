@@ -3,10 +3,12 @@ version: v0.14.0-rc3
 name: 0.14.0-rc3
 pre-release: true
 branch: release-0.14
-status: projects
+status: installers
 components:
   shipyard: ef2bcba975cf259d3b6473ff33c95d5a1ac9d076
   admiral: f2f26e9547c823d76674609ffe690838688895cf
   cloud-prepare: ef22d3e342ce910564909a5afc2fe4c116f61dd7
   lighthouse: e894c328d58528077a2000b292c1b265cd9004ed
   submariner: d33db3ffb40eebb2d9f7a5ce328184ac0f82c4ba
+  submariner-charts: b19b7e6294344985f326cf7cb210bb49c53817e5
+  submariner-operator: 9dcfd429d9503b2023055310f3e72d9873d0e8a5
