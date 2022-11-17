@@ -14,11 +14,14 @@ function _pull_image() {
 }
 
 function pull_images() {
-    local project_version
+    local project_version=$BASE_BRANCH
     clone_repo
     checkout_project_branch
-    project_version=$(cd "projects/${project}" && make print-version BASE_BRANCH="${release['branch']:-devel}" | \
-                      grep -oP "(?<=CALCULATED_VERSION=).+")
+
+    # Only when a specific image version is requested pull it, otherwise use the default latest for the branch.
+    [[ -z "${release["components.${project}"]}" ]] || \
+        project_version=$(cd "projects/${project}" && make print-version BASE_BRANCH="${release['branch']:-${BASE_BRANCH}}" | \
+                          grep -oP "(?<=CALCULATED_VERSION=).+")
 
     for image in $(project_images); do
         _pull_image "$project_version"
