@@ -3,6 +3,7 @@ version: v0.14.0-rc4
 name: 0.14.0-rc4
 pre-release: true
 branch: release-0.14
-status: shipyard
+status: admiral
 components:
   shipyard: f6ef77489d735185ad7d200926bc151c11e03200
+  admiral: df50f126a51e8ecad34ec3359ed62eb56f9b0bcd
