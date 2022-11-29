@@ -124,7 +124,7 @@ function create_pr() {
     # Apply labels separately, since each label trigger the CI separately anyway and that causes multiple runs clogging the CI up.
     dryrun gh pr edit --add-label e2e-all-k8s "${pr_url}" || echo "INFO: Didn't label 'e2e-all-k8s', continuing without it."
     dryrun gh pr edit --add-label ready-to-test "${pr_url}"
-    dryrun gh pr merge --auto --repo "${ORG}/${project}" --squash "${pr_url}" || echo "WARN: Failed to enable auto merge on ${pr_url}"
+    dryrun gh pr merge --auto --repo "${ORG}/${project}" --rebase "${pr_url}" || echo "WARN: Failed to enable auto merge on ${pr_url}"
     reviews+=("${pr_url}")
 }
 
