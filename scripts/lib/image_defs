@@ -5,6 +5,6 @@ REPO="quay.io/submariner"
 
 declare -A project_images
 project_images[lighthouse]="lighthouse-agent lighthouse-coredns"
-project_images[shipyard]="nettest shipyard-dapper-base"
+project_images[shipyard]="nettest shipyard-dapper-base shipyard-linting"
 project_images[submariner]="submariner-gateway submariner-globalnet submariner-route-agent submariner-networkplugin-syncer"
 project_images[submariner-operator]="submariner-operator submariner-operator-index subctl"
