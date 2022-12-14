@@ -2,7 +2,7 @@
 version: v0.15.0-m0
 name: 0.15.0-m0
 pre-release: true
-status: installers
+status: released
 components:
   shipyard: ac0f7d776f6c9e68909b57368c56b0dec78ca709
   admiral: 7cf80c57603e3d8824f8e75742aa9eb151ca7442
@@ -11,3 +11,4 @@ components:
   submariner: 28cd912c0b60857eb6e4f225305d55fd91c20b73
   submariner-charts: 3f4af474fc95403ebfe982f4a06223bde64eda31
   submariner-operator: d69e812fc1e533882c23e8b706002e0c7a7f87bb
+  subctl: 98f65ae7e95e0f5ebe695545acd03d4e815a2cb5
