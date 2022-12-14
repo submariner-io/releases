@@ -1,0 +1,11 @@
+---
+version: v0.15.0-m0
+name: 0.15.0-m0
+pre-release: true
+status: projects
+components:
+  shipyard: ac0f7d776f6c9e68909b57368c56b0dec78ca709
+  admiral: 7cf80c57603e3d8824f8e75742aa9eb151ca7442
+  cloud-prepare: b20523e20725f8acb9526187fd7ceb7f3ead8ef1
+  lighthouse: 1af2fab3a524dcb62634f6c135cfa67fdc0ba79e
+  submariner: 28cd912c0b60857eb6e4f225305d55fd91c20b73
