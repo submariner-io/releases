@@ -24,6 +24,26 @@ function expect_in_file() {
 
 ### Testing Functions ###
 
+function test_release_stable() {
+    local suffix=$1
+    git remote rm upstream_releases 2> /dev/null || :
+    git remote add -f upstream_releases "https://github.com/${ORG}/releases.git" > /dev/null 2>&1
+
+    local branch
+    branch=$(git rev-parse --symbolic --remotes='upstream_releases/release-*' | \
+                 grep -w -v "$BASE_BRANCH" | grep -w -o -m 1 'release-[0-9]*\.[0-9]*')
+    local version=${branch#*-}.${suffix}
+
+    print_test "Running 'make release' - stable branch '${version}'"
+    if _make release VERSION="$version"; then
+        exit_error "Running 'make release' should've failed needing to run on ${branch}"
+    fi
+
+    if ! grep -e "ERROR:.*${branch}" - <<<"${output}" > /dev/null; then
+        exit_error "Running 'make release' should've failed with output indicating the branch ${branch}"
+    fi
+}
+
 function test_semver_faulty() {
     print_test "Running 'make release' - faulty version '$1'"
     if _make release "VERSION=$1"; then
@@ -87,12 +107,13 @@ for version in "${faulty_versions[@]}"; do
     test_semver_faulty "$version"
 done
 
+# Test that stable branches are handled correctly
+versions=('100' '100-rc0' '100-rc1')
+for version in "${versions[@]}"; do
+    test_release_stable "$version"
+done
+
 # Test with non-existing branches
 # Only pre-releases are expected to work as we expect RCs or formal releases to happen on a branch (which must exist)
 test_release '100.0.0-m0' 'shipyard' 'pre-release: true'
 test_release '100.0.0-rc0' 'branch' 'branch: release-100.0' 'pre-release: true'
-
-# Test with an existing known branch
-# Only releases or release candidates are expected to work as we're not releasing milestones on stable branches
-test_release '0.9.100' 'shipyard' 'branch: release-0.9'
-test_release '0.9.100-rc1' 'shipyard' 'branch: release-0.9' 'pre-release: true'
