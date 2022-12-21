@@ -258,15 +258,21 @@ function release_released() {
     for_every_project create_project_release "${PROJECTS[@]}"
 }
 
-function post_reviews_comment() {
+function comment_finished_status() {
     if [[ ${#reviews[@]} = 0 ]]; then
         return
     fi
 
-    local comment="Release for status '${release['status']}' is done, please review:"
-    for review in "${reviews[@]}"; do
-        comment+=$(printf "\n * %s" "${review}")
-    done
+    local comment="Release for status '${release['status']}' finished "
+
+    if [[ $errors -gt 0 ]]; then
+        comment+=$(printf "%s\n%s" "with ${errors} errors." "Please check the job for more details: ${GITHUB_JOB_URL}")
+    else
+        comment+="successfully. Please review:"
+        for review in "${reviews[@]}"; do
+            comment+=$(printf "\n * %s" "${review}")
+        done
+    fi
 
     local pr_url
     pr_url=$(gh api -H 'Accept: application/vnd.github.groot-preview+json' \
@@ -292,7 +298,7 @@ branch|shipyard|admiral|projects|installers|released)
     ;;
 esac
 
-post_reviews_comment || echo "WARN: Can't post reviews comment"
+comment_finished_status || echo "WARN: Can't post comment with release status"
 
 if [[ $errors -gt 0 ]]; then
     printerr "Encountered ${errors} errors while doing the release."
