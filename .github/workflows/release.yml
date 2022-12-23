@@ -34,4 +34,5 @@ jobs:
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
           QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
           RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GITHUB_JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}
         run: make do-release
