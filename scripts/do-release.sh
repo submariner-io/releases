@@ -10,6 +10,13 @@ set -o pipefail
 
 ### Functions: General ###
 
+# Run the supplied command in the background so that `errexit` and `pipefail` are honored.
+# Errors will be counted instead of exiting immediately.
+function record_errors() {
+    "$@" &
+    wait $! || errors=$((errors+1))
+}
+
 function create_release() {
     local project="$1"
     local target="$2"
@@ -47,7 +54,7 @@ function create_project_release() {
     # Release the project on GitHub so that it gets tagged
     export GITHUB_TOKEN="${RELEASE_TOKEN}"
     commit_ref=$(_git rev-parse --verify HEAD)
-    create_release "${project}" "${commit_ref}" || errors=$((errors+1))
+    record_errors create_release "${project}" "${commit_ref}"
 }
 
 function clone_and_create_branch() {
@@ -109,9 +116,11 @@ function create_pr() {
     local msg="$1"
     local base_branch="${release['branch']:-devel}"
     local branch output pr_url
+    local empty_flag=--allow-empty
     export GITHUB_TOKEN="${RELEASE_TOKEN}"
 
-    _git commit -a -s -m "${msg}"
+    dryrun unset empty_flag
+    _git commit $empty_flag -a -s -m "${msg}"
     branch=$(_git rev-parse --abbrev-ref HEAD)
     push_to_repo "${branch}"
     output=$(dryrun gh pr create --repo "${ORG}/${project}" --head "${branch}" --base "${base_branch}" --title "${msg}" \
@@ -180,7 +189,7 @@ function create_stable_branch() {
     clone_and_create_branch "${branch}" devel
     update_base_branch
     _git commit -a -s -m "Update base image to use stable branch '${branch}'"
-    push_to_repo "${branch}" || errors=$((errors+1))
+    record_errors push_to_repo "${branch}"
 }
 
 function release_branch() {
@@ -204,7 +213,7 @@ function release_shipyard() {
 
     # Create a PR to pin Shipyard on every one of its consumers
     for project in "${SHIPYARD_CONSUMERS[@]}"; do
-        update_dependencies Shipyard shipyard || errors=$((errors+1))
+        record_errors update_dependencies Shipyard shipyard
     done
 }
 
@@ -217,7 +226,7 @@ function release_admiral() {
 
     # Create a PR to pin Admiral on every one of it's consumers
     for project in "${ADMIRAL_CONSUMERS[@]}"; do
-        update_dependencies Admiral admiral || errors=$((errors+1))
+        record_errors update_dependencies Admiral admiral
     done
 }
 
@@ -238,7 +247,7 @@ function release_projects() {
     # Create a PR for operator to use these versions
     local project="submariner-operator"
     local update_dependencies_extra=update_operator_versions
-    update_dependencies Operator "${OPERATOR_CONSUMES[@]}" || errors=$((errors+1))
+    record_errors update_dependencies Operator "${OPERATOR_CONSUMES[@]}"
 }
 
 ### Functions: Installers Stage ###
@@ -248,7 +257,7 @@ function release_installers() {
 
     # Create a PR for subctl to use these versions
     local project="subctl"
-    update_dependencies Subctl "${SUBCTL_CONSUMES[@]}" || errors=$((errors+1))
+    record_errors update_dependencies Subctl "${SUBCTL_CONSUMES[@]}"
 }
 
 ### Functions: Released Stage ###
@@ -257,7 +266,7 @@ function release_released() {
     local commit_ref
     commit_ref=$(git rev-parse --verify HEAD)
     make subctl SUBCTL_ARGS=cross
-    create_release releases "${commit_ref}" projects/subctl/dist/subctl-* || errors=$((errors+1))
+    record_errors create_release releases "${commit_ref}" projects/subctl/dist/subctl-*
 
     for_every_project create_project_release "${PROJECTS[@]}"
 }
