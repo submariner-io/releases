@@ -59,8 +59,12 @@ function clone_and_create_branch() {
 }
 
 function _update_go_mod() {
+    local target_version=${release['branch']:-devel}
+    dryrun target_version="${release['version']}"
+    dryrun export GONOPROXY="github.com/submariner-io/${target}"
+
     go mod tidy -compat=1.17
-    GOPROXY=direct go get "github.com/submariner-io/${target}@${release['version']}"
+    go get "github.com/submariner-io/${target}@${target_version}"
     go mod tidy -compat=1.17
     go mod vendor
 }
@@ -77,7 +81,7 @@ function update_go_mod() {
         fi
 
         # Run in subshell so we don't change the working directory even on failure
-        ( cd "$dir" && dryrun _update_go_mod; )
+        ( cd "$dir" && _update_go_mod; )
     done
 }
 
