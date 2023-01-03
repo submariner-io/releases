@@ -59,16 +59,16 @@ function _test_release_step() {
 function test_release() {
     local version="$1"
     local status="$2"
-    local expected_fields=("${@:3}")
+    local branch="$3"
 
     _test_release_step "${version}" "${status}"
 
-    for field in "${expected_fields[@]}"; do
-        expect_in_file "${field}"
-    done
+    if [[ -n "$branch" ]]; then
+        expect_in_file "branch: ${branch}"
 
-    # Since the branch is expected to exist, the script will fail, so remove it for testing
-    VERSION="${version}" sanitize_branch
+        # Since the branch is expected to exist, the script will fail, so remove it for testing
+        VERSION="${version}" sanitize_branch
+    fi
 
     while [[ -n "${NEXT_STATUS[${status}]}" ]]; do
         status="${NEXT_STATUS[${status}]}"
@@ -100,5 +100,5 @@ done
 
 # Test with non-existing branches
 # Only pre-releases are expected to work as we expect RCs or formal releases to happen on a branch (which must exist)
-test_release '100.0.0-m0' 'shipyard' 'pre-release: true'
-test_release '100.0.0-rc0' 'branch' 'branch: release-100.0' 'pre-release: true'
+test_release '100.0.0-m0' 'shipyard'
+test_release '100.0.0-rc0' 'branch' 'release-100.0'

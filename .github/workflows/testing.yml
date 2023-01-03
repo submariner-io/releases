@@ -20,22 +20,27 @@ jobs:
         with:
           paths_ignore: '["releases/**"]'
 
-  release:
-    name: Make release
+  command:
+    name: Command
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        command: ['do-release', 'release']
+
     steps:
       - name: Check out the repository
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
         with:
           fetch-depth: 0
 
-      - name: Test the `make release` command
+      - name: Test the `make ${{ matrix.command }}` command
         env:
           # Needed for testing as we're running validations which hit the GH API rate limit
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: make test-release
+        run: make test-${{ matrix.command }}
 
   entire-release:
     name: Entire release process

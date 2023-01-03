@@ -21,12 +21,13 @@ function create_release() {
     local project="$1"
     local target="$2"
     local files=( "${@:3}" )
-    [[ "${release['pre-release']}" = "true" ]] && local prerelease="--prerelease"
-#    [[ -n "${release['release-notes']}" ]] && local notes="--notes ${release['release-notes']}"
+    local prerelease=false
+
+    [[ -z "${semver[pre]}" ]] || prerelease=true
 
     gh config set prompt disabled
-    # shellcheck disable=SC2086,SC2068 # Some things have to be expanded or GH CLI flips out
-    with_retries 3 dryrun gh release create "${release['version']}" ${files[@]} ${prerelease} \
+    with_retries 3 dryrun gh release create "${release['version']}" "${files[@]}" \
+        --prerelease="$prerelease" \
         --title "${release['name']}" \
         --repo "${ORG}/${project}" \
         --target "${target}"

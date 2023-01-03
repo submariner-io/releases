@@ -118,15 +118,11 @@ version: v${VERSION}
 name: ${VERSION}
 EOF
 
-    if [[ -n "${semver['pre']}" ]]; then
-        write "pre-release: true"
-
-        # On first RC we'll branch to allow development to continue while doing the release
-        if [[ "${semver['pre']}" = "rc0" ]]; then
-            set_stable_branch
-            set_status "branch"
-            return
-        fi
+    # On first RC we'll branch to allow development to continue while doing the release
+    if [[ "${semver['pre']}" = "rc0" ]]; then
+        set_stable_branch
+        set_status "branch"
+        return
     fi
 
     # Detect stable branch and set it if necessary

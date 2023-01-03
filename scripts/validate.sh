@@ -157,17 +157,6 @@ function validate_release() {
 
     is_semver "${version#v}" || return 1
 
-    local pre_release="${release['pre-release']}"
-    if [[ "$pre_release" = "true" ]] && [[ ! "$version" =~ -[0-9a-z\.]+$ ]]; then
-        printerr "Version ${version@Q} should have a hyphen followed by identifiers as it's marked as pre-release"
-        return 1
-    fi
-
-    if [[ "$pre_release" != "true" ]] && [[ "$version" =~ - ]]; then
-        printerr "Version ${version@Q} should not have a hyphen as it isn't marked as pre-release"
-        return 1
-    fi
-
     case "${release['status']}" in
     branch)
         for_every_project validate_no_branch "${PROJECTS[@]}"
