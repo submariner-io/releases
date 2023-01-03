@@ -21,12 +21,18 @@ function create_release() {
     local project="$1"
     local target="$2"
     local files=( "${@:3}" )
+    local version="${release[version]}"
+    local latest=false
     local prerelease=false
 
     [[ -z "${semver[pre]}" ]] || prerelease=true
 
+    # Mark as latest release only when we're actually trying to release the latest GA release (ignoring any pre-releases).
+    [[ $({ echo "$version"; git tag -l 'v*'; } | grep -v '-' | sort -V | tail -n1) != "$version" ]] || latest=true
+
     gh config set prompt disabled
-    with_retries 3 dryrun gh release create "${release['version']}" "${files[@]}" \
+    with_retries 3 dryrun gh release create "$version" "${files[@]}" \
+        --latest="$latest" \
         --prerelease="$prerelease" \
         --title "${release['name']}" \
         --repo "${ORG}/${project}" \
