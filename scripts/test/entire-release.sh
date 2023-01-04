@@ -20,9 +20,7 @@ function _test_release_step() {
 
 ### Main ###
 
-base_commit=$(git rev-parse HEAD)
-trap reset_git EXIT
-
+prepare_test_repo
 status="shipyard"
 extract_semver "${VERSION}"
 [[ "${semver['pre']}" != "rc0" ]] || status="branch"

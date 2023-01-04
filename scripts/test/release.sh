@@ -94,8 +94,7 @@ function test_release() {
 
 ### Main ###
 
-base_commit=$(git rev-parse HEAD)
-trap reset_git EXIT
+prepare_test_repo
 
 print_test "Running 'make release' - no version argument"
 if _make release; then
