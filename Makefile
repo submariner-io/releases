@@ -53,7 +53,7 @@ release: config-git
 	./scripts/release.sh
 
 test-%: export SKIP_WHEN_TESTING=y
-test-%:
+test-%: config-git
 	./scripts/test/$*.sh
 
 validate:

@@ -2,6 +2,10 @@
 
 set -e
 
+### Constants ###
+
+readonly TEST_DIR=projects/releases
+
 ### General Functions ###
 
 function exit_error() {
@@ -14,6 +18,16 @@ function exit_error() {
 
 function print_test() {
     echo "TEST: $*"
+}
+
+# Copy over current git repo to testing directory to test any changes and avoid affecting the local repo.
+function prepare_test_repo() {
+    rm -rf "$TEST_DIR"
+
+    # The `advice.detachedHead=false` setting is needed when the repo is in the middle of a rebase and such.
+    git -c advice.detachedHead=false clone . "$TEST_DIR"
+    cd "$TEST_DIR"
+    git commit -a --allow-empty -m "Current state"
 }
 
 function _make() {
