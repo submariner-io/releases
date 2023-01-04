@@ -52,6 +52,7 @@ do-release: config-git
 release: config-git
 	./scripts/release.sh
 
+test-%: export SKIP_WHEN_TESTING=y
 test-%:
 	./scripts/test/$*.sh
 

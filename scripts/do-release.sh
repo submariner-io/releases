@@ -66,6 +66,7 @@ function clone_and_create_branch() {
 }
 
 function _update_go_mod() {
+    [[ -z "$SKIP_WHEN_TESTING" ]] || { echo "SKIPPING: ${FUNCNAME[0]}" && return 0; }
     local target_version=${release['branch']:-devel}
     dryrun target_version="${release['version']}"
     dryrun export GONOPROXY="github.com/submariner-io/${target}"
