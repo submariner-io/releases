@@ -13,9 +13,9 @@ source "${DAPPER_SOURCE}/scripts/test/utils"
 function _test_release_step() {
     print_test "Entire release process for version ${VERSION@Q} - current status ${status@Q}"
 
-    _make release VERSION="${VERSION}" || exit_error "Running 'make release' failed"
-    _make validate || exit_error "Running 'make validate' failed"
-    _make do-release || exit_error "Running 'make do-release' failed"
+    expect_success_running_make release VERSION="${VERSION}"
+    expect_success_running_make validate
+    expect_success_running_make do-release
 }
 
 ### Main ###
