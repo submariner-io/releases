@@ -36,6 +36,20 @@ function _make() {
     return "$?"
 }
 
+function expect_success_running_make() {
+    _make "$@" || exit_error "Expected 'make $*' to succeed, but it failed."
+}
+
+function expect_failure_running_make() {
+    ! _make "$@" || exit_error "Expected 'make $*' to fail, but it succeeded."
+}
+
+function expect_make_output_to_contain() {
+    local expected=$1
+    grep -e "${expected}" - <<<"${output}" > /dev/null || \
+        exit_error "Expected 'make release' output to contain ${expected@Q} but it didn't."
+}
+
 # In case we're targeting a branch, the commands will fail, so remove it for testing
 function sanitize_branch() {
     if grep 'branch:' "releases/v${VERSION}.yaml" > /dev/null ; then

@@ -35,24 +35,14 @@ function test_release_stable() {
     local version=${branch#*-}.${suffix}
 
     print_test "Running 'make release' - stable branch '${version}'"
-    if _make release VERSION="$version"; then
-        exit_error "Running 'make release' should've failed needing to run on ${branch}"
-    fi
-
-    if ! grep -e "ERROR:.*${branch}" - <<<"${output}" > /dev/null; then
-        exit_error "Running 'make release' should've failed with output indicating the branch ${branch}"
-    fi
+    expect_failure_running_make release VERSION="$version"
+    expect_make_output_to_contain "ERROR:.*${branch}"
 }
 
 function test_semver_faulty() {
     print_test "Running 'make release' - faulty version '$1'"
-    if _make release "VERSION=$1"; then
-        exit_error "Running 'make release' should've failed due to faulty version $1"
-    fi
-
-    if ! grep -e "ERROR:.*${1}" - <<<"${output}" > /dev/null; then
-        exit_error "Running 'make release' should've failed with output indicating the version $1"
-    fi
+    expect_failure_running_make release "VERSION=$1"
+    expect_make_output_to_contain "ERROR:.*${1}"
 }
 
 function _test_release_step() {
@@ -60,9 +50,7 @@ function _test_release_step() {
     local status="$2"
 
     print_test "Running 'make release' - version '${version}' expecting status '${status}'"
-    if ! _make release "VERSION=${version}"; then
-        exit_error "Running 'make release' failed for version '${version}'"
-    fi
+    expect_success_running_make release "VERSION=${version}"
 
     expect_in_file "version: v${version}"
     expect_in_file "status: ${status}"
@@ -97,9 +85,7 @@ function test_release() {
 prepare_test_repo
 
 print_test "Running 'make release' - no version argument"
-if _make release; then
-    exit_error 'should fail when no VERSION is given'
-fi
+expect_failure_running_make release
 
 faulty_versions=( '' '1' '1.2' 'a.2.3' '1.a.3' '1.2.a' '01.2.3' '1.02.3' '1.2.03' '1.2.3-?')
 for version in "${faulty_versions[@]}"; do
