@@ -25,6 +25,13 @@ function dapper_in_dapper() {
     echo "ENV DAPPER_CP=${cur_pwd}/${orig_pwd}/projects/subctl" >> Dockerfile.dapper
 }
 
+# Skips make when requested (useful for testing)
+function _make() {
+    local DEBUG_PRINT=false
+    [[ -z "$SKIP_WHEN_TESTING" ]] || { echo "SKIPPING: make $*" && return 0; }
+    make "$@"
+}
+
 ### Main ###
 
 determine_target_release
@@ -41,8 +48,8 @@ target=( cmd/bin/subctl )
 
 # If cross build requested perform it, except when dry-running as it takes a very long time and has little benefit when testing
 [[ "$1" == "cross" && "$dryrun" != "true" ]] && target+=( build-cross )
-make "${target[@]}" VERSION="${release['version']}" DEFAULT_IMAGE_VERSION="${DEFAULT_IMAGE_VERSION:-${release['version']}}"
+_make "${target[@]}" VERSION="${release['version']}" DEFAULT_IMAGE_VERSION="${DEFAULT_IMAGE_VERSION:-${release['version']}}"
 
 ln -f -s "$(pwd)/cmd/bin/subctl" /go/bin/subctl
-./cmd/bin/subctl version
+[[ -n "$SKIP_WHEN_TESTING" ]] || ./cmd/bin/subctl version
 
