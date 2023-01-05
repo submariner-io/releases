@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -e -o pipefail
 
 ### Constants ###
 
@@ -9,15 +9,14 @@ readonly TEST_DIR=projects/releases
 ### General Functions ###
 
 function exit_error() {
-    echo "--------- Captured output ---------"
-    echo "${output}"
-    echo "-----------------------------------"
     echo "ERROR: $*"
     exit 1
 }
 
-function print_test() {
-    echo "TEST: $*"
+function start_test() {
+    [[ -z "$CI" ]] || { printf '::endgroup::\n::group::%s\n' "$*" && return 0; }
+    local div=${*//?/=}
+    printf '%s\n%s\n%s\n' "$div" "$*" "$div"
 }
 
 # Copy over current git repo to testing directory to test any changes and avoid affecting the local repo.
@@ -32,7 +31,7 @@ function prepare_test_repo() {
 
 function _make() {
     declare -g output
-    output=$(make "${@}" dryrun=true 2>&1)
+    { output=$(make "$@" dryrun=true 2>&1 | tee /dev/fd/5); } 5>&1
     return "$?"
 }
 

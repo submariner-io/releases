@@ -34,13 +34,13 @@ function test_release_stable() {
                  grep -w -v "$BASE_BRANCH" | grep -w -o -m 1 'release-[0-9]*\.[0-9]*')
     local version=${branch#*-}.${suffix}
 
-    print_test "Running 'make release' - stable branch '${version}'"
+    start_test "'make release' - stable branch '${version}'"
     expect_failure_running_make release VERSION="$version"
     expect_make_output_to_contain "ERROR:.* must be based on .*${branch}"
 }
 
 function test_semver_faulty() {
-    print_test "Running 'make release' - faulty version '$1'"
+    start_test "'make release' - faulty version '$1'"
     expect_failure_running_make release "VERSION=$1"
     expect_make_output_to_contain "ERROR: .*${1}.* not a valid semantic version"
 }
@@ -49,7 +49,7 @@ function _test_release_step() {
     local version="$1"
     local status="$2"
 
-    print_test "Running 'make release' - version '${version}' expecting status '${status}'"
+    start_test "'make release' - version '${version}' expecting status '${status}'"
     expect_success_running_make release "VERSION=${version}"
 
     expect_in_file "version: v${version}"
@@ -61,7 +61,6 @@ function test_release() {
     local status="$2"
     local expected_fields=("${@:3}")
 
-    print_test "Running 'make release' - entire release process for version ${version}"
     _test_release_step "${version}" "${status}"
 
     for field in "${expected_fields[@]}"; do
@@ -84,7 +83,7 @@ function test_release() {
 
 prepare_test_repo
 
-print_test "Running 'make release' - no version argument"
+start_test "'make release' - no version argument"
 expect_failure_running_make release
 expect_make_output_to_contain "ERROR:.* not a valid semantic version"
 
