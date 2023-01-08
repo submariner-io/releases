@@ -6,6 +6,11 @@ export BASE_BRANCH
 export GIT_EMAIL
 export GIT_NAME
 
+ifdef dryrun
+$(warning [31mThe 'dryrun' variable is deprecated, please use 'DRY_RUN' instead.[0m)
+export DRY_RUN ?= $(dryrun)
+endif
+
 ifneq (,$(DAPPER_SOURCE))
 
 # Running in Dapper
