@@ -36,13 +36,13 @@ function test_release_stable() {
 
     print_test "Running 'make release' - stable branch '${version}'"
     expect_failure_running_make release VERSION="$version"
-    expect_make_output_to_contain "ERROR:.*${branch}"
+    expect_make_output_to_contain "ERROR:.* must be based on .*${branch}"
 }
 
 function test_semver_faulty() {
     print_test "Running 'make release' - faulty version '$1'"
     expect_failure_running_make release "VERSION=$1"
-    expect_make_output_to_contain "ERROR:.*${1}"
+    expect_make_output_to_contain "ERROR: .*${1}.* not a valid semantic version"
 }
 
 function _test_release_step() {
@@ -86,6 +86,7 @@ prepare_test_repo
 
 print_test "Running 'make release' - no version argument"
 expect_failure_running_make release
+expect_make_output_to_contain "ERROR:.* not a valid semantic version"
 
 faulty_versions=( '' '1' '1.2' 'a.2.3' '1.a.3' '1.2.a' '01.2.3' '1.02.3' '1.2.03' '1.2.3-?')
 for version in "${faulty_versions[@]}"; do
