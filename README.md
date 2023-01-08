@@ -11,7 +11,7 @@ To create or advance a release, simply run `make release VERSION='$semver'`, e.g
 * `make release VERSION='1.2.3'
 * `make release VERSION='1.2.3-rc1'
 
-To run the process without making external changes (GitHub, Quay...), run the command with `dryrun=true`.
+To run the process without making external changes (GitHub, Quay...), run the command with `DRY_RUN=true`.
 
 Make sure you set the `GITHUB_TOKEN` environment variable to a [Personal Access Token](https://github.com/settings/tokens) which has
 at least `public_repo` access to your repository.

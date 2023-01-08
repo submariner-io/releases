@@ -31,7 +31,7 @@ function prepare_test_repo() {
 
 function _make() {
     declare -g output
-    { output=$(make "$@" dryrun=true 2>&1 | tee /dev/fd/5); } 5>&1
+    { output=$(make "$@" DRY_RUN=true 2>&1 | tee /dev/fd/5); } 5>&1
     return "$?"
 }
 
