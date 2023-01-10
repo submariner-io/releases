@@ -148,7 +148,13 @@ function tag_images() {
     local tag=$1
     shift
     local project_version
-    project_version=$(cd "projects/${project}" && make print-version | grep -oP "(?<=CALCULATED_VERSION=).+")
+
+    # Use the latest RC image for the initial GA image, to avoid any potentially breaking changes that might've slipped in untested.
+    if [[ "${semver[patch]}" = "0" && -z "${semver[pre]}" ]]; then
+        project_version=$(git rev-parse --symbolic --tags="v${semver[major]}.${semver[minor]}.*" | sort -V | tail -n1)
+    else
+        project_version=$(cd "projects/${project}" && make print-version | grep -oP "(?<=CALCULATED_VERSION=).+")
+    fi
     
     echo "$QUAY_PASSWORD" | dryrun skopeo login quay.io -u "$QUAY_USERNAME" --password-stdin
     for image; do
