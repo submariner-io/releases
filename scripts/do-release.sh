@@ -130,7 +130,7 @@ function create_pr() {
 
     # shellcheck disable=SC2181 # The command is too long already, this is more readable
     if [[ $? -ne 0 ]]; then
-        reviews+=("Error creating pull request to ${msg@Q} on ${project}: ${output@Q}")
+        echo "Error creating pull request to ${msg@Q} on ${project}: ${output@Q}" >> "$reviews"
         return 1
     fi
 
@@ -140,7 +140,7 @@ function create_pr() {
     dryrun gh pr edit --add-label e2e-all-k8s "${pr_url}" || echo "INFO: Didn't label 'e2e-all-k8s', continuing without it."
     dryrun gh pr edit --add-label ready-to-test "${pr_url}" || >&2 echo "WARN: Didn't label 'ready-to-test', continuing without it."
     dryrun gh pr merge --auto --repo "${ORG}/${project}" --rebase "${pr_url}" || echo "WARN: Failed to enable auto merge on ${pr_url}"
-    reviews+=("${pr_url}")
+    echo " * $pr_url" >> "$reviews"
 }
 
 # Tag the images matching the release commit using the release tag
@@ -277,15 +277,13 @@ function comment_finished_status() {
     local comment="Release for status '${release['status']}' finished "
 
     if [[ $errors -gt 0 ]]; then
-        comment+=$(printf "%s\n%s" "with ${errors} errors." "Please check the job for more details: ${GITHUB_JOB_URL}")
+        comment+="with ${errors} errors."$'\n'"Please check the job for more details: ${GITHUB_JOB_URL}"
     else
-        [[ ${#reviews[@]} -gt 0 ]] || return 0
-        comment+="successfully. Please review:"
-        for review in "${reviews[@]}"; do
-            comment+=$(printf "\n * %s" "${review}")
-        done
+        [[ -s "$reviews" ]] || return 0
+        comment+='successfully. Please review:'
     fi
 
+    comment+=$'\n\n'"$(<"$reviews")"
     local pr_url
     pr_url=$(gh api -H 'Accept: application/vnd.github.groot-preview+json' \
         "repos/:owner/:repo/commits/$(git rev-parse HEAD)/pulls" | jq -r '.[0] | .html_url')
@@ -294,7 +292,7 @@ function comment_finished_status() {
 
 ### Main ###
 
-reviews=()
+reviews=$(mktemp)
 errors=0
 determine_target_release
 read_release_file
