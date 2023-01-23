@@ -274,15 +274,12 @@ function release_released() {
 }
 
 function comment_finished_status() {
-    if [[ ${#reviews[@]} = 0 ]]; then
-        return
-    fi
-
     local comment="Release for status '${release['status']}' finished "
 
     if [[ $errors -gt 0 ]]; then
         comment+=$(printf "%s\n%s" "with ${errors} errors." "Please check the job for more details: ${GITHUB_JOB_URL}")
     else
+        [[ ${#reviews[@]} -gt 0 ]] || return 0
         comment+="successfully. Please review:"
         for review in "${reviews[@]}"; do
             comment+=$(printf "\n * %s" "${review}")
