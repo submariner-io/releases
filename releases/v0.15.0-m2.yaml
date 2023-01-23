@@ -1,7 +1,7 @@
 ---
-# bump
 version: v0.15.0-m2
 name: 0.15.0-m2
-status: shipyard
+status: admiral
 components:
   shipyard: 124ee0a0d60c292440660af9b384af945517cdbe
+  admiral: 5b68cbdc2873c66217c039f74404016d4a63fb02
