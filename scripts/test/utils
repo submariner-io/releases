@@ -8,11 +8,6 @@ readonly TEST_DIR=projects/releases
 
 ### General Functions ###
 
-function exit_error() {
-    echo "ERROR: $*"
-    exit 1
-}
-
 function start_test() {
     [[ -z "$CI" ]] || { printf '::endgroup::\n::group::%s\n' "$*" && return 0; }
     local div=${*//?/=}
