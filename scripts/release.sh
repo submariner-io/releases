@@ -15,22 +15,17 @@ source "${SCRIPTS_DIR}/lib/debug_functions"
 
 function expect_env() {
     local env_var="$1"
-    if [[ -z "${!env_var}" ]]; then
-        printerr "Expected environment variable ${env_var@Q} is not set"
-        exit 1
-    fi
+    [[ -n "${!env_var}" ]] || exit_error "Expected environment variable ${env_var@Q} is not set"
 }
 
 function expect_git() {
     local git_config="$1"
-    if [[ -z "$(git config --get "${git_config}")" ]]; then
-        printerr "Expected Git config ${git_config@Q} is not set, please set it and try again"
-        exit 1
-    fi
+    [[ -n "$(git config --get "${git_config}")" ]] || \
+        exit_error "Expected Git config ${git_config@Q} is not set, please set it and try again"
 }
 
 function validate() {
-    is_semver "$VERSION"
+    validate_semver "$VERSION"
     dryrun expect_env "GITHUB_TOKEN"
     expect_git "user.email"
     expect_git "user.name"
@@ -42,9 +37,8 @@ function validate() {
     local branch
     branch="$(stable_branch_name)"
     if [[ "${BASE_BRANCH}" != "${branch}" ]] && git fetch upstream_releases "${branch}" >/dev/null 2>&1; then
-        printerr "Releases for ${semver['major']}.${semver['minor']} must be based on the ${branch@Q} branch. " \
+        exit_error "Releases for ${semver['major']}.${semver['minor']} must be based on the ${branch@Q} branch. " \
             "Please rebase your branch on ${branch@Q} and try again."
-        exit 1
     fi
 }
 
@@ -67,11 +61,10 @@ function sync_upstream() {
 
 # Validates the created commit to make sure we're not missing anything
 function validate_commit {
-    if ! make validate; then
-        printerr "Failed to run validation for the commit, please attend any reported errors and try again."
+    make validate || {
         reset_git
-        exit 1
-    fi
+        exit_error "Failed to run validation for the commit, please attend any reported errors and try again."
+    }
 }
 
 ### Functions: Creating initial release ###
@@ -129,10 +122,8 @@ function write_component() {
     local project=${1:-${project}}
     local branch=${release['branch']:-devel}
     local commit_hash
-    if ! commit_hash="$(gh_commit_sha "${branch}")"; then
-        printerr "Failed to determine latest commit hash for ${project} - make sure branch ${branch@Q} exists"
-        return 1
-    fi
+    commit_hash="$(gh_commit_sha "${branch}")" || \
+        exit_error "Failed to determine latest commit hash for ${project} - make sure branch ${branch@Q} exists"
 
     write "components.${project}" "$commit_hash"
 }
@@ -174,8 +165,7 @@ function advance_stage() {
         echo "The release ${VERSION} has been released, nothing to do."
         ;;
     *)
-        printerr "Unknown status '${release['status']}'"
-        exit 1
+        exit_error "Unknown status '${release['status']}'"
         ;;
     esac
 }

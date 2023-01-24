@@ -97,31 +97,22 @@ function validate_shipyard_consumers() {
 }
 
 function validate_no_branch() {
-    if gh_commit_sha "${release['branch']}" >/dev/null 2>&1; then
-        printerr "'${project}' already has stable branch '${release['branch']}'."
-        return 1
-    fi
+    ! gh_commit_sha "${release['branch']}" >/dev/null 2>&1 || \
+        exit_error "'${project}' already has stable branch '${release['branch']}'."
 }
 
 function validate_project_commits() {
     local latest_hash
 
     for project; do
-        if gh_commit_sha "${release['version']}" >/dev/null 2>&1; then
-            printerr "'${project}' is already released with version '${release['version']}'."
-            return 1
-        fi
-
-        if ! latest_hash="$(gh_commit_sha "${release['branch']:-devel}")"; then
-            printerr "Failed to determine latest commit hash for ${project}"
-            return 1
-        fi
+        ! gh_commit_sha "${release['version']}" >/dev/null 2>&1 || \
+            exit_error "'${project}' is already released with version '${release['version']}'."
+        latest_hash="$(gh_commit_sha "${release['branch']:-devel}")" || \
+            exit_error "Failed to determine latest commit hash for ${project}"
 
         local commit_hash="${release["components.${project}"]}"
-        if [[ ! $latest_hash =~ ^${commit_hash} ]]; then
-            printerr "Version of ${project} (${commit_hash}) isn't the latest, consider using ${latest_hash}"
-            return 1
-        fi
+        [[ $latest_hash =~ ^${commit_hash} ]] || \
+            exit_error "Version of ${project} (${commit_hash}) isn't the latest, consider using ${latest_hash}"
     done
 }
 
@@ -130,32 +121,20 @@ function validate_no_update_prs() {
     local update_prs
 
     for project; do
-        if ! update_prs="$(dryrun gh_api "pulls?base=${release['branch']:-devel}&head=${ORG}:${head}&state=open" | jq -r ".[].html_url")"; then
-            printerr "Failed to list pull requests for ${project}."
-            return 1
-        fi
+        update_prs="$(dryrun gh_api "pulls?base=${release['branch']:-devel}&head=${ORG}:${head}&state=open" | jq -r ".[].html_url")" || \
+            exit_error "Failed to list pull requests for ${project}."
 
-        if [[ -n "${update_prs}" ]]; then
-            printerr "Found open ${head@Q} pull requests on ${project}, make sure they're merged before proceeding"
-            echo "${update_prs}"
-            return 1
-        fi
+        [[ -z "${update_prs}" ]] || \
+            exit_error "Found open ${head@Q} pull requests on ${project}, make sure they're merged before proceeding:"$'\n'"$update_prs"
     done
 }
 
 function validate_release() {
-    if ! validate_release_fields; then
-        printerr "File is missing expected fields"
-        return 1
-    fi
-
-    local version=${release['version']}
-    if ! git check-ref-format "refs/tags/${version}"; then
-        printerr "Version ${version@Q} is not a valid tag name"
-        return 1
-    fi
-
-    is_semver "${version#v}" || return 1
+    local version="${release['version']}"
+    validate_release_fields || exit_error "File is missing expected fields"
+    validate_semver "${version#v}"
+    git check-ref-format "refs/tags/${version}" || \
+        exit_error "Version ${version@Q} is not a valid tag name"
 
     case "${release['status']}" in
     branch)
