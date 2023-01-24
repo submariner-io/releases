@@ -12,9 +12,9 @@ source "${DAPPER_SOURCE}/scripts/test/utils"
 
 function expect_in_file() {
     local expected="^${1}$"
-    local file="releases/v${2:-${version}}.yaml"
+    local file="${file:-releases/v${version}.yaml}"
 
-    if ! grep -e "${expected}" "${file}" > /dev/null; then
+    if ! grep -E "${expected}" "${file}" > /dev/null; then
         echo "--------- ${file} ---------"
         cat "${file}"
         echo "---------------------------"
@@ -43,6 +43,24 @@ function test_semver_faulty() {
     start_test "'make release' - faulty version '$1'"
     expect_failure_running_make release "VERSION=$1"
     expect_make_output_to_contain "ERROR: .*${1}.* not a valid semantic version"
+}
+
+function test_update_hashes() {
+    local status="$1"
+    local file='releases/vtest-update-hashes.yaml'
+    shift
+    start_test "'make release' - update hashes for status '$status'"
+
+    # Generate a fake commit that will be updated
+    yq -n ".version=\"v0.100.0-m0\" | .status=\"${status}\"" > "$file"
+    git add "$file"
+    git commit -a -m "Testing update hashes"
+
+    expect_success_running_make release UPDATE=yes
+    expect_in_file "status: ${status}"
+    for component; do
+        expect_in_file "  ${component}: [0-9a-f]{40}"
+    done
 }
 
 function _test_release_step() {
@@ -102,3 +120,16 @@ done
 # Only pre-releases are expected to work as we expect RCs or formal releases to happen on a branch (which must exist)
 test_release '100.0.0-m0' 'shipyard'
 test_release '100.0.0-rc0' 'branch' 'release-100.0'
+
+# Reset test repo for further testing
+cd "${DAPPER_SOURCE}"
+prepare_test_repo
+
+# Test updating release hashes
+expect_success_running_make release UPDATE=yes
+expect_make_output_to_contain "Couldn't detect a target release file, skipping."
+test_update_hashes shipyard shipyard
+test_update_hashes admiral admiral
+test_update_hashes projects "${PROJECTS_PROJECTS[@]}"
+test_update_hashes installers "${INSTALLER_PROJECTS[@]}"
+test_update_hashes released subctl
