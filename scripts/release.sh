@@ -49,24 +49,13 @@ function validate() {
 }
 
 function write() {
-    echo "$*" >> "${file}"
+    local key="$1"
+    local value="$2"
+    yq -i ".${key}=\"${value}\"" "$file"
 }
 
 function stable_branch_name() {
     echo "release-${semver['major']}.${semver['minor']}"
-}
-
-function set_stable_branch() {
-    write "branch: $(stable_branch_name)"
-}
-
-function set_status() {
-    if [[ -z "${release['status']}" ]]; then
-        write "status: ${1}"
-        return
-    fi
-
-    sed -i -E "s/(status: ).*/\1${1}/" "${file}"
 }
 
 function sync_upstream() {
@@ -112,26 +101,24 @@ function create_pr() {
 function create_initial() {
     declare -gA release
     echo "Creating initial release file ${file}"
-    cat > "${file}" <<EOF
----
-version: v${VERSION}
-name: ${VERSION}
-EOF
+    touch "$file"
+    write version "v${VERSION}"
+    write name "$VERSION"
 
     # On first RC we'll branch to allow development to continue while doing the release
     if [[ "${semver['pre']}" = "rc0" ]]; then
-        set_stable_branch
-        set_status "branch"
+        write branch "$(stable_branch_name)"
+        write status "branch"
         return
     fi
 
     # Detect stable branch and set it if necessary
     if [[ -z "${semver['pre']}" || "${semver['pre']}" =~ rc.* ]]; then
-        set_stable_branch
+        write branch "$(stable_branch_name)"
     fi
 
     # We're not branching, so just move on to shipyard
-    set_status "shipyard"
+    write status "shipyard"
     read_release_file
     advance_to_shipyard
 }
@@ -147,11 +134,10 @@ function write_component() {
         return 1
     fi
 
-    write "  ${project}: ${commit_hash}"
+    write "components.${project}" "$commit_hash"
 }
 
 function advance_to_shipyard() {
-    write "components:"
     write_component "shipyard"
 }
 
@@ -178,7 +164,7 @@ function advance_stage() {
     case "${release['status']}" in
     branch|shipyard|admiral|projects|installers)
         local next="${NEXT_STATUS[${release['status']}]}"
-        set_status "${next}"
+        write status "$next"
         # shellcheck disable=SC2086
         advance_to_${next}
         validate_commit
