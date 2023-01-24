@@ -5,10 +5,11 @@ set -e
 set -o pipefail
 
 export ORG="${ORG:-submariner-io}"
+GITHUB_ACTOR=${GITHUB_ACTOR:-$ORG}
 
 source "${DAPPER_SOURCE}/scripts/lib/utils"
 source "${SCRIPTS_DIR}/lib/utils"
-print_env ORG GITHUB_ACTOR GITHUB_REPOSITORY_OWNER
+print_env ORG UPDATE GITHUB_ACTOR GITHUB_REPOSITORY_OWNER
 source "${SCRIPTS_DIR}/lib/debug_functions"
 
 ### Functions: General ###
@@ -25,7 +26,7 @@ function expect_git() {
 }
 
 function validate() {
-    validate_semver "$VERSION"
+    update_hashes_requested || validate_semver "$VERSION"
     dryrun expect_env "GITHUB_TOKEN"
     expect_git "user.email"
     expect_git "user.name"
@@ -78,11 +79,10 @@ function create_pr() {
     # shellcheck disable=SC2046
     project="$(basename $(pwd))"
     local repo="${ORG}/${project}"
-    local gh_user=${GITHUB_ACTOR:-${ORG}}
 
     git add "${file}"
     git commit -s -m "${msg}"
-    dryrun git push -f "https://${GITHUB_TOKEN}:x-oauth-basic@github.com/${gh_user}/${project}.git" "HEAD:${branch}"
+    dryrun git push -f "https://${GITHUB_TOKEN}:x-oauth-basic@github.com/${GITHUB_ACTOR}/${project}.git" "HEAD:${branch}"
     pr_to_review=$(dryrun gh pr create --repo "${repo}" --head "${gh_user}:${branch}" --base "${BASE_BRANCH}" --label "automated" \
                    --title "${msg}" --body "${msg}")
     dryrun gh pr merge --auto --repo "${repo}" --rebase "${pr_to_review}" \
@@ -170,12 +170,36 @@ function advance_stage() {
     esac
 }
 
+### Functions: Updating hashes for release in process ###
+
+function update_hashes_requested() {
+    [[ "${UPDATE@L}" =~ ^(true|yes|y)$ ]]
+}
+
+function update_hashes() {
+    determine_target_release
+    read_release_file
+    local status="${release['status']}"
+
+    [[ $(type -t "advance_to_${status}") == function ]] || exit_error "Unsupported status when updating hashes: ${status@Q}"
+    "advance_to_${release['status']}"
+    git commit --amend --no-edit --only "$file"
+    dryrun git push -f "https://${GITHUB_TOKEN}:x-oauth-basic@github.com/${GITHUB_ACTOR}/releases.git" \
+        "HEAD:releasing-${release['version']}"
+}
+
 ### Main ###
 
 extract_semver "$VERSION"
 base_commit=$(git rev-parse HEAD)
 sync_upstream
 validate
+
+if update_hashes_requested; then
+    update_hashes
+    echo "Updated hashes for the release (file=${file})"
+    exit
+fi
 
 file="releases/v${VERSION}.yaml"
 if [[ ! -f "${file}" ]]; then
