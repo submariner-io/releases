@@ -243,7 +243,7 @@ function release_admiral() {
 function update_operator_versions() {
     local versions_file
     versions_file=$(grep -l -r --include='*.go' --exclude-dir=vendor 'Default.*Version *=' "projects/${project}/")
-    [[ -n "${versions_file}" ]] || { printerr "Can't find file for default image versions"; return 1; }
+    [[ -n "${versions_file}" ]] || exit_error "Can't find file for default image versions"
 
     sed -i -E "s/(Default.*Version *=) .*/\1 \"${release['version']#v}\"/" "${versions_file}"
 }
@@ -309,14 +309,9 @@ branch|shipyard|admiral|projects|installers|released)
     "release_${release['status']}"
     ;;
 *)
-    printerr "Unknown status '${release['status']}'"
-    exit 1
+    exit_error "Unknown status '${release['status']}'"
     ;;
 esac
 
 comment_finished_status || echo "WARN: Can't post comment with release status"
-
-if [[ $errors -gt 0 ]]; then
-    printerr "Encountered ${errors} errors while doing the release."
-    exit 1
-fi
+[[ $errors -eq 0 ]] || exit_error "Encountered ${errors} errors while doing the release."

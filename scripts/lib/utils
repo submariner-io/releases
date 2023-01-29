@@ -15,11 +15,13 @@ ORG=${ORG:-${GITHUB_REPOSITORY_OWNER:-$(git config --get remote.origin.url | awk
 declare -A NEXT_STATUS=( [branch]=shipyard [shipyard]=admiral [admiral]=projects [projects]=installers [installers]=released )
 
 function printerr() {
-    local DEBUG_PRINT=false
-    local err_msg="$*"
+    >&2 echo "ERROR: $*"
+}
 
-    [[ -z "${file}" ]] || err_msg+=" (${file})"
-    printf "ERROR: %s\n" "${err_msg}" >&2
+function exit_error() {
+    local DEBUG_PRINT=false
+    printerr "$*"
+    exit 1
 }
 
 function count_parents() {
@@ -107,14 +109,11 @@ function checkout_project_branch() {
     _git checkout "${branch}"
 }
 
-function is_semver() {
+function validate_semver() {
     local DEBUG_PRINT=false
     local ver="(0|[1-9][0-9]*)"
     local regex="^${ver}\.${ver}\.${ver}(-([0-9a-zA-Z.-]*))?$"
-    if [[ ! "$1" =~ ${regex} ]]; then
-        printerr "Version ${1@Q} is not a valid semantic version"
-        return 1
-    fi
+    [[ "$1" =~ ${regex} ]] || exit_error "Version ${1@Q} is not a valid semantic version"
 }
 
 function extract_semver() {
