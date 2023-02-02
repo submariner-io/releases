@@ -68,8 +68,6 @@ function validate_commit {
     }
 }
 
-### Functions: Creating initial release ###
-
 function create_pr() {
     local branch="$1"
     local msg="$2"
@@ -90,6 +88,7 @@ function create_pr() {
     echo "Created Pull Request: ${pr_to_review}"
 }
 
+### Functions: Creating initial release ###
 
 function create_initial() {
     declare -gA release
@@ -148,6 +147,36 @@ function advance_to_released() {
     write_component "subctl"
 }
 
+function update_prs_message() {
+    case "$1" in
+    admiral)
+        print_update_prs "${SHIPYARD_CONSUMERS[@]}"
+        ;;
+    projects)
+        print_update_prs "${ADMIRAL_CONSUMERS[@]}"
+        ;;
+    installers)
+        print_update_prs "${INSTALLER_PROJECTS[@]}"
+        ;;
+    released)
+        print_update_prs "${RELEASED_PROJECTS[@]}"
+        ;;
+    esac
+}
+
+function print_update_prs() {
+    local branch="${release['branch']:-devel}"
+    local head="update-dependencies-${branch}"
+    local update_prs=()
+
+    for project; do
+        update_prs+=("$(dryrun gh_api "pulls?base=${branch}&head=${ORG}:${head}&state=open" | jq -r ".[].html_url")") || \
+            exit_error "Failed to list pull requests for ${project}."
+    done
+
+    [[ ${#update_prs[*]} -eq 0 ]] || printf 'Depends on %s\n' "${update_prs[@]}"
+}
+
 function advance_stage() {
     echo "Advancing release to the next stage (file=${file})"
 
@@ -159,7 +188,7 @@ function advance_stage() {
         # shellcheck disable=SC2086
         advance_to_${next}
         validate_commit
-        create_pr "releasing-${VERSION}" "Advancing ${VERSION} release to status: ${next}"
+        create_pr "releasing-${VERSION}" "Advancing ${VERSION} release to status: ${next}"$'\n\n'"$(update_prs_message "$next")"
         ;;
     released)
         echo "The release ${VERSION} has been released, nothing to do."
