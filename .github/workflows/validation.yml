@@ -3,6 +3,8 @@ name: Validation
 
 on:
   pull_request:
+    # Unlabeled is needed when `dependent` label is removed, to re-validate the release.
+    types: [unlabeled, opened, synchronize, reopened]
 
 permissions: {}
 

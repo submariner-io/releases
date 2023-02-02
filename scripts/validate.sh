@@ -116,19 +116,6 @@ function validate_project_commits() {
     done
 }
 
-function validate_no_update_prs() {
-    local head="update-dependencies-${release['branch']:-devel}"
-    local update_prs
-
-    for project; do
-        update_prs="$(dryrun gh_api "pulls?base=${release['branch']:-devel}&head=${ORG}:${head}&state=open" | jq -r ".[].html_url")" || \
-            exit_error "Failed to list pull requests for ${project}."
-
-        [[ -z "${update_prs}" ]] || \
-            exit_error "Found open ${head@Q} pull requests on ${project}, make sure they're merged before proceeding:"$'\n'"$update_prs"
-    done
-}
-
 function validate_release() {
     local version="${release['version']}"
     validate_release_fields || exit_error "File is missing expected fields"
@@ -145,19 +132,15 @@ function validate_release() {
         ;;
     admiral)
         validate_project_commits admiral
-        validate_no_update_prs "${SHIPYARD_CONSUMERS[@]}"
         ;;
     projects)
         validate_project_commits "${PROJECTS_PROJECTS[@]}"
-        validate_no_update_prs "${ADMIRAL_CONSUMERS[@]}"
         ;;
     installers)
         validate_project_commits "${INSTALLER_PROJECTS[@]}"
-        validate_no_update_prs "${INSTALLER_PROJECTS[@]}"
         ;;
     released)
         validate_project_commits "${RELEASED_PROJECTS[@]}"
-        validate_no_update_prs "${RELEASED_PROJECTS[@]}"
         ;;
     esac
 
