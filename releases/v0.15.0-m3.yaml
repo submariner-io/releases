@@ -1,0 +1,6 @@
+---
+version: v0.15.0-m3
+name: 0.15.0-m3
+status: shipyard
+components:
+  shipyard: 45b7e76f5503dede6946c8a30f9dcfeb6ed0f731
