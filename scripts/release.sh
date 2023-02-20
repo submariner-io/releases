@@ -70,7 +70,8 @@ function validate_commit {
 
 function create_pr() {
     local branch="$1"
-    local msg="$2"
+    local title="$2"
+    local msg="$3"
     local pr_to_review
     local project
 
@@ -79,10 +80,10 @@ function create_pr() {
     local repo="${ORG}/${project}"
 
     git add "${file}"
-    git commit -s -m "${msg}"
+    git commit -s -m "${title}"
     dryrun git push -f "https://${GITHUB_TOKEN}:x-oauth-basic@github.com/${GITHUB_ACTOR}/${project}.git" "HEAD:${branch}"
     pr_to_review=$(dryrun gh pr create --repo "${repo}" --head "${GITHUB_ACTOR}:${branch}" --base "${BASE_BRANCH}" --label "automated" \
-                   --title "${msg}" --body "${msg}")
+                   --title "${title}" --body "${msg}")
     dryrun gh pr merge --auto --repo "${repo}" --rebase "${pr_to_review}" \
         || echo "WARN: Failed to enable auto merge on ${pr_to_review}"
     echo "Created Pull Request: ${pr_to_review}"
@@ -170,7 +171,8 @@ function print_update_prs() {
     local update_prs=()
 
     for project; do
-        update_prs+=("$(dryrun gh_api "pulls?base=${branch}&head=${ORG}:${head}&state=open" | jq -r ".[].html_url")") || \
+        #shellcheck disable=SC2207 # Split on purpose, as we need the individual URLs
+        update_prs+=($(dryrun gh_api "pulls?base=${branch}&head=${ORG}:${head}&state=open" | jq -r ".[].html_url")) || \
             exit_error "Failed to list pull requests for ${project}."
     done
 
@@ -188,7 +190,7 @@ function advance_stage() {
         # shellcheck disable=SC2086
         advance_to_${next}
         validate_commit
-        create_pr "releasing-${VERSION}" "Advancing ${VERSION} release to status: ${next}"$'\n\n'"$(update_prs_message "$next")"
+        create_pr "releasing-${VERSION}" "Advancing ${VERSION} release to status: ${next}" "$(update_prs_message "$next")"
         ;;
     released)
         echo "The release ${VERSION} has been released, nothing to do."
