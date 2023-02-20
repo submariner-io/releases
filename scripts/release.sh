@@ -93,7 +93,7 @@ function create_pr() {
 function create_initial() {
     declare -gA release
     echo "Creating initial release file ${file}"
-    touch "$file"
+    echo '---' > "$file"
     write version "v${VERSION}"
     write name "$VERSION"
 
