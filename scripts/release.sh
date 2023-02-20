@@ -81,7 +81,7 @@ function create_pr() {
     git add "${file}"
     git commit -s -m "${msg}"
     dryrun git push -f "https://${GITHUB_TOKEN}:x-oauth-basic@github.com/${GITHUB_ACTOR}/${project}.git" "HEAD:${branch}"
-    pr_to_review=$(dryrun gh pr create --repo "${repo}" --head "${gh_user}:${branch}" --base "${BASE_BRANCH}" --label "automated" \
+    pr_to_review=$(dryrun gh pr create --repo "${repo}" --head "${GITHUB_ACTOR}:${branch}" --base "${BASE_BRANCH}" --label "automated" \
                    --title "${msg}" --body "${msg}")
     dryrun gh pr merge --auto --repo "${repo}" --rebase "${pr_to_review}" \
         || echo "WARN: Failed to enable auto merge on ${pr_to_review}"
