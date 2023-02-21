@@ -1,7 +1,7 @@
 ---
 version: v0.15.0-m3
 name: 0.15.0-m3
-status: installers
+status: released
 components:
   shipyard: 45b7e76f5503dede6946c8a30f9dcfeb6ed0f731
   admiral: 713beabe7e5cc2dc661c01a0528a55bea82b0e09
@@ -10,3 +10,4 @@ components:
   submariner: ad5f7a0c764d0f0b6e43a794e9946722c40244f0
   submariner-charts: 72c6f180ba43ad5684f17a169d889416dedf60d7
   submariner-operator: 31ba13a010302d5706ecc2e1837421b12c5d00b9
+  subctl: 5765400358460a4e94b9f0ccd85a535d2a248da2
