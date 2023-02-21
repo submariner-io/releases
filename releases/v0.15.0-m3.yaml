@@ -1,7 +1,10 @@
 ---
 version: v0.15.0-m3
 name: 0.15.0-m3
-status: admiral
+status: projects
 components:
   shipyard: 45b7e76f5503dede6946c8a30f9dcfeb6ed0f731
   admiral: 713beabe7e5cc2dc661c01a0528a55bea82b0e09
+  cloud-prepare: 311c131a26a8062dc6751f145c2067919d88cc0c
+  lighthouse: 20144150ff890e106f35c3571e3eb7406d79cf49
+  submariner: ad5f7a0c764d0f0b6e43a794e9946722c40244f0
