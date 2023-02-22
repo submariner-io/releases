@@ -2,7 +2,7 @@
 version: v0.14.2
 name: 0.14.2
 branch: release-0.14
-status: installers
+status: released
 components:
   shipyard: 711f9d28e241a52c57ef549f10eb1aa8930d67ff
   admiral: 9c302e62e0ff0dc6de8f20cdf473526b2f8f0782
@@ -11,3 +11,4 @@ components:
   submariner: 49e26737278e3f0c8af0c6ebe7a0ef6afc4b308f
   submariner-charts: 1d5fa891f14b004960069444bf6d0de5a2c0155e
   submariner-operator: 07e108aab1ed01009e5670aef0b1d1dd42c71ffe
+  subctl: be42bebaf5ddf328218ebc0a9c4e37fee54d7ad7
