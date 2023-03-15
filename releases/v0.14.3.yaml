@@ -2,6 +2,7 @@
 version: v0.14.3
 name: 0.14.3
 branch: release-0.14
-status: shipyard
+status: admiral
 components:
   shipyard: eff31f20c26fe9d36bbe2511f96c7c1ce60f0ab1
+  admiral: c4b85a6bedf47dee059f7b7f6241857bab53deba
