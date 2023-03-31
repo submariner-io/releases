@@ -3,6 +3,7 @@ version: v0.15.0-rc0
 name: 0.15.0-rc0
 pre-release: true
 branch: release-0.15
-status: shipyard
+status: admiral
 components:
   shipyard: 9be8e3ff84725d3af9c7cc215d6bdfa8990723bb
+  admiral: 46cb4212e940082bedcfdf551b8324a3807cb84f
