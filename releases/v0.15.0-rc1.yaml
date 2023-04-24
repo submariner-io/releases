@@ -2,7 +2,10 @@
 version: v0.15.0-rc1
 name: 0.15.0-rc1
 branch: release-0.15
-status: admiral
+status: projects
 components:
   shipyard: 3236ac72011806d4a855dc7847c67810b2c13f33
   admiral: e4c1d20bc64a07eaff7312428d63e8df02441d00
+  cloud-prepare: ccaaaae1fccf195c24a4ce84dc82c79146cc8102
+  lighthouse: 2bd0e6d214a46050c2bee79452d6021624c04c6f
+  submariner: 53a4c099470a740aef123f222ba323b5c1a5c873
