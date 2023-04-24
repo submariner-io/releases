@@ -2,7 +2,7 @@
 version: v0.15.0-rc1
 name: 0.15.0-rc1
 branch: release-0.15
-status: installers
+status: released
 components:
   shipyard: 3236ac72011806d4a855dc7847c67810b2c13f33
   admiral: e4c1d20bc64a07eaff7312428d63e8df02441d00
@@ -11,3 +11,4 @@ components:
   submariner: 53a4c099470a740aef123f222ba323b5c1a5c873
   submariner-charts: 80c9ff083caaca6a031185413de20c9e0aa346db
   submariner-operator: c0341451922cefc6a68edafbc2c55f63b18c9ff8
+  subctl: 695706211aec85cf695b367a9d6537a401e69155
