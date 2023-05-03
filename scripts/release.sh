@@ -179,6 +179,19 @@ function print_update_prs() {
     [[ ${#update_prs[*]} -eq 0 ]] || printf 'Depends on %s\n' "${update_prs[@]}"
 }
 
+function print_component_links {
+    local component_links=()
+    read_release_file
+
+    for project in "${PROJECTS[@]}"; do
+        if [ -n "${release[components.${project}]}" ]; then
+            component_links+=("$(printf '* https://github.com/submariner-io/%s/commits/%s\n' "${project}" "${release['branch']:-devel}")")
+        fi
+    done
+
+    [[ ${#component_links[@]} -eq 0 ]] || printf 'Components:\n%s\n' "${component_links[@]}"
+}
+
 function advance_stage() {
     echo "Advancing release to the next stage (file=${file})"
 
@@ -190,7 +203,7 @@ function advance_stage() {
         # shellcheck disable=SC2086
         advance_to_${next}
         validate_commit
-        create_pr "releasing-${VERSION}" "Advancing ${VERSION} release to status: ${next}" "$(update_prs_message "$next")"
+        create_pr "releasing-${VERSION}" "Advancing ${VERSION} release to status: ${next}" "$(print_component_links; update_prs_message "$next")"
         ;;
     released)
         echo "The release ${VERSION} has been released, nothing to do."
@@ -236,7 +249,7 @@ file="releases/v${VERSION}.yaml"
 if [[ ! -f "${file}" ]]; then
     create_initial
     echo "Created initial release file ${file}"
-    create_pr "releasing-${VERSION}" "Initiating release of ${VERSION}"
+    create_pr "releasing-${VERSION}" "Initiating release of ${VERSION}" "$(print_component_links)"
 else
     advance_stage
     echo "Advanced release to the next stage (file=${file})"
