@@ -145,7 +145,7 @@ function advance_to_installers() {
 }
 
 function advance_to_released() {
-    write_component "subctl"
+  for_every_project write_component "${RELEASED_PROJECTS[@]}"
 }
 
 function update_prs_message() {
