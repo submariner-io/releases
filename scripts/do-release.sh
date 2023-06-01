@@ -272,6 +272,11 @@ function release_installers() {
     # Create a PR for subctl to use these versions
     local project="subctl"
     record_errors update_dependencies Subctl "${SUBCTL_CONSUMES[@]}"
+
+    # Create a PR in submariner-charts to update the CHARTS_VERSION in the Makefile
+    local project="submariner-charts"
+    local update_dependencies_extra=update_charts_versions
+    record_errors update_dependencies Charts
 }
 
 ### Functions: Released Stage ###
@@ -283,6 +288,10 @@ function release_released() {
     record_errors create_release releases "${commit_ref}" projects/subctl/dist/subctl-*
 
     for_every_project create_project_release "${PROJECTS[@]}"
+}
+
+function update_charts_versions() {
+     sed -i -E "s/(CHARTS_VERSION=).*/\1${release['version']#v}/" projects/"${project}"/Makefile
 }
 
 function comment_finished_status() {

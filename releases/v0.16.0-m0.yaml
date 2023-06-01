@@ -1,0 +1,11 @@
+---
+version: v0.16.0-m0
+name: 0.16.0-m0
+status: installers
+components:
+  shipyard: e333c1b82ac2e67f1e9ae8b41238ba63e44f4c8f
+  admiral: 425c51d62337866c277a26a54995d22637ba7139
+  cloud-prepare: 1cc3d983ba852042047701ed7ca32151ec018812
+  lighthouse: ed0054ac12f0742faf9668115356220327a1f63a
+  submariner: 2a45ad95369a635799323a8109bd62f22eb80c2f
+  submariner-operator: b39de406486ddc976fc9ac667cd7985e66aeca20
