@@ -2,7 +2,7 @@
 version: v0.14.5
 name: 0.14.5
 branch: release-0.14
-status: installers
+status: released
 components:
   shipyard: 12fea195ba711e06bcd223a237d55b98a4be7227
   admiral: 61e7352e000106387af74c7f7199a7d5fff2c3bb
@@ -11,3 +11,4 @@ components:
   submariner: 5ec40ef07685eea35278ce4d48dcfe165ed17bd3
   submariner-charts: b2c25ce1e798ef858cd07b083ffdc9f4a0da3bc2
   submariner-operator: c35a6b4c95704bef0288f4154ca8c9360973215d
+  subctl: 8e0c16776e086fbfad9d5cacc293846390363d76
