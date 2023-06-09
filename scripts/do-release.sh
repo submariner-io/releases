@@ -72,46 +72,35 @@ function clone_and_create_branch() {
     _git checkout -B "${branch}" "remotes/origin/${base_branch}"
 }
 
-function _update_go_mod() {
+function update_go_mod() {
     [[ -z "$SKIP_WHEN_TESTING" ]] || { echo "SKIPPING: ${FUNCNAME[0]}" && return 0; }
     local target_version=${release['branch']:-devel}
     dryrun eval target_version="${release['version']}"
-    dryrun export GONOPROXY="github.com/submariner-io/${target}"
 
-    go mod tidy -compat=1.17
-    go get "github.com/submariner-io/${target}@${target_version}"
-    go mod tidy -compat=1.17
+    go mod tidy
+
+    awk '/github.com\/submariner-io.* v/ { print $1 }' go.mod | while read -r target; do
+        dryrun export GONOPROXY="${target}"
+        go get "${target}@${target_version}"
+    done
+
+    go mod tidy
     go mod vendor
 }
 
-function update_go_mod() {
-    local target="$1"
-
-    shopt -s globstar
-    for gomod in projects/"${project}"/**/go.mod; do
-        dir="${gomod%/*}"
-        if [ ! -d "$dir" ]; then
-            # The project doesn't have any go.mod, dir is ".../**/go.mod"
-            return 1
-        fi
-
-        # Run in subshell so we don't change the working directory even on failure
-        ( cd "$dir" && _update_go_mod; )
-    done
-}
-
 function update_dependencies() {
-    local msg="$1"
-    shift
-
     clone_and_create_branch "update-dependencies-${release['branch']:-devel}"
 
-    for dependency; do
-        update_go_mod "$dependency"
-    done
+    if [ -f "projects/${project}/go.mod" ]; then
+        shopt -s globstar
+        for gomod in projects/"${project}"/**/go.mod; do
+            # Run in subshell so we don't change the working directory even on failure
+            ( cd "${gomod%/*}" && update_go_mod; )
+        done
+    fi
 
     run_if_defined "$update_dependencies_extra"
-    create_pr "Update ${msg} to ${release['version']}"
+    create_pr "Update Submariner dependencies to ${release['version']}"
 }
 
 function push_to_repo() {
@@ -225,10 +214,8 @@ function release_shipyard() {
     # Release Shipyard first so that we get the tag
     create_project_release shipyard
 
-    # Create a PR to pin Shipyard on every one of its consumers
-    for project in "${SHIPYARD_CONSUMERS[@]}"; do
-        record_errors update_dependencies Shipyard shipyard
-    done
+    # Create a PR to bump Shipyard in Admiral
+    project=admiral record_errors update_dependencies
 }
 
 ### Functions: Admiral Stage ###
@@ -238,9 +225,9 @@ function release_admiral() {
     # Release Admiral first so that we get the tag
     create_project_release admiral
 
-    # Create a PR to pin Admiral on every one of it's consumers
-    for project in "${ADMIRAL_CONSUMERS[@]}"; do
-        record_errors update_dependencies Admiral admiral
+    # Create a PR to pin Admiral on every one of its consumers
+    for project in "${PROJECTS_PROJECTS[@]}"; do
+        record_errors update_dependencies
     done
 }
 
@@ -261,7 +248,7 @@ function release_projects() {
     # Create a PR for operator to use these versions
     local project="submariner-operator"
     local update_dependencies_extra=update_operator_versions
-    record_errors update_dependencies Operator "${OPERATOR_CONSUMES[@]}"
+    record_errors update_dependencies
 }
 
 ### Functions: Installers Stage ###
@@ -271,12 +258,12 @@ function release_installers() {
 
     # Create a PR for subctl to use these versions
     local project="subctl"
-    record_errors update_dependencies Subctl "${SUBCTL_CONSUMES[@]}"
+    record_errors update_dependencies
 
     # Create a PR in submariner-charts to update the CHARTS_VERSION in the Makefile
     local project="submariner-charts"
     local update_dependencies_extra=update_charts_versions
-    record_errors update_dependencies Charts
+    record_errors update_dependencies
 }
 
 ### Functions: Released Stage ###

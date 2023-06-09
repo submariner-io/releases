@@ -151,10 +151,10 @@ function advance_to_released() {
 function update_prs_message() {
     case "$1" in
     admiral)
-        print_update_prs "${SHIPYARD_CONSUMERS[@]}"
+        print_update_prs "$1"
         ;;
     projects)
-        print_update_prs "${ADMIRAL_CONSUMERS[@]}"
+        print_update_prs "${PROJECTS_PROJECTS[@]}"
         ;;
     installers)
         print_update_prs "${INSTALLER_PROJECTS[@]}"

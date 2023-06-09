@@ -74,7 +74,7 @@ function validate_release_fields() {
 
 function validate_admiral_consumers() {
     local expected_version="$1"
-    for project in "${ADMIRAL_CONSUMERS[@]}"; do
+    for project in "${PROJECTS_PROJECTS[@]}"; do
         local actual_version
         actual_version=$(grep admiral "projects/${project}/go.mod" | cut -f2 -d' ')
         if [[ "${expected_version}" != "${actual_version}" ]]; then
@@ -86,14 +86,13 @@ function validate_admiral_consumers() {
 
 function validate_shipyard_consumers() {
     local expected_version="$1"
-    for project in "${SHIPYARD_CONSUMERS[@]}"; do
-        local actual_version
-        actual_version=$(head -1 "projects/${project}/Dockerfile.dapper" | cut -f2 -d':')
-        if [[ "${expected_version}" != "${actual_version}" ]]; then
-            printerr "Expected Shipyard version ${expected_version} but found ${actual_version} in ${project}"
-            return 1
-        fi
-    done
+    local project=admiral
+    local actual_version
+    actual_version=$(head -1 "projects/${project}/Dockerfile.dapper" | cut -f2 -d':')
+    if [[ "${expected_version}" != "${actual_version}" ]]; then
+        printerr "Expected Shipyard version ${expected_version} but found ${actual_version} in ${project}"
+        return 1
+    fi
 }
 
 function validate_no_branch() {
