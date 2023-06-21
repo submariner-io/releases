@@ -189,7 +189,7 @@ function print_component_links {
         fi
     done
 
-    [[ ${#component_links[@]} -eq 0 ]] || printf 'Components:\n%s\n' "${component_links[@]}"
+    [[ ${#component_links[@]} -eq 0 ]] || { echo Components:; printf '%s\n' "${component_links[@]}"; }
 }
 
 function advance_stage() {
