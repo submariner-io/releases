@@ -2,7 +2,7 @@
 version: v0.15.2
 name: 0.15.2
 branch: release-0.15
-status: installers
+status: released
 components:
   shipyard: 95e8f41ab7c630ced095cf5d426517373f0812ba
   admiral: 2cbb49a6ac70dae15f36d7c00207d47933ad0bd1
@@ -10,3 +10,5 @@ components:
   lighthouse: a63289692af99180cc9c371de2ed9721501e0074
   submariner: ec971891f7221c971d96af7b9f95f9763dac75b3
   submariner-operator: a045fc2e99f1469770a3ca6b9f6430a356c710a6
+  subctl: 1127924cb03278f2de59c954bb9eaba96b2414c2
+  submariner-charts: 10ede11579d93add4b2d388c7192bc437ae11985
