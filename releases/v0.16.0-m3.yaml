@@ -1,7 +1,10 @@
 ---
 version: v0.16.0-m3
 name: 0.16.0-m3
-status: admiral
+status: projects
 components:
   shipyard: c898dd17c1a414f4ee5b42c30f7f316a380194d9
   admiral: 6febc35a01d2fe109fa46d8432edc55dc5a33332
+  cloud-prepare: 18b1158d6d777201aa74d968d369d96b47c1d183
+  lighthouse: 77413257b111c3966ff822cb1143dd5ccb8ec207
+  submariner: a8f43d4d73fd50793dca93c62bf9713e2833b657
