@@ -2,6 +2,7 @@
 version: v0.16.0-rc0
 name: 0.16.0-rc0
 branch: release-0.16
-status: shipyard
+status: admiral
 components:
   shipyard: 9e634a783fe767bf4e55a3d48b72822bbb2e5c30
+  admiral: 898b7b6b12bf0a49b2854beb6b0e0523cf90b27e
