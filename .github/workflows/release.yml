@@ -4,7 +4,7 @@ name: Release the Target Release
 on:
   push:
     branches:
-      - devel
+      - release-0.16
     paths:
       - 'releases/**'
 
