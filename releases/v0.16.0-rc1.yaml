@@ -2,10 +2,11 @@
 version: v0.16.0-rc1
 name: 0.16.0-rc1
 branch: release-0.16
-status: projects
+status: installers
 components:
   shipyard: d48224e08e063c99176ca2e6de74b6861c832f7e
   admiral: 87e367cfafb601cd28633c06a6619ee55318cff3
   cloud-prepare: 5d61c91157fa324dec4ebd025591cff66ab1adf1
   lighthouse: 6f1d3f22e8065ef74fe2afd4da892573c8c5e77e
   submariner: d1b6c9e194f87bdec13851f1c9f12e3490ef1b22
+  submariner-operator: 0807883713b0343580477e81ca8d26b179e206cb
