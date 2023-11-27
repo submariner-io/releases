@@ -1,6 +1,7 @@
 ---
 version: v0.17.0-m1
 name: 0.17.0-m1
-status: shipyard
+status: admiral
 components:
   shipyard: ffa8df098237ba1eb272757703e3dd029f397ea3
+  admiral: 26d5a2ddab5844af4b18d385d4484f33a9ed02a0
