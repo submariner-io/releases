@@ -1,7 +1,7 @@
 ---
 version: v0.17.0-m1
 name: 0.17.0-m1
-status: installers
+status: released
 components:
   shipyard: ffa8df098237ba1eb272757703e3dd029f397ea3
   admiral: 26d5a2ddab5844af4b18d385d4484f33a9ed02a0
@@ -9,3 +9,5 @@ components:
   lighthouse: 060f4ae640bfff67426398716aafa12fa7e1b303
   submariner: 1ec0e6a212801f791ab46b495736f117ac19c346
   submariner-operator: dbe96322c578dd913f742107e1daabcac2ea4941
+  subctl: 05e37983080969b28643177432c39cf916a476e4
+  submariner-charts: 4b653a30205e1e0b9a93b8615f1bb9a310cd9d97
