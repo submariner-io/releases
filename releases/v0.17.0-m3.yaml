@@ -1,10 +1,11 @@
 ---
 version: v0.17.0-m3
 name: 0.17.0-m3
-status: projects
+status: installers
 components:
   shipyard: 502f9bfb889428d1cfcf9324d76c4d400df12ea2
   admiral: 8967800c21aa1478e7a59fda8f25af76cd8a7d21
   cloud-prepare: b0bcc5cf66569b6d033d24959383ef491764d01b
   lighthouse: 13f8c1d7f041355360a2031d34bf050d93b215c1
   submariner: 4c559171af5ce7fcd13ddf3a74c52e2a57adb2b1
+  submariner-operator: e4e8bb978faf7e5b8ff2b960e412d18412a27c28
