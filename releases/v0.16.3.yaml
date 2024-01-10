@@ -2,10 +2,11 @@
 version: v0.16.3
 name: 0.16.3
 branch: release-0.16
-status: projects
+status: installers
 components:
   shipyard: 03f30315107ee1cdc2ebb68df25db633946cd86c
   admiral: 9402bbb79146a29a31aa54fb26b350d9e03bb8de
   cloud-prepare: f86e0f635ee364967158d7fd12ebbd82d12ce96d
   lighthouse: 487f6296ce9b5dc774053f742cf25c742a21314e
   submariner: 58e6b641a7367a217421735101d3b18ba6662698
+  submariner-operator: 133b18e07a0951e013248662a6790b8b9efb1bcd
