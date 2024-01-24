@@ -1,6 +1,8 @@
-@dfarrell07 *.md
-@mkolesnik *
+@aswinsuryan releases/*
+@dfarrell07 *.md releases/*
+@mkolesnik * 
 @Oats87 *
 @skitt *
 @sridhargaddam *
 @tpantelis *
+@vthapar releases/*
