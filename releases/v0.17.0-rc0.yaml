@@ -2,4 +2,6 @@
 version: v0.17.0-rc0
 name: 0.17.0-rc0
 branch: release-0.17
-status: branch
+status: shipyard
+components:
+  shipyard: a8a0e4cda0b1c8bfeb997d090fe0d88d3b3d8bb2
