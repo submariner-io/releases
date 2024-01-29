@@ -1,6 +1,7 @@
 ---
 version: v0.18.0-m0
 name: 0.18.0-m0
-status: shipyard
+status: admiral
 components:
   shipyard: 88783a98dbe37d5674840876bcb89f1674c85d04
+  admiral: d895217b77318c8cb09a524462881c47fa08ce13
