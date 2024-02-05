@@ -1,4 +1,4 @@
 # Auto-generated, do not edit; see CODEOWNERS.in
-* @mkolesnik @Oats87 @skitt @sridhargaddam @tpantelis
-*.md @dfarrell07 @mkolesnik @Oats87 @skitt @sridhargaddam @tpantelis
+* @mkolesnik @Oats87 @skitt @sridhargaddam @tpantelis @vthapar
+*.md @dfarrell07 @mkolesnik @Oats87 @skitt @sridhargaddam @tpantelis @vthapar
 releases/* @aswinsuryan @dfarrell07 @mkolesnik @Oats87 @skitt @sridhargaddam @tpantelis @vthapar
