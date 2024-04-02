@@ -1,7 +1,10 @@
 ---
 version: v0.18.0-m2
 name: 0.18.0-m2
-status: admiral
+status: projects
 components:
   shipyard: c8ecdaae4eeb1457776272f280af1e8e314cf9f5
   admiral: 3d226d86cb615138f61a7c481d7cb29ea173a3d7
+  cloud-prepare: e5e4eb15ca82f7a3463794f884891b77ea211785
+  lighthouse: 88f91119d9cf0adce60e8e2bb9aae671a9d58c35
+  submariner: c5e5e603d820b9c6c4d1fe85b6fc9c1437753898
