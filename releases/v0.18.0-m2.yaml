@@ -1,7 +1,7 @@
 ---
 version: v0.18.0-m2
 name: 0.18.0-m2
-status: installers
+status: released
 components:
   shipyard: c8ecdaae4eeb1457776272f280af1e8e314cf9f5
   admiral: 3d226d86cb615138f61a7c481d7cb29ea173a3d7
@@ -9,3 +9,5 @@ components:
   lighthouse: 88f91119d9cf0adce60e8e2bb9aae671a9d58c35
   submariner: c5e5e603d820b9c6c4d1fe85b6fc9c1437753898
   submariner-operator: f515417fa2226baf36346ad1a5f922f6ae67f0ca
+  subctl: c7467e14b8bb98fdea70488a3a9bef0b0bd8476a
+  submariner-charts: c83ec2d623b2276501820559b6f9bfac8bce15b3
