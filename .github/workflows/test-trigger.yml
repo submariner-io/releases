@@ -12,6 +12,10 @@ jobs:
     if: github.repository_owner == 'tpantelis'
     runs-on: ubuntu-latest
     steps:
+      - name: Check out the repository
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633
+        with:
+          fetch-depth: 0
       - name: Get the latest release tag
         run: |
           RELEASE_JSON=$(curl -L \
@@ -24,3 +28,4 @@ jobs:
       - name: Print the latest release tag
         run: |
           echo "Latest release tag: $LATEST_TAG, GHREF: $GITHUB_REF"
+          ls $GITHUB_WORKSPACE/.krew.yaml
