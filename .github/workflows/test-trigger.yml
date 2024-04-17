@@ -1,0 +1,26 @@
+---
+name: Post Release
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  update-krew:
+    name: Update krew-index
+    if: github.repository_owner == 'tpantelis'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the latest release tag
+        run: |
+          RELEASE_JSON=$(curl -L \
+             -H "Accept: application/vnd.github+json" \
+             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+             -H "X-GitHub-Api-Version: 2022-11-28" \
+             "${{ github.api_url }}/repos/submariner-io/releases/releases/latest")
+          echo "Latest release JSON: $RELEASE_JSON"
+          echo "LATEST_TAG=$(echo $RELEASE_JSON | jq -r .tag_name)" >> $GITHUB_ENV
+      - name: Print the latest release tag
+        run: |
+          echo "Latest release tag: $LATEST_TAG, GHREF: $GITHUB_REF"
