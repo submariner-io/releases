@@ -1,0 +1,6 @@
+---
+version: v0.18.0-m3
+name: 0.18.0-m3
+status: shipyard
+components:
+  shipyard: 5a7a7c4547c30338b0387e4ee14721f0a9d96655
