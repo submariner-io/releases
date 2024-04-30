@@ -1,10 +1,11 @@
 ---
 version: v0.18.0-m3
 name: 0.18.0-m3
-status: projects
+status: installers
 components:
   shipyard: 5a7a7c4547c30338b0387e4ee14721f0a9d96655
   admiral: d69b51b73cae9c8f90104f34d2929022fd0aa27c
   cloud-prepare: 25821449fd2b77754e8164d6e833c2e2929b6743
   lighthouse: 0306313f5da63c8a1c6ccbe1a8b02bbb223204be
   submariner: eb9b2f6602769754a4c9fd236dbeec910cfbd915
+  submariner-operator: e93cdf5a396a598467eb24ebc89e04a2dabdc7dd
