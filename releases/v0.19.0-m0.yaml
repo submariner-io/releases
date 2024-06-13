@@ -1,10 +1,11 @@
 ---
 version: v0.19.0-m0
 name: 0.19.0-m0
-status: projects
+status: installers
 components:
   shipyard: db01484410c75ab809fef557fa21704e3920bc1a
   admiral: 5392652c02fee43d1cce1d63b0fd1c70d6f9d779
   cloud-prepare: f7d55b6907cb0e780e15f858b75511ab5ff76f5a
   lighthouse: ce885300bc1643f15ccfce16049b9ea7f7d4dd0e
   submariner: 0b17499ef790484fd085f150f5430cdbe5e7b4b0
+  submariner-operator: be0e089dbaf0381d0b8975456e94f2bf34c9031b
