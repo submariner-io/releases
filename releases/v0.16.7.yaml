@@ -1,0 +1,7 @@
+---
+version: v0.16.7
+name: 0.16.7
+branch: release-0.16
+status: shipyard
+components:
+  shipyard: 5696bd9497c6fb68aa5c71e4d26ec74125c5ff3a
