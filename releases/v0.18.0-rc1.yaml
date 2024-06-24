@@ -2,10 +2,11 @@
 version: v0.18.0-rc1
 name: 0.18.0-rc1
 branch: release-0.18
-status: projects
+status: installers
 components:
   shipyard: 011349c6f17e8cbd2693645a4662e43cfa84341a
   admiral: 907c63849531b16d997f049d698e6910f8d6732f
   cloud-prepare: 5b8210950ff8e8e0fb885254801c7b9d13c1903b
   lighthouse: 02b6a5b372668db7159ba1ae01fb8a03b25fccae
   submariner: e3f3e56b57fe22371cdcf885315804f67663006e
+  submariner-operator: 68fefdd741056b2307b4632be13285d1b1e41bc4
