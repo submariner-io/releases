@@ -2,6 +2,7 @@
 version: v0.18.0-rc1
 name: 0.18.0-rc1
 branch: release-0.18
-status: shipyard
+status: admiral
 components:
   shipyard: 011349c6f17e8cbd2693645a4662e43cfa84341a
+  admiral: 907c63849531b16d997f049d698e6910f8d6732f
