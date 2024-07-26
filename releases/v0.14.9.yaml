@@ -2,10 +2,12 @@
 version: v0.14.9
 name: 0.14.9
 branch: release-0.14
-status: projects
+status: installers
 components:
   shipyard: d0e0f75ebe9fa4de7f9cc27237b6575a12a6419c
   admiral: 1921baa87f79526a6ea49a070402bd86c76496bf
   cloud-prepare: 85e83b5ff80b42850556584e078aee28aa90a22e
   lighthouse: 437a4c25bf5482cda85c8761eed1da1d815ecafb
   submariner: 0b3f8c22d07f8048d33f13615f9b558438541eba
+  submariner-charts: 6ceec753c9e0deed66dacec679536368bb7bacd8
+  submariner-operator: e66da70e0a58aea252c2bc3d5719e6820f12ce79
