@@ -1,0 +1,6 @@
+---
+version: v0.19.0-m3
+name: 0.19.0-m3
+status: shipyard
+components:
+  shipyard: ef2f392253b7d61ffd548037df148f1845627f4e
