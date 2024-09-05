@@ -1,7 +1,7 @@
 ---
 version: v0.19.0-m3
 name: 0.19.0-m3
-status: installers
+status: released
 components:
   shipyard: ef2f392253b7d61ffd548037df148f1845627f4e
   admiral: 6f2d5a52ca3b33fafc7be6002e569358ef03ebf0
@@ -9,3 +9,5 @@ components:
   lighthouse: 9476467467f46fedf0434a2626e186784d55cc66
   submariner: 15d9c5fce634c549a8babb586f33c4323faf0cfb
   submariner-operator: a131f8379a5ca0708f06a4ac725f8fff9fcfede5
+  subctl: 4e5b0485ec031db5981a6fe86d24297a5d25ec05
+  submariner-charts: cfebd2c93a5e520c84d18c34eb51cfd153541f23
