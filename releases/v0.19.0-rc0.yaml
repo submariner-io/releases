@@ -2,10 +2,11 @@
 version: v0.19.0-rc0
 name: 0.19.0-rc0
 branch: release-0.19
-status: projects
+status: installers
 components:
   shipyard: 35f3468294128ce32bec0d775ff3131127dd9076
   admiral: fae5e9c116d213a3585a11875bc57a02264ce204
   cloud-prepare: 21b0d6a82ea7eac735255d705a3f28c29b434a30
   lighthouse: 025858cc14929d14f886d2f3fb5df874e8ee72e0
   submariner: ab2f029703445034cd9fd1499fe3e67c844cfd29
+  submariner-operator: 854b1e7d2f94fe54e0475a772a40221419ca2056
