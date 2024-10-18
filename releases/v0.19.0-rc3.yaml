@@ -2,6 +2,7 @@
 version: v0.19.0-rc3
 name: 0.19.0-rc3
 branch: release-0.19
-status: shipyard
+status: admiral
 components:
   shipyard: 35f3468294128ce32bec0d775ff3131127dd9076
+  admiral: 8a5ecb962986f6d57d43845e8a3bea8b172f508f
