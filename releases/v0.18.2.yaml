@@ -2,7 +2,10 @@
 version: v0.18.2
 name: 0.18.2
 branch: release-0.18
-status: admiral
+status: projects
 components:
   shipyard: 8a76f3b57859a1233bd9becec215b13836d564b8
   admiral: ff93fbefc6291ef50756ea25268e10b70b7324d9
+  cloud-prepare: 41faf0c879f9519f2cdfe7d757edb7f323591324
+  lighthouse: 5809ae41628f79765b2760b902d06d883389f4ed
+  submariner: 6621b503d8a4ea24502f465d38694810217dffd7
