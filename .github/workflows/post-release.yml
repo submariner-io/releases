@@ -30,4 +30,4 @@ jobs:
           echo "Latest release tag: $LATEST_TAG"
       - name: Update new version in krew-index
         if: ${{ github.ref_name == env.LATEST_TAG }}
-        uses: rajatjindal/krew-release-bot@v0.0.46
+        uses: rajatjindal/krew-release-bot@v0.0.47
