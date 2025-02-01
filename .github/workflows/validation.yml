@@ -34,7 +34,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up QEMU (to support building on non-native architectures)
-        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf
+        uses: docker/setup-qemu-action@53851d14592bedcffcf25ea515637cff71ef929a
 
       - name: Create the release in dry-run mode
         env:
