@@ -2,10 +2,11 @@
 version: v0.20.0-rc0
 name: 0.20.0-rc0
 branch: release-0.20
-status: projects
+status: installers
 components:
   shipyard: dd157297d3ec214acdf163bc284cc663b9c796c2
   admiral: 26fc75dfc3e694fcc3135a0c7b377b183195b5bb
   cloud-prepare: 4998643cb45fd0a97521495545627606ae7b1f56
   lighthouse: ec55cba51c1024844f2c49280cd68715815fe4bd
   submariner: d20fce2e9e93b9bf8a1dc20d10ebc32b5ead4afa
+  submariner-operator: 193497308432448be1a8c49627958ab3a81514af
