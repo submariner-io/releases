@@ -2,7 +2,7 @@
 version: v0.20.0-rc1
 name: 0.20.0-rc1
 branch: release-0.20
-status: installers
+status: released
 components:
   shipyard: 8fde9372397b2e1e067da0ee433334a2da2c6998
   admiral: b25463de36aa16e5c6a95f20ceac6bf1182e48c0
@@ -10,3 +10,5 @@ components:
   lighthouse: c9e76a4aee91e125f5f301c1341bf31001605a96
   submariner: f0a5355cabfc9bd66b8117ec9d30590ef0376b2b
   submariner-operator: 44970648cf5cca760d82671adc3d8febed82df27
+  subctl: 88593f4cdbeb216a2d528fb6d82c4dcbbfd21769
+  submariner-charts: 46569e97062fd857e06bc287faed3efa275d01cb
