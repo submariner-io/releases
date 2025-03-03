@@ -2,10 +2,11 @@
 version: v0.20.0
 name: 0.20.0
 branch: release-0.20
-status: projects
+status: installers
 components:
   shipyard: dd26823b3b2aac4342dbb72ebb6ac7ff0e24bebb
   admiral: af224e6e82a2bd07059afe6bf6eeb51aa31d3bcd
   cloud-prepare: 43cfb578dc4a2f3fcf3475bd2ee4d88653489050
   lighthouse: 057c25b5520ad4bbd8f3d0edcb2e403e12ecee08
   submariner: c26bd871be2ce9573ae1375cc48f89abd30a8709
+  submariner-operator: 23102318f94ed1165526bf3f70117d837fb1db9d
