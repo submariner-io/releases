@@ -1,0 +1,7 @@
+---
+version: v0.19.3
+name: 0.19.3
+branch: release-0.19
+status: shipyard
+components:
+  shipyard: 88a05616d22f1ab9997ca566d981a35f11b974bd
