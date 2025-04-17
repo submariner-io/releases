@@ -2,7 +2,7 @@
 version: v0.19.4
 name: 0.19.4
 branch: release-0.19
-status: installers
+status: released
 components:
   shipyard: c034951d25c44e7dc9e32c4ea70a5827b139bc81
   admiral: 4c58dca6c83f7836f6d583883686d92402d38416
@@ -10,3 +10,5 @@ components:
   lighthouse: b806a97652f75ebf1fdfb3eebb0e7e71802096c7
   submariner: 673b3e17d1b34472c5526c08d0999cf1c192b7f4
   submariner-operator: 6f5880dddc48f7034480b6825e0b5fd319c12117
+  subctl: 396e9206549c1858e8314d27e181b27b1252c7d4
+  submariner-charts: a0dd0efd9f551e2517d2141ed2d6a9e559ad914a
