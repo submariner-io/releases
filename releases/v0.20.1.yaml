@@ -2,6 +2,7 @@
 version: v0.20.1
 name: 0.20.1
 branch: release-0.20
-status: shipyard
+status: admiral
 components:
   shipyard: 71ea18a53850490c087c354a07cbbd853976ccd2
+  admiral: 2afbdb6ef160d205b98eb5bb289a4c9197fd2076
