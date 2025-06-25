@@ -1,6 +1,7 @@
 ---
 version: v0.21.0-m3
 name: 0.21.0-m3
-status: shipyard
+status: admiral
 components:
   shipyard: 337859607e7cf62d0d9fd98bceb57b1dc8cc1a79
+  admiral: fda3deb1527357fcaa54787956b0802ed4b5e45a
