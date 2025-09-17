@@ -1,7 +1,7 @@
 ---
 version: v0.22.0-m2
 name: 0.22.0-m2
-status: installers
+status: released
 components:
   shipyard: 946f3957d06d019e05f79058156cde6621166c0f
   admiral: 65f50cedbd9473acfa9071cc6aa2f4169568ef46
@@ -9,3 +9,5 @@ components:
   lighthouse: ce2c8cd5e3a67d7203b07d382656c57413c3a91e
   submariner: aa1a2835606c4c44a43ab5d170bd611d6acd5695
   submariner-operator: 8903c889ffacfa53b40297bbff21f2757ac2ebf3
+  subctl: 76b93f53730682bccf318c0b363afd87842f0e55
+  submariner-charts: d1722306130f53f6056d1afa653cbf6ab723738a
