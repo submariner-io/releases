@@ -1,10 +1,11 @@
 ---
 version: v0.22.0-m2
 name: 0.22.0-m2
-status: projects
+status: installers
 components:
   shipyard: 946f3957d06d019e05f79058156cde6621166c0f
   admiral: 65f50cedbd9473acfa9071cc6aa2f4169568ef46
   cloud-prepare: 751644af13e91cce28693bbb8324a058d7bdf633
   lighthouse: ce2c8cd5e3a67d7203b07d382656c57413c3a91e
   submariner: aa1a2835606c4c44a43ab5d170bd611d6acd5695
+  submariner-operator: 8903c889ffacfa53b40297bbff21f2757ac2ebf3
