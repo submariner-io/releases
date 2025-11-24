@@ -2,6 +2,7 @@
 version: v0.22.0-rc1
 name: 0.22.0-rc1
 branch: release-0.22
-status: shipyard
+status: admiral
 components:
   shipyard: c709a93cc7978dc0fba62f8240a3476306ab6b1c
+  admiral: a3ecedbb49cc8a7267b8fbacf2317d5f3375eb1e
