@@ -1,0 +1,6 @@
+---
+version: v0.23.0-m0
+name: 0.23.0-m0
+status: shipyard
+components:
+  shipyard: a30380a37d0ce9595da0f8d78a165f61685f6237
