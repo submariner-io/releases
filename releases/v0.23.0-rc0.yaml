@@ -2,6 +2,7 @@
 version: v0.23.0-rc0
 name: 0.23.0-rc0
 branch: release-0.23
-status: shipyard
+status: admiral
 components:
   shipyard: 167369d84f2551b2f00c826114307d85c6abdb18
+  admiral: 0c44f80d299cad2cd73219b9330297b27300db93
