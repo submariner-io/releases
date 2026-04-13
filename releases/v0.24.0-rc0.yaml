@@ -2,4 +2,6 @@
 version: v0.24.0-rc0
 name: 0.24.0-rc0
 branch: release-0.24
-status: branch
+status: shipyard
+components:
+  shipyard: ffb298f86fd3638987177341d9a3f81548ac6351
