@@ -2,6 +2,7 @@
 version: v0.24.0-rc0
 name: 0.24.0-rc0
 branch: release-0.24
-status: shipyard
+status: admiral
 components:
   shipyard: ffb298f86fd3638987177341d9a3f81548ac6351
+  admiral: 9c4777645484ab6f2ea355407c95e7a6eddab5cd
