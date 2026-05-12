@@ -1,0 +1,7 @@
+---
+version: v0.24.0
+name: 0.24.0
+branch: release-0.24
+status: shipyard
+components:
+  shipyard: 6a3537699ae51fdcaba9ae288c7c20f2c9d1244e
