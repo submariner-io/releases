@@ -2,7 +2,10 @@
 version: v0.25.0-rc0
 name: 0.25.0-rc0
 branch: release-0.25
-status: admiral
+status: projects
 components:
   shipyard: 4fe3419a9014b220691fb310811137afe0049d85
   admiral: 310809c22c197faffe2d9cf5eefa07eff8252946
+  cloud-prepare: 4a75d341f00d0512a6d7ebbc24325399da30d21e
+  lighthouse: fbf6a3636f60be546264fbe37b1456c6175302a5
+  submariner: 2f8dc77f60fe3ced7ac5b266a56569dc01408f35
