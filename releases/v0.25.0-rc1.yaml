@@ -1,0 +1,7 @@
+---
+version: v0.25.0-rc1
+name: 0.25.0-rc1
+branch: release-0.25
+status: shipyard
+components:
+  shipyard: 4fe3419a9014b220691fb310811137afe0049d85
