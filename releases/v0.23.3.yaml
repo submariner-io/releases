@@ -10,3 +10,5 @@ components:
   lighthouse: 76a853f2327aa8708b98f8789d235ba2767df6cd
   submariner: f2d2f6b7d0d5c2b42e85def2d62d92cb76c59398
   submariner-operator: f589dcc76d9554222361087801d9299d870420ff
+  subctl: f7b0e2e2b6b6905ecb0b38cbb09256ff9db8b140
+  submariner-charts: f25ccac38a6be3ea0620d2a5a49d27e030882495
