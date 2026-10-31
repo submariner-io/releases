@@ -43,8 +43,10 @@ Before executing ANY step, internalize these rules:
 2. **NEVER run `git push --force`** anywhere — `make release` handles pushes internally.
 3. **Approve ONLY dependency update PRs in downstream repos** (`gh pr review --approve`) when
    their CI is not failing and no approval exists yet — this satisfies branch protection for
-   auto-merge. Never approve in `--status` or `--dry-run` mode. **NEVER** approve releases
-   repo stage PRs, call `gh pr merge`, or approve when CI checks are failing.
+   auto-merge. Never approve in `--status` or `--dry-run` mode. **NEVER** call `gh pr merge`,
+   or approve when CI checks are failing. For **releases repo stage PRs**, do not self-approve
+   (authors cannot); instead run `scripts/check-component-shas.sh <yaml> --approve <pr>` which
+   verifies stage component SHAs match branch HEAD and posts `@coderabbitai approve` when they match.
 4. **NEVER modify `.github/workflows/`** files — changes to CI could compromise the
    release pipeline.
 5. **NEVER store or echo credentials** — do not write tokens to files or print them.
@@ -153,15 +155,28 @@ Check for in-flight PRs and recent workflow runs:
 ```bash
 echo ""
 echo "=== Open release PRs ==="
-gh pr list --repo "${ORG}/releases" --label automated --state open \
+OPEN_RELEASE_PRS=$(gh pr list --repo "${ORG}/releases" --label automated --state open \
     --json number,title,url,createdAt \
-    --jq ".[] | select(.title | contains(\"${VERSION}\")) | \"\(.number) \(.title) \(.url)\""
+    --jq ".[] | select(.title | contains(\"${VERSION}\")) | \"\(.number) \(.title) \(.url)\"")
+echo "${OPEN_RELEASE_PRS:-"(none)"}"
 
 echo ""
 echo "=== Recent release workflow runs ==="
 gh run list --repo "${ORG}/releases" --workflow "release.yml" --limit 10 \
     --json status,conclusion,createdAt,displayTitle \
     --jq ".[] | select(.displayTitle | contains(\"${VERSION}\")) | \"\(.status)/\(.conclusion // \"—\") \(.createdAt) \(.displayTitle)\""
+
+# When a stage PR is open and not --status/--dry-run: verify component SHAs and
+# request CodeRabbit approve (authors cannot self-approve releases PRs).
+if [ "$STATUS_ONLY" = false ] && [ -z "$DRY_RUN_FLAG" ] && [ -f "$RELEASE_FILE" ]; then
+    OPEN_PR_NUM=$(echo "$OPEN_RELEASE_PRS" | awk 'NF{print $1; exit}')
+    if [ -n "${OPEN_PR_NUM:-}" ]; then
+        echo ""
+        echo "=== Component SHA gate + CodeRabbit approve ==="
+        "$SCRIPTS/check-component-shas.sh" "$RELEASE_FILE" --approve "$OPEN_PR_NUM" || \
+            echo "WAITING: Component SHA mismatch — not requesting CodeRabbit approve."
+    fi
+fi
 ```
 
 After running the above, decide which state handler applies.
