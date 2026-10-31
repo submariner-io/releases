@@ -2,6 +2,11 @@
 version: v0.25.0-rc2
 name: 0.25.0-rc2
 branch: release-0.25
-status: shipyard
+status: installers
 components:
   shipyard: cc55dd11ae132d4b809feed86ed45419d060b7ae
+  admiral: 4c05aac679b0075bc23ae97a2a38348478a88a80
+  cloud-prepare: 4194361bbffc967e0fa100f7bbc9c1b3ce3c2051
+  lighthouse: 550e28c6326d1d6b1e90812dc34802efd546ef8b
+  submariner: 7fdf910e084af8209a6a2b9e9678097bd45770ef
+  submariner-operator: a1fa5753d1ef69128ef79cef3eee2ef9293b80f0
