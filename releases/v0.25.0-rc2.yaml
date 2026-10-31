@@ -2,6 +2,7 @@
 version: v0.25.0-rc2
 name: 0.25.0-rc2
 branch: release-0.25
-status: shipyard
+status: admiral
 components:
   shipyard: cc55dd11ae132d4b809feed86ed45419d060b7ae
+  admiral: 4c05aac679b0075bc23ae97a2a38348478a88a80
