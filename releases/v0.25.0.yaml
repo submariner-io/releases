@@ -1,0 +1,7 @@
+---
+version: v0.25.0
+name: 0.25.0
+branch: release-0.25
+status: shipyard
+components:
+  shipyard: f333fcf0a5f8827d08766c1c0c6acb8d0181389d
