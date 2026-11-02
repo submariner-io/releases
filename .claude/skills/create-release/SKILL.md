@@ -45,6 +45,10 @@ Before executing ANY step, internalize these rules:
    their CI is not failing and no approval exists yet — this satisfies branch protection for
    auto-merge. Never approve in `--status` or `--dry-run` mode. **NEVER** approve releases
    repo stage PRs, call `gh pr merge`, or approve when CI checks are failing.
+3b. **NEVER advance a stage while its downstream dependency PR is open or missing from the
+   release branch.** Always `exit 0` with WAITING until `check-dep-pr.sh` reports MERGED and
+   `verify-dep-on-branch.sh` confirms the merge commit is on `BRANCH_VAL`. Advancing early
+   pins a stale component SHA via `write_component`.
 4. **NEVER modify `.github/workflows/`** files — changes to CI could compromise the
    release pipeline.
 5. **NEVER store or echo credentials** — do not write tokens to files or print them.
@@ -244,26 +248,35 @@ else
     echo "NOT YET RELEASED"
 fi
 
-# Check admiral dep PR
+# Check admiral dep PR — MUST be merged (and on branch) before advancing.
+# Advancing early pins a stale admiral SHA via write_component(branch HEAD).
 echo ""
 echo "--- Admiral dependency PR ---"
 ADMIRAL_PR_URL=$("$SCRIPTS/find-dep-pr.sh" "$ORG" "$VERSION" "$BRANCH_VAL" "shipyard" "admiral")
-READY=false
-if "$SCRIPTS/check-dep-pr.sh" "$ORG" "admiral" "$VERSION" "$BRANCH_VAL" "${ADMIRAL_PR_URL:-"-"}" $APPROVE_FLAG; then
-    READY=true
+if ! "$SCRIPTS/check-dep-pr.sh" "$ORG" "admiral" "$VERSION" "$BRANCH_VAL" "${ADMIRAL_PR_URL:-"-"}" $APPROVE_FLAG; then
+    echo "WAITING: Admiral dependency PR not merged — do NOT advance to admiral."
+    exit 0
+fi
+if [ -z "${ADMIRAL_PR_URL:-}" ] || [ "${ADMIRAL_PR_URL}" = "-" ]; then
+    ADMIRAL_PR_URL=$("$SCRIPTS/find-dep-pr.sh" "$ORG" "$VERSION" "$BRANCH_VAL" "shipyard" "admiral")
+fi
+if ! "$SCRIPTS/verify-dep-on-branch.sh" "$ORG" "admiral" "$BRANCH_VAL" "$ADMIRAL_PR_URL"; then
+    echo "WAITING: Admiral dep PR merged but merge commit not yet on ${BRANCH_VAL} — do NOT advance."
+    exit 0
 fi
 
-# Advance when ready
-if [ "$READY" = true ] && [ "$STATUS_ONLY" = false ]; then
-    if [ "$SHIPYARD_RELEASE_OK" = false ]; then
-        echo "WAITING: Shipyard GitHub release not yet published."; exit 0
-    fi
-    if "$SCRIPTS/verify-images.sh" "$ORG" "$VERSION" "shipyard"; then
-        echo ">>> Images verified. Advancing to admiral..."
-        make release VERSION="${VERSION}" $BASE_BRANCH_ARG $DRY_RUN_FLAG
-    else
-        echo "WAITING: Shipyard images not yet on quay.io."
-    fi
+if [ "$STATUS_ONLY" = true ]; then
+    echo "STATUS: Admiral dep PR merged and on branch. Run without --status to advance."
+    exit 0
+fi
+if [ "$SHIPYARD_RELEASE_OK" = false ]; then
+    echo "WAITING: Shipyard GitHub release not yet published."; exit 0
+fi
+if "$SCRIPTS/verify-images.sh" "$ORG" "$VERSION" "shipyard"; then
+    echo ">>> Dep PR on branch + images verified. Advancing to admiral..."
+    make release VERSION="${VERSION}" $BASE_BRANCH_ARG $DRY_RUN_FLAG
+else
+    echo "WAITING: Shipyard images not yet on quay.io."
 fi
 ```
 
@@ -280,7 +293,8 @@ else
     echo "NOT YET RELEASED"
 fi
 
-# Check dep PRs for cloud-prepare, lighthouse, submariner
+# Check dep PRs for cloud-prepare, lighthouse, submariner — all must be merged
+# and present on BRANCH_VAL before advancing (avoids stale component pins).
 PROJECTS_READY=0
 PROJECTS_TOTAL=3
 for REPO in cloud-prepare lighthouse submariner; do
@@ -288,20 +302,32 @@ for REPO in cloud-prepare lighthouse submariner; do
     echo "--- ${REPO} dependency PR ---"
     PR_URL=$("$SCRIPTS/find-dep-pr.sh" "$ORG" "$VERSION" "$BRANCH_VAL" "admiral" "$REPO")
     if "$SCRIPTS/check-dep-pr.sh" "$ORG" "$REPO" "$VERSION" "$BRANCH_VAL" "${PR_URL:-"-"}" $APPROVE_FLAG; then
-        PROJECTS_READY=$((PROJECTS_READY + 1))
+        if [ -z "${PR_URL:-}" ] || [ "$PR_URL" = "-" ]; then
+            PR_URL=$("$SCRIPTS/find-dep-pr.sh" "$ORG" "$VERSION" "$BRANCH_VAL" "admiral" "$REPO")
+        fi
+        if "$SCRIPTS/verify-dep-on-branch.sh" "$ORG" "$REPO" "$BRANCH_VAL" "$PR_URL"; then
+            PROJECTS_READY=$((PROJECTS_READY + 1))
+        else
+            echo "WAITING: ${REPO} dep merged but not yet on ${BRANCH_VAL}"
+        fi
     fi
 done
 echo ""
-echo "Project dependency PRs: ${PROJECTS_READY}/${PROJECTS_TOTAL} merged"
+echo "Project dependency PRs ready on branch: ${PROJECTS_READY}/${PROJECTS_TOTAL}"
 
-# Advance when all 3 merged
-if [ "$PROJECTS_READY" -eq "$PROJECTS_TOTAL" ] && [ "$STATUS_ONLY" = false ]; then
-    if [ "$ADMIRAL_RELEASE_OK" = false ]; then
-        echo "WAITING: Admiral GitHub release not yet published."; exit 0
-    fi
-    echo ">>> All project dependency PRs merged. Advancing to projects..."
-    make release VERSION="${VERSION}" $BASE_BRANCH_ARG $DRY_RUN_FLAG
+if [ "$PROJECTS_READY" -lt "$PROJECTS_TOTAL" ]; then
+    echo "WAITING: Not all project dependency PRs are merged onto ${BRANCH_VAL} — do NOT advance to projects."
+    exit 0
 fi
+if [ "$STATUS_ONLY" = true ]; then
+    echo "STATUS: All project dep PRs merged and on branch. Run without --status to advance."
+    exit 0
+fi
+if [ "$ADMIRAL_RELEASE_OK" = false ]; then
+    echo "WAITING: Admiral GitHub release not yet published."; exit 0
+fi
+echo ">>> All project dependency PRs merged onto branch. Advancing to projects..."
+make release VERSION="${VERSION}" $BASE_BRANCH_ARG $DRY_RUN_FLAG
 ```
 
 ### projects → Wait for Operator Dependency PR, Then Advance
@@ -319,40 +345,48 @@ for REPO in cloud-prepare lighthouse submariner; do
     fi
 done
 
-# Check operator dep PR
+# Check operator dep PR — must be merged onto BRANCH_VAL before advancing
 echo ""
 echo "--- Operator dependency PR ---"
 OPERATOR_PR_URL=$("$SCRIPTS/find-dep-pr.sh" "$ORG" "$VERSION" "$BRANCH_VAL" "projects" "submariner-operator")
-READY=false
-if "$SCRIPTS/check-dep-pr.sh" "$ORG" "submariner-operator" "$VERSION" "$BRANCH_VAL" "${OPERATOR_PR_URL:-"-"}" $APPROVE_FLAG; then
-    READY=true
+if ! "$SCRIPTS/check-dep-pr.sh" "$ORG" "submariner-operator" "$VERSION" "$BRANCH_VAL" "${OPERATOR_PR_URL:-"-"}" $APPROVE_FLAG; then
+    echo "WAITING: Operator dependency PR not merged — do NOT advance to installers."
+    exit 0
+fi
+if [ -z "${OPERATOR_PR_URL:-}" ] || [ "${OPERATOR_PR_URL}" = "-" ]; then
+    OPERATOR_PR_URL=$("$SCRIPTS/find-dep-pr.sh" "$ORG" "$VERSION" "$BRANCH_VAL" "projects" "submariner-operator")
+fi
+if ! "$SCRIPTS/verify-dep-on-branch.sh" "$ORG" "submariner-operator" "$BRANCH_VAL" "$OPERATOR_PR_URL"; then
+    echo "WAITING: Operator dep PR merged but merge commit not yet on ${BRANCH_VAL} — do NOT advance."
+    exit 0
 fi
 
-# Advance: verify project releases published + images ready
-if [ "$READY" = true ] && [ "$STATUS_ONLY" = false ]; then
-    if [ "$PROJECTS_RELEASE_OK" = false ]; then
-        echo "WAITING: One or more project GitHub releases not yet published."; exit 0
-    fi
-    # Show release image workflow status
-    echo "--- Release Image workflows ---"
-    IMAGE_TAG="${VERSION#v}"
-    for REPO in cloud-prepare lighthouse submariner; do
-        RUN=$(gh run list --repo "${ORG}/${REPO}" --event push --limit 20 \
-            --json status,conclusion,headBranch,displayTitle \
-            --jq ".[] | select(.headBranch == \"v${IMAGE_TAG}\")" \
-            2>/dev/null | jq -s '.[0]' 2>/dev/null || true)
-        if [ -z "$RUN" ] || [ "$RUN" = "null" ]; then
-            echo "  ${REPO}: release workflow not yet triggered"
-        else
-            echo "  ${REPO}: $(echo "$RUN" | jq -r '"\(.displayTitle // "release"): \(.status)/\(.conclusion // "—")"' 2>/dev/null || echo "unknown")"
-        fi
-    done
-    if "$SCRIPTS/verify-images.sh" "$ORG" "$VERSION" "projects" "$RELEASE_FILE"; then
-        echo ">>> Images verified. Advancing to installers..."
-        make release VERSION="${VERSION}" $BASE_BRANCH_ARG $DRY_RUN_FLAG
+if [ "$STATUS_ONLY" = true ]; then
+    echo "STATUS: Operator dep PR merged and on branch. Run without --status to advance."
+    exit 0
+fi
+if [ "$PROJECTS_RELEASE_OK" = false ]; then
+    echo "WAITING: One or more project GitHub releases not yet published."; exit 0
+fi
+# Show release image workflow status
+echo "--- Release Image workflows ---"
+IMAGE_TAG="${VERSION#v}"
+for REPO in cloud-prepare lighthouse submariner; do
+    RUN=$(gh run list --repo "${ORG}/${REPO}" --event push --limit 20 \
+        --json status,conclusion,headBranch,displayTitle \
+        --jq ".[] | select(.headBranch == \"v${IMAGE_TAG}\")" \
+        2>/dev/null | jq -s '.[0]' 2>/dev/null || true)
+    if [ -z "$RUN" ] || [ "$RUN" = "null" ]; then
+        echo "  ${REPO}: release workflow not yet triggered"
     else
-        echo "WAITING: Project images not yet on quay.io."
+        echo "  ${REPO}: $(echo "$RUN" | jq -r '"\(.displayTitle // "release"): \(.status)/\(.conclusion // "—")"' 2>/dev/null || echo "unknown")"
     fi
+done
+if "$SCRIPTS/verify-images.sh" "$ORG" "$VERSION" "projects" "$RELEASE_FILE"; then
+    echo ">>> Dep PR on branch + images verified. Advancing to installers..."
+    make release VERSION="${VERSION}" $BASE_BRANCH_ARG $DRY_RUN_FLAG
+else
+    echo "WAITING: Project images not yet on quay.io."
 fi
 ```
 
@@ -369,7 +403,7 @@ else
     echo "NOT YET RELEASED"
 fi
 
-# Check dep PRs for subctl, submariner-charts
+# Check dep PRs for subctl, submariner-charts — must be merged onto BRANCH_VAL
 INST_READY=0
 INST_TOTAL=2
 for REPO in subctl submariner-charts; do
@@ -377,36 +411,48 @@ for REPO in subctl submariner-charts; do
     echo "--- ${REPO} dependency PR ---"
     PR_URL=$("$SCRIPTS/find-dep-pr.sh" "$ORG" "$VERSION" "$BRANCH_VAL" "installers" "$REPO")
     if "$SCRIPTS/check-dep-pr.sh" "$ORG" "$REPO" "$VERSION" "$BRANCH_VAL" "${PR_URL:-"-"}" $APPROVE_FLAG; then
-        INST_READY=$((INST_READY + 1))
+        if [ -z "${PR_URL:-}" ] || [ "$PR_URL" = "-" ]; then
+            PR_URL=$("$SCRIPTS/find-dep-pr.sh" "$ORG" "$VERSION" "$BRANCH_VAL" "installers" "$REPO")
+        fi
+        if "$SCRIPTS/verify-dep-on-branch.sh" "$ORG" "$REPO" "$BRANCH_VAL" "$PR_URL"; then
+            INST_READY=$((INST_READY + 1))
+        else
+            echo "WAITING: ${REPO} dep merged but not yet on ${BRANCH_VAL}"
+        fi
     fi
 done
 echo ""
-echo "Installer dependency PRs: ${INST_READY}/${INST_TOTAL} merged"
+echo "Installer dependency PRs ready on branch: ${INST_READY}/${INST_TOTAL}"
 
-# Advance: verify operator release published + images ready
-if [ "$INST_READY" -eq "$INST_TOTAL" ] && [ "$STATUS_ONLY" = false ]; then
-    if [ "$OPERATOR_RELEASE_OK" = false ]; then
-        echo "WAITING: Operator GitHub release not yet published."; exit 0
-    fi
-    echo "--- Release Image workflows ---"
-    IMAGE_TAG="${VERSION#v}"
-    for REPO in submariner-operator subctl; do
-        RUN=$(gh run list --repo "${ORG}/${REPO}" --event push --limit 20 \
-            --json status,conclusion,headBranch,displayTitle \
-            --jq ".[] | select(.headBranch == \"v${IMAGE_TAG}\")" \
-            2>/dev/null | jq -s '.[0]' 2>/dev/null || true)
-        if [ -z "$RUN" ] || [ "$RUN" = "null" ]; then
-            echo "  ${REPO}: release workflow not yet triggered"
-        else
-            echo "  ${REPO}: $(echo "$RUN" | jq -r '"\(.displayTitle // "release"): \(.status)/\(.conclusion // "—")"' 2>/dev/null || echo "unknown")"
-        fi
-    done
-    if "$SCRIPTS/verify-images.sh" "$ORG" "$VERSION" "installers" "$RELEASE_FILE"; then
-        echo ">>> Images verified. Advancing to released..."
-        make release VERSION="${VERSION}" $BASE_BRANCH_ARG $DRY_RUN_FLAG
+if [ "$INST_READY" -lt "$INST_TOTAL" ]; then
+    echo "WAITING: Not all installer dependency PRs are merged onto ${BRANCH_VAL} — do NOT advance to released."
+    exit 0
+fi
+if [ "$STATUS_ONLY" = true ]; then
+    echo "STATUS: Installer dep PRs merged and on branch. Run without --status to advance."
+    exit 0
+fi
+if [ "$OPERATOR_RELEASE_OK" = false ]; then
+    echo "WAITING: Operator GitHub release not yet published."; exit 0
+fi
+echo "--- Release Image workflows ---"
+IMAGE_TAG="${VERSION#v}"
+for REPO in submariner-operator subctl; do
+    RUN=$(gh run list --repo "${ORG}/${REPO}" --event push --limit 20 \
+        --json status,conclusion,headBranch,displayTitle \
+        --jq ".[] | select(.headBranch == \"v${IMAGE_TAG}\")" \
+        2>/dev/null | jq -s '.[0]' 2>/dev/null || true)
+    if [ -z "$RUN" ] || [ "$RUN" = "null" ]; then
+        echo "  ${REPO}: release workflow not yet triggered"
     else
-        echo "WAITING: Installer images not yet on quay.io."
+        echo "  ${REPO}: $(echo "$RUN" | jq -r '"\(.displayTitle // "release"): \(.status)/\(.conclusion // "—")"' 2>/dev/null || echo "unknown")"
     fi
+done
+if "$SCRIPTS/verify-images.sh" "$ORG" "$VERSION" "installers" "$RELEASE_FILE"; then
+    echo ">>> Dep PRs on branch + images verified. Advancing to released..."
+    make release VERSION="${VERSION}" $BASE_BRANCH_ARG $DRY_RUN_FLAG
+else
+    echo "WAITING: Installer images not yet on quay.io."
 fi
 ```
 
