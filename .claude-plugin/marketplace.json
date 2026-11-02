@@ -1,0 +1,24 @@
+{
+  "name": "submariner",
+  "owner": {
+    "name": "Submariner Project",
+    "url": "https://submariner.io"
+  },
+  "metadata": {
+    "description": "Release orchestration tools for the Submariner project"
+  },
+  "plugins": [
+    {
+      "name": "releases",
+      "description": "Automated upstream release orchestration for Submariner repositories",
+      "version": "1.0.0",
+      "author": {
+        "name": "Submariner Contributors",
+        "url": "https://github.com/submariner-io"
+      },
+      "source": "./",
+      "category": "productivity",
+      "homepage": "https://submariner.io"
+    }
+  ]
+}
