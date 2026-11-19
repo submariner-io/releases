@@ -43,8 +43,10 @@ Before executing ANY step, internalize these rules:
 2. **NEVER run `git push --force`** anywhere — `make release` handles pushes internally.
 3. **Approve ONLY dependency update PRs in downstream repos** (`gh pr review --approve`) when
    their CI is not failing and no approval exists yet — this satisfies branch protection for
-   auto-merge. Never approve in `--status` or `--dry-run` mode. **NEVER** approve releases
-   repo stage PRs, call `gh pr merge`, or approve when CI checks are failing.
+   auto-merge. Never approve in `--status` or `--dry-run` mode. **NEVER** call `gh pr merge`,
+   or approve when CI checks are failing. For **releases repo stage PRs**, do not self-approve
+   (authors cannot). Run `scripts/check-component-shas.sh <yaml>` to verify stage component
+   SHAs match branch HEAD before treating a stage PR as correctly pinned.
 4. **NEVER modify `.github/workflows/`** files — changes to CI could compromise the
    release pipeline.
 5. **NEVER store or echo credentials** — do not write tokens to files or print them.
@@ -153,15 +155,27 @@ Check for in-flight PRs and recent workflow runs:
 ```bash
 echo ""
 echo "=== Open release PRs ==="
-gh pr list --repo "${ORG}/releases" --label automated --state open \
+OPEN_RELEASE_PRS=$(gh pr list --repo "${ORG}/releases" --label agentic --state open \
     --json number,title,url,createdAt \
-    --jq ".[] | select(.title | contains(\"${VERSION}\")) | \"\(.number) \(.title) \(.url)\""
+    --jq ".[] | select(.title | contains(\"${VERSION}\")) | \"\(.number) \(.title) \(.url)\"")
+echo "${OPEN_RELEASE_PRS:-\"(none)\"}"
 
 echo ""
 echo "=== Recent release workflow runs ==="
 gh run list --repo "${ORG}/releases" --workflow "release.yml" --limit 10 \
     --json status,conclusion,createdAt,displayTitle \
     --jq ".[] | select(.displayTitle | contains(\"${VERSION}\")) | \"\(.status)/\(.conclusion // \"—\") \(.createdAt) \(.displayTitle)\""
+
+# When a stage PR is open: verify newly pinned component SHAs match branch HEAD.
+if [ -f "$RELEASE_FILE" ]; then
+    OPEN_PR_NUM=$(echo "$OPEN_RELEASE_PRS" | awk 'NF{print $1; exit}')
+    if [ -n "${OPEN_PR_NUM:-}" ]; then
+        echo ""
+        echo "=== Component SHA gate ==="
+        "$SCRIPTS/check-component-shas.sh" "$RELEASE_FILE" || \
+            echo "WAITING: Component SHA mismatch — stage pin may be stale."
+    fi
+fi
 ```
 
 After running the above, decide which state handler applies.
@@ -185,7 +199,7 @@ if [ "$STATUS_ONLY" = true ]; then
     exit 0
 fi
 
-OPEN_INIT_PR=$(gh pr list --repo "${ORG}/releases" --label automated --state open \
+OPEN_INIT_PR=$(gh pr list --repo "${ORG}/releases" --label agentic --state open \
     --json number,title \
     --jq ".[] | select(.title | contains(\"${VERSION}\")) | .number" | wc -l | xargs)
 if [ "${OPEN_INIT_PR:-0}" -gt 0 ]; then
@@ -218,7 +232,7 @@ if [ "$BRANCH_COUNT" -lt "$BRANCH_TOTAL" ]; then
     exit 0
 fi
 
-OPEN_RELEASE_PR=$(gh pr list --repo "${ORG}/releases" --label automated --state open \
+OPEN_RELEASE_PR=$(gh pr list --repo "${ORG}/releases" --label agentic --state open \
     --json number,title \
     --jq ".[] | select(.title | contains(\"${VERSION}\")) | .number" | wc -l | xargs)
 if [ "${OPEN_RELEASE_PR:-0}" -gt 0 ]; then
@@ -546,7 +560,7 @@ fi
 
 - `make release` runs inside a Dapper container (Docker required)
 - `do-release.sh` is idempotent: it skips already-tagged repos
-- Auto-merge is enabled on all release PRs; dependency PRs are labeled `automated`
+- Auto-merge is enabled on all release PRs; release and dependency PRs are labeled `agentic`
 - CI typically takes 20-40 minutes per repo; full release takes 20-24 hours
 - A 10-minute `/loop` interval stays under GitHub API rate limits (~72 calls/hr vs 5000/hr)
 - Transient errors: skill reports and waits, next `/loop` tick retries. Persistent failures (CI blocked, do-release failed): human intervention required.

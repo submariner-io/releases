@@ -121,7 +121,7 @@ function create_pr() {
     branch=$(_git rev-parse --abbrev-ref HEAD)
     push_to_repo "${branch}"
     output=$(dryrun gh pr create --repo "${ORG}/${project}" --head "${branch}" --base "${base_branch}" --title "${msg}" \
-                --label automated --body "${msg}" 2>&1)
+                --label agentic --body "${msg}" 2>&1)
 
     # shellcheck disable=SC2181 # The command is too long already, this is more readable
     if [[ $? -ne 0 ]]; then

@@ -22,13 +22,13 @@ APPROVE=false
 # If no URL provided, do a fallback search
 if [ -z "$PR_URL" ]; then
     PR_URL=$(gh pr list --repo "${ORG}/${REPO}" \
-        --base "${BRANCH_VAL}" --label automated --state open \
+        --base "${BRANCH_VAL}" --label agentic --state open \
         --json url,title \
         --jq ".[] | select(.title == \"Update Submariner dependencies to v${VERSION}\") | .url" \
         2>/dev/null | head -1 || true)
     if [ -z "$PR_URL" ]; then
         PR_URL=$(gh pr list --repo "${ORG}/${REPO}" \
-            --base "${BRANCH_VAL}" --label automated --state merged \
+            --base "${BRANCH_VAL}" --label agentic --state merged \
             --limit 20 --json url,title \
             --jq ".[] | select(.title == \"Update Submariner dependencies to v${VERSION}\") | .url" \
             2>/dev/null | head -1 || true)
