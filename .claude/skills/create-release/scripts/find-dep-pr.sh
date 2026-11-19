@@ -43,13 +43,13 @@ fi
 # Fallback: version-scoped search on the release base branch
 if [ -z "$PR_URL" ]; then
     PR_URL=$(gh pr list --repo "${ORG}/${TARGET_REPO}" \
-        --base "${BRANCH_VAL}" --label automated --state open \
+        --base "${BRANCH_VAL}" --label agentic --state open \
         --json url,title \
         --jq ".[] | select(.title == \"Update Submariner dependencies to v${VERSION}\") | .url" \
         2>/dev/null | head -1 || true)
     if [ -z "$PR_URL" ]; then
         PR_URL=$(gh pr list --repo "${ORG}/${TARGET_REPO}" \
-            --base "${BRANCH_VAL}" --label automated --state merged \
+            --base "${BRANCH_VAL}" --label agentic --state merged \
             --limit 20 --json url,title \
             --jq ".[] | select(.title == \"Update Submariner dependencies to v${VERSION}\") | .url" \
             2>/dev/null | head -1 || true)
