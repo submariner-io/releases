@@ -153,7 +153,7 @@ Check for in-flight PRs and recent workflow runs:
 ```bash
 echo ""
 echo "=== Open release PRs ==="
-gh pr list --repo "${ORG}/releases" --label automated --state open \
+gh pr list --repo "${ORG}/releases" --label agentic --state open \
     --json number,title,url,createdAt \
     --jq ".[] | select(.title | contains(\"${VERSION}\")) | \"\(.number) \(.title) \(.url)\""
 
@@ -185,7 +185,7 @@ if [ "$STATUS_ONLY" = true ]; then
     exit 0
 fi
 
-OPEN_INIT_PR=$(gh pr list --repo "${ORG}/releases" --label automated --state open \
+OPEN_INIT_PR=$(gh pr list --repo "${ORG}/releases" --label agentic --state open \
     --json number,title \
     --jq ".[] | select(.title | contains(\"${VERSION}\")) | .number" | wc -l | xargs)
 if [ "${OPEN_INIT_PR:-0}" -gt 0 ]; then
@@ -218,7 +218,7 @@ if [ "$BRANCH_COUNT" -lt "$BRANCH_TOTAL" ]; then
     exit 0
 fi
 
-OPEN_RELEASE_PR=$(gh pr list --repo "${ORG}/releases" --label automated --state open \
+OPEN_RELEASE_PR=$(gh pr list --repo "${ORG}/releases" --label agentic --state open \
     --json number,title \
     --jq ".[] | select(.title | contains(\"${VERSION}\")) | .number" | wc -l | xargs)
 if [ "${OPEN_RELEASE_PR:-0}" -gt 0 ]; then
@@ -546,7 +546,7 @@ fi
 
 - `make release` runs inside a Dapper container (Docker required)
 - `do-release.sh` is idempotent: it skips already-tagged repos
-- Auto-merge is enabled on all release PRs; dependency PRs are labeled `automated`
+- Auto-merge is enabled on all release PRs; releases-repo stage PRs are labeled `agentic`, dependency PRs from `make do-release` are labeled `automated`
 - CI typically takes 20-40 minutes per repo; full release takes 20-24 hours
 - A 10-minute `/loop` interval stays under GitHub API rate limits (~72 calls/hr vs 5000/hr)
 - Transient errors: skill reports and waits, next `/loop` tick retries. Persistent failures (CI blocked, do-release failed): human intervention required.
