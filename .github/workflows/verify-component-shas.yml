@@ -1,0 +1,86 @@
+---
+name: Verify Component SHAs
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-component-shas:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Check added/updated components against branch HEAD
+        env:
+          ORG: submariner-io
+        run: |
+          set -euo pipefail
+
+          git fetch --no-tags origin "${{ github.base_ref }}"
+          BASE_REF="origin/${{ github.base_ref }}"
+
+          # 1. Detect the added or modified release YAML file in the PR
+          FILE=$(git diff --name-only --diff-filter=AM "$BASE_REF...HEAD" -- 'releases/v*.yaml' | head -n 1)
+
+          if [ -z "$FILE" ]; then
+            echo "No release YAML file added or modified. Skipping."
+            exit 0
+          fi
+
+          echo "Checking file: $FILE"
+
+          # 2. Extract target branch; default to "devel" ONLY if the "branch" key is absent
+          if [ "$(yq 'has("branch")' "$FILE")" == "true" ]; then
+            BRANCH=$(yq -r '.branch // ""' "$FILE" | xargs)
+            if [ -z "$BRANCH" ]; then
+              echo "::error file=$FILE::The 'branch' key is present in $FILE, but its value is empty or null."
+              exit 1
+            fi
+          else
+            BRANCH="devel"
+          fi
+
+          echo "Target branch across component repos: $BRANCH"
+
+          # 3. Extract added/modified component lines from git diff and compare with remote HEAD
+          FAILED=0
+
+          while read -r line; do
+            # Extract component name and 40-char SHA from "+  component-name: <sha>"
+            COMP=$(echo "$line" | sed -E 's/^\+\s+([a-z0-9-]+):.*/\1/')
+            NEW_SHA=$(echo "$line" | awk '{print $NF}' | tr -d '"')
+
+            echo "🔍 Checking added/updated component: $COMP"
+            echo "   PR SHA:   $NEW_SHA"
+
+            REPO_URL="https://github.com/${ORG}/${COMP}.git"
+            HEAD_SHA=$(git ls-remote "$REPO_URL" "refs/heads/$BRANCH" | awk '{print $1}')
+            echo "   HEAD SHA: ${HEAD_SHA:-"(unavailable)"}"
+
+            if [ -z "$HEAD_SHA" ]; then
+              echo "::error file=$FILE::Failed to fetch HEAD for $REPO_URL on branch $BRANCH"
+              FAILED=1
+            elif [ "$NEW_SHA" != "$HEAD_SHA" ]; then
+              echo "::error file=$FILE::SHA mismatch for $COMP! PR has $NEW_SHA, but $BRANCH HEAD is $HEAD_SHA"
+              FAILED=1
+            else
+              echo "✅ $COMP matches $BRANCH HEAD!"
+            fi
+          done < <(git diff -U0 "$BASE_REF...HEAD" -- "$FILE" | grep -E '^\+\s+[a-z0-9-]+:\s+"?[0-9a-f]{40}"?' || true)
+
+          # 4. Fail the workflow if any component check failed
+          if [ "$FAILED" -ne 0 ]; then
+            exit 1
+          fi
