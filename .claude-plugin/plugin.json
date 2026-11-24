@@ -1,0 +1,13 @@
+{
+  "name": "releases",
+  "description": "Automated upstream release orchestration for Submariner repositories",
+  "version": "1.0.0",
+  "author": {
+    "name": "Submariner Contributors",
+    "url": "https://github.com/submariner-io"
+  },
+  "homepage": "https://submariner.io",
+  "repository": "https://github.com/submariner-io/releases",
+  "license": "Apache-2.0",
+  "keywords": ["submariner", "release", "automation", "kubernetes", "ci"]
+}
