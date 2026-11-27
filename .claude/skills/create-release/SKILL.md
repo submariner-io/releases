@@ -166,12 +166,63 @@ gh run list --repo "${ORG}/releases" --workflow "release.yml" --limit 10 \
 
 After running the above, decide which state handler applies.
 
-Set `BASE_BRANCH_ARG` for use in all `make release` calls — required for z-releases and RCs after the stable branch exists:
+For **not-started**, choose the release base correctly (do **not** assume
+`STABLE_BRANCH` if it does not exist yet — first `rc0` still initiates from `devel`):
 
 ```bash
+if [ ! -f "$RELEASE_FILE" ]; then
+    if gh api "repos/${ORG}/releases/branches/${STABLE_BRANCH}" --jq '.name' >/dev/null 2>&1; then
+        BRANCH_VAL="${STABLE_BRANCH}"
+    else
+        BRANCH_VAL="devel"
+    fi
+fi
+
 BASE_BRANCH_ARG=""
 [ "$BRANCH_VAL" != "devel" ] && BASE_BRANCH_ARG="BASE_BRANCH=${BRANCH_VAL}"
+echo "BRANCH_VAL=${BRANCH_VAL} BASE_BRANCH_ARG=${BASE_BRANCH_ARG:-none}"
 ```
+
+### Running `make release` safely (required)
+
+`scripts/release.sh` `sync_upstream` **rebases the current git branch** onto
+`BASE_BRANCH`, then force-pushes that tip as `releasing-${VERSION}`. If you run
+`make release` from a long-lived `devel` checkout while
+`BASE_BRANCH=release-X.Y`, every devel-only commit is replayed onto the stable
+branch and the stage PR is contaminated (dozens of files/commits instead of a
+single release YAML).
+
+**Rule:** Never run `make release` when `git branch --show-current` differs from
+the intended base (`BRANCH_VAL`, or `devel` when unset). Always use a disposable
+worktree checked out to that base. Do not rebase or reset the operator's main
+checkout.
+
+```bash
+run_make_release() {
+    local base="${BRANCH_VAL:-devel}"
+    local worktree="/tmp/releases-make-release-${VERSION}"
+    local start_dir
+    start_dir="$(pwd)"
+
+    git fetch origin "${base}"
+    if git -C "$REPO_ROOT" worktree list | grep -q "${worktree}"; then
+        git -C "$worktree" fetch origin "${base}"
+        git -C "$worktree" checkout -B "make-release-${VERSION}" "origin/${base}"
+    else
+        rm -rf "$worktree"
+        git -C "$REPO_ROOT" worktree add -B "make-release-${VERSION}" "$worktree" "origin/${base}"
+    fi
+
+    echo ">>> make release in worktree ${worktree} (base=${base})"
+    ( cd "$worktree" && make release VERSION="${VERSION}" $BASE_BRANCH_ARG $DRY_RUN_FLAG )
+    local rc=$?
+    cd "$start_dir"
+    return $rc
+}
+```
+
+Use `run_make_release` everywhere this skill previously called `make release`
+directly (all stage handlers below).
 
 ---
 
@@ -194,7 +245,7 @@ if [ "${OPEN_INIT_PR:-0}" -gt 0 ]; then
 fi
 
 echo ">>> Initiating release v${VERSION}..."
-make release VERSION="${VERSION}" $BASE_BRANCH_ARG $DRY_RUN_FLAG
+run_make_release
 echo ">>> Initial release PR created. Waiting for CI + merge."
 ```
 
@@ -227,7 +278,7 @@ elif [ "$STATUS_ONLY" = true ]; then
     echo "STATUS: All branches exist. Run without --status to advance to shipyard."
 else
     echo ">>> All branches created. Advancing to shipyard..."
-    make release VERSION="${VERSION}" $BASE_BRANCH_ARG $DRY_RUN_FLAG
+    run_make_release
 fi
 ```
 
@@ -260,7 +311,7 @@ if [ "$READY" = true ] && [ "$STATUS_ONLY" = false ]; then
     fi
     if "$SCRIPTS/verify-images.sh" "$ORG" "$VERSION" "shipyard"; then
         echo ">>> Images verified. Advancing to admiral..."
-        make release VERSION="${VERSION}" $BASE_BRANCH_ARG $DRY_RUN_FLAG
+        run_make_release
     else
         echo "WAITING: Shipyard images not yet on quay.io."
     fi
@@ -309,7 +360,7 @@ if [ "$PROJECTS_READY" -eq "$PROJECTS_TOTAL" ] && [ "$STATUS_ONLY" = false ]; th
     fi
 
     echo ">>> All project dependency PRs merged. Advancing to projects..."
-    make release VERSION="${VERSION}" $BASE_BRANCH_ARG $DRY_RUN_FLAG
+    run_make_release
 fi
 ```
 
@@ -358,7 +409,7 @@ if [ "$READY" = true ] && [ "$STATUS_ONLY" = false ]; then
     done
     if "$SCRIPTS/verify-images.sh" "$ORG" "$VERSION" "projects" "$RELEASE_FILE"; then
         echo ">>> Images verified. Advancing to installers..."
-        make release VERSION="${VERSION}" $BASE_BRANCH_ARG $DRY_RUN_FLAG
+        run_make_release
     else
         echo "WAITING: Project images not yet on quay.io."
     fi
@@ -412,7 +463,7 @@ if [ "$INST_READY" -eq "$INST_TOTAL" ] && [ "$STATUS_ONLY" = false ]; then
     done
     if "$SCRIPTS/verify-images.sh" "$ORG" "$VERSION" "installers" "$RELEASE_FILE"; then
         echo ">>> Images verified. Advancing to released..."
-        make release VERSION="${VERSION}" $BASE_BRANCH_ARG $DRY_RUN_FLAG
+        run_make_release
     else
         echo "WAITING: Installer images not yet on quay.io."
     fi
@@ -551,3 +602,29 @@ fi
 - A 10-minute `/loop` interval stays under GitHub API rate limits (~72 calls/hr vs 5000/hr)
 - Transient errors: skill reports and waits, next `/loop` tick retries. Persistent failures (CI blocked, do-release failed): human intervention required.
 - Helper scripts loaded from `devel` branch via worktree at `/tmp/releases-create-release-skill/`
+- Stage advances that call `make release` must use `run_make_release` (worktree on `BRANCH_VAL`), never bare `make release` from `devel` when `BASE_BRANCH` is a stable branch.
+
+---
+
+## Known bugs
+
+### BUG: z-stream / stable-base `make release` from `devel` contaminates stage PRs
+
+**Status:** Fixed in this skill via `run_make_release` (worktree on base). Still a footgun if ignored.
+
+**Seen:** 2026-11-27 initiating `0.23.5` — [PR #1536](https://github.com/submariner-io/releases/pull/1536) was 42 commits / 30 files ahead of `release-0.23`. A correct initiate ([#1494](https://github.com/submariner-io/releases/pull/1494) for `0.23.4`) is 1 file (`releases/v0.23.4.yaml`).
+
+**Root cause:**
+1. Skill set `BRANCH_VAL=STABLE_BRANCH` / `BASE_BRANCH=release-X.Y` for not-started without ensuring cwd matched that base.
+2. Operator ran on long-lived `devel`.
+3. `release.sh` `sync_upstream` does `git rebase upstream_releases/${BASE_BRANCH}` on the **current** branch, then force-pushes that tip as `releasing-$VERSION`.
+
+**Impact:** Stage PR dumps unrelated devel history (other release YAMLs, workflows, skills, CODEOWNERS, …) onto the stable branch. Auto-merge must not proceed. Local `devel` is left rebased/diverged from `origin/devel`.
+
+**Proposed / applied fix:**
+1. Before initiate, if `releases/v$VERSION.yaml` is absent: use `STABLE_BRANCH` as base only when that branch exists on the remote; otherwise `devel` (first RC).
+2. Never call `make release` when the current branch ≠ intended base. Use disposable worktree `origin/$BRANCH_VAL` via `run_make_release`.
+3. After a bad run: close the contaminated PR, restore operator `devel` (`git fetch origin && git reset --hard origin/devel`), re-initiate from the worktree path.
+4. Optional hardening in `scripts/release.sh` (upstream code change, not done here): refuse to proceed if `git rev-parse --abbrev-ref HEAD` tip is not an ancestor-equivalent of `BASE_BRANCH` before rebase (or require clean checkout of `BASE_BRANCH`). That would defend non-skill callers too.
+
+**Do not:** “fix” a contaminated PR by editing files in place while it still contains the rebased devel history — close and recreate from the correct base.
